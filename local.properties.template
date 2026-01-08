@@ -1,0 +1,6 @@
+db.url=jdbc:postgresql://localhost:5432/mdgtaxi
+db.username=postgres
+db.password=231205
+db.driver=org.postgresql.Driver
+hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+tomcat.home=D:/Tomcat
