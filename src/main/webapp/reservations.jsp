@@ -6,7 +6,7 @@
     <jsp:include page="/WEB-INF/includes/sidebar.jsp" />
 
     <main class="flex-grow-1 p-4">
-        <jsp:include page="/WEB-INF/content/dashboard-content.jsp" />
+        <jsp:include page="/WEB-INF/content/reservations-content.jsp" />
     </main>
 </div>
 
