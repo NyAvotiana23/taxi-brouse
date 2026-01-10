@@ -33,8 +33,6 @@ public class TrajetReservation implements Serializable {
     @Column(name = "nom_passager", nullable = false)
     private String nomPassager;
 
-    @Column(name = "montant", nullable = false, precision = 15, scale = 2)
-    private BigDecimal montant;
 
     @Column(name = "date_reservation", nullable = false)
     private LocalDateTime dateReservation;

@@ -49,6 +49,73 @@ public class TrajetService {
         }
     }
 
+    public List<Trajet> getTrajetsByLigneId(Long ligneId) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<Trajet> query = em.createQuery(
+                    "SELECT t FROM Trajet t WHERE t.ligne.id = :ligneId ORDER BY t.datetimeDepart DESC",
+                    Trajet.class);
+            query.setParameter("ligneId", ligneId);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    public List<Trajet> getFilteredTrajets(Long idLigne, Long idChauffeur, Long idVehicule,
+            Long idTrajetStatut, String dateDebut, String dateFin) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            StringBuilder jpql = new StringBuilder("SELECT t FROM Trajet t WHERE 1=1");
+
+            if (idLigne != null) {
+                jpql.append(" AND t.ligne.id = :idLigne");
+            }
+            if (idChauffeur != null) {
+                jpql.append(" AND t.chauffeur.id = :idChauffeur");
+            }
+            if (idVehicule != null) {
+                jpql.append(" AND t.vehicule.id = :idVehicule");
+            }
+            if (idTrajetStatut != null) {
+                jpql.append(" AND t.trajetStatut.id = :idTrajetStatut");
+            }
+            if (dateDebut != null && !dateDebut.isEmpty()) {
+                jpql.append(" AND t.datetimeDepart >= :dateDebut");
+            }
+            if (dateFin != null && !dateFin.isEmpty()) {
+                jpql.append(" AND t.datetimeDepart <= :dateFin");
+            }
+
+            jpql.append(" ORDER BY t.datetimeDepart DESC");
+
+            TypedQuery<Trajet> query = em.createQuery(jpql.toString(), Trajet.class);
+
+            if (idLigne != null) {
+                query.setParameter("idLigne", idLigne);
+            }
+            if (idChauffeur != null) {
+                query.setParameter("idChauffeur", idChauffeur);
+            }
+            if (idVehicule != null) {
+                query.setParameter("idVehicule", idVehicule);
+            }
+            if (idTrajetStatut != null) {
+                query.setParameter("idTrajetStatut", idTrajetStatut);
+            }
+            if (dateDebut != null && !dateDebut.isEmpty()) {
+                query.setParameter("dateDebut", java.time.LocalDateTime.parse(dateDebut));
+            }
+            if (dateFin != null && !dateFin.isEmpty()) {
+                query.setParameter("dateFin", java.time.LocalDateTime.parse(dateFin));
+            }
+
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
     public Trajet updateTrajet(Trajet trajet) {
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();

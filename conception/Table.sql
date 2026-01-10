@@ -345,7 +345,6 @@ CREATE TABLE Trajet_Reservation
     id_reservation_statut    BIGINT         NOT NULL,
     numero_siege             VARCHAR(50),
     nom_passager             VARCHAR(255)   NOT NULL,
-    montant                  DECIMAL(15, 2) NOT NULL CHECK (montant >= 0),
     date_reservation         TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
     nombre_place_reservation INTEGER        NOT NULL DEFAULT 1 CHECK (nombre_place_reservation > 0),
     FOREIGN KEY (id_client) REFERENCES Client (id),

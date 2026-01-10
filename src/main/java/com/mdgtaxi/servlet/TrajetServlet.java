@@ -32,7 +32,35 @@ public class TrajetServlet extends HttpServlet {
             req.setAttribute("trajet", trajet);
         }
 
-        List<Trajet> trajets = trajetService.getAllTrajets();
+        // Récupérer les paramètres de filtre
+        String idLigneStr = req.getParameter("filterLigne");
+        String idChauffeurStr = req.getParameter("filterChauffeur");
+        String idVehiculeStr = req.getParameter("filterVehicule");
+        String idTrajetStatutStr = req.getParameter("filterStatut");
+        String dateDebut = req.getParameter("filterDateDebut");
+        String dateFin = req.getParameter("filterDateFin");
+
+        // Convertir les paramètres en Long si présents
+        Long idLigne = (idLigneStr != null && !idLigneStr.isEmpty()) ? Long.valueOf(idLigneStr) : null;
+        Long idChauffeur = (idChauffeurStr != null && !idChauffeurStr.isEmpty()) ? Long.valueOf(idChauffeurStr) : null;
+        Long idVehicule = (idVehiculeStr != null && !idVehiculeStr.isEmpty()) ? Long.valueOf(idVehiculeStr) : null;
+        Long idTrajetStatut = (idTrajetStatutStr != null && !idTrajetStatutStr.isEmpty())
+                ? Long.valueOf(idTrajetStatutStr)
+                : null;
+
+        // Utiliser le filtre si au moins un critère est présent
+        List<Trajet> trajets;
+        boolean hasFilters = idLigne != null || idChauffeur != null || idVehicule != null ||
+                idTrajetStatut != null || (dateDebut != null && !dateDebut.isEmpty()) ||
+                (dateFin != null && !dateFin.isEmpty());
+
+        if (hasFilters) {
+            trajets = trajetService.getFilteredTrajets(idLigne, idChauffeur, idVehicule, idTrajetStatut, dateDebut,
+                    dateFin);
+        } else {
+            trajets = trajetService.getAllTrajets();
+        }
+
         List<Ligne> lignes = ligneService.getAllLignes();
         List<Chauffeur> chauffeurs = chauffeurService.getAllChauffeurs();
         List<Vehicule> vehicules = vehiculeService.getAllVehicules();
@@ -43,6 +71,14 @@ public class TrajetServlet extends HttpServlet {
         req.setAttribute("chauffeurs", chauffeurs);
         req.setAttribute("vehicules", vehicules);
         req.setAttribute("trajetStatuts", trajetStatuts);
+
+        // Passer les paramètres de filtre à la JSP pour maintenir l'état
+        req.setAttribute("filterLigne", idLigneStr);
+        req.setAttribute("filterChauffeur", idChauffeurStr);
+        req.setAttribute("filterVehicule", idVehiculeStr);
+        req.setAttribute("filterStatut", idTrajetStatutStr);
+        req.setAttribute("filterDateDebut", dateDebut);
+        req.setAttribute("filterDateFin", dateFin);
 
         req.getRequestDispatcher("/trajets.jsp").forward(req, resp);
     }

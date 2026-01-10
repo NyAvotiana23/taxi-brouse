@@ -5,98 +5,20 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c1c861f5-aebe-49fb-9999-4ef53b312464" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/conception/Conception.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/conception/Table.sql" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/conception/Vue.sql" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/Caisse.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/CaisseMouvement.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/CaisseType.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/CarburantMouvementTaux.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/CarburantType.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/Chauffeur.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/ChauffeurMouvementStatut.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/ChauffeurStatut.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/Client.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/Devise.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/DeviseMouvementTaux.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/Ligne.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/LigneArret.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/LigneDetail.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/ModePaiement.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/PrevisionFinance.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/PrevisionTrajet.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/Province.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/Region.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/ReservationStatus.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/Trajet.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/TrajetArretDetail.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/TrajetCarburantDetail.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/TrajetFinance.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/TrajetMotifArret.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/TrajetMouvementStatut.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/TrajetReservation.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/TrajetReservationMouvementStatus.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/TrajetReservationPaiement.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/TrajetStatut.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/TypeClient.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/TypeMouvement.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/Vehicule.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/VehiculeEntretien.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/VehiculeMouvementStatut.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/VehiculeStatut.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/VehiculeType.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/Ville.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/service/ChauffeurService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/service/TypeObjectDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/service/TypeObjectService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/service/VehiculeService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/view/VmCaisseDetail.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/view/VmCaisseMouvementHistorique.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/view/VmCaisseSoldeActuel.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/view/VmCaisseTracabilite.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/view/VmChauffeurActivite.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/view/VmChauffeurDetail.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/view/VmChauffeurHistoriqueStatut.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/view/VmChauffeurStatutActuel.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/view/VmLigneItineraire.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/view/VmPerformanceLigne.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/view/VmPerformanceVehicule.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/view/VmPrevisionDetail.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/view/VmPrevisionVsReel.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/view/VmTrajetDetail.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/view/VmTrajetStatutActuel.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/view/VmVehiculeCoutEntretien.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/view/VmVehiculeDetail.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/view/VmVehiculeHistoriqueStatut.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/view/VmVehiculeStatutActuel.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/view/VmVilleDetail.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/chauffeur/chauffeur-detail.jsp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/chauffeur/chauffeur-form.jsp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/chauffeur/chauffeur-liste.jsp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/dashboard-content.jsp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/includes/footer.jsp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/includes/header.jsp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/includes/navbar.jsp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/includes/sidebar.jsp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/layouts/main-layout.jsp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/vehicule/vehicule-detail.jsp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/vehicule/vehicule-form.jsp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/vehicule/vehicule-liste.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/conception/Conception.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/conception/Controlle.md" beforeDir="false" afterPath="$PROJECT_DIR$/conception/Controlle.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/conception/Fonctionnalite.md" beforeDir="false" afterPath="$PROJECT_DIR$/conception/Fonctionnalite.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/conception/Metier.md" beforeDir="false" afterPath="$PROJECT_DIR$/conception/Metier.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/Driver.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/Vehicle.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/servlet/DriverServlet.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/servlet/VehicleServlet.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/driver-form.jsp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/driver-list.jsp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/index.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/index.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/vehicle-form.jsp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/vehicle-list.jsp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/conception/Table.sql" beforeDir="false" afterPath="$PROJECT_DIR$/conception/Table.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/TrajetReservation.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/TrajetReservation.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/service/ReservationService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/service/ReservationService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/service/TrajetService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/service/TrajetService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/service/TypeObjectService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/service/TypeObjectService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/servlet/ReservationServlet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/servlet/ReservationServlet.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/servlet/TrajetServlet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/servlet/TrajetServlet.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/chauffeures-content.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/chauffeures-content.jsp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/lignes-content.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/lignes-content.jsp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/reservations-content.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/reservations-content.jsp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/trajets-content.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/trajets-content.jsp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/vehicules-content.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/vehicules-content.jsp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/includes/sidebar.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/includes/sidebar.jsp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -140,23 +62,23 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Maven.taxi-brouse [package].executor": "Run",
-    "Maven.taxi-brouse [verify].executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "main",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "D:/S5/Mme Baovola/taxi-brouse",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Maven.taxi-brouse [package].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.taxi-brouse [verify].executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;D:/S5/Mme Baovola/taxi-brouse&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="D:\S5\Mme Baovola\taxi-brouse\src\main\webapp\WEB-INF" />
@@ -215,7 +137,8 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1767935751393</updated>
-      <workItem from="1767935752598" duration="17324000" />
+      <workItem from="1767935752598" duration="26509000" />
+      <workItem from="1768031458536" duration="697000" />
     </task>
     <servers />
   </component>

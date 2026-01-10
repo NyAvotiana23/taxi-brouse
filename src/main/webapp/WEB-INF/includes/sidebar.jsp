@@ -10,5 +10,14 @@
     <a class="nav-link" href="<%= request.getContextPath() %>/vehicules">
       <i class="bi bi-car-front-fill"></i> Véhicules
     </a>
+    <a class="nav-link" href="<%= request.getContextPath() %>/lignes">
+      <i class="bi bi-signpost-2-fill"></i> Lignes
+    </a>
+    <a class="nav-link" href="<%= request.getContextPath() %>/trajets">
+      <i class="bi bi-geo-alt-fill"></i> Trajets
+    </a>
+    <a class="nav-link" href="<%= request.getContextPath() %>/reservations">
+      <i class="bi bi-calendar-check-fill"></i> Réservations
+    </a>
   </nav>
 </div>
