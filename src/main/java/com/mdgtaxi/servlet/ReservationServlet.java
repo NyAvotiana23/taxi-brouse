@@ -35,7 +35,7 @@ public class ReservationServlet extends HttpServlet {
         List<TrajetReservation> reservations = reservationService.getAllReservations();
         List<Trajet> trajets = trajetService.getAllTrajets();
         List<Client> clients = clientService.getAllClients();
-        List<TypeObjectDTO> reservationStatuts = typeObjectService.findAllTypeObject("Reservation_Status");
+        List<TypeObjectDTO> reservationStatuts = typeObjectService.findAllTypeObject("Reservation_Statut");
 
         // Calculer les statistiques
         Map<String, Long> statsByStatus = reservationService.getReservationStatsByStatus();

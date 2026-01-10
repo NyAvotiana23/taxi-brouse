@@ -349,7 +349,7 @@ CREATE TABLE Trajet_Reservation
     nombre_place_reservation INTEGER        NOT NULL DEFAULT 1 CHECK (nombre_place_reservation > 0),
     FOREIGN KEY (id_client) REFERENCES Client (id),
     FOREIGN KEY (id_trajet) REFERENCES Trajet (id),
-    FOREIGN KEY (id_reservation_statut) REFERENCES Reservation_Status (id),
+    FOREIGN KEY (id_reservation_statut) REFERENCES Reservation_Statut(id),
     UNIQUE (id_trajet, numero_siege)
 );
 
@@ -364,8 +364,8 @@ CREATE TABLE Trajet_Reservation_Mouvement_Status
     id_nouveau_statut    BIGINT    NOT NULL,
     observation          TEXT,
     FOREIGN KEY (id_trajet_reservation) REFERENCES Trajet_Reservation (id),
-    FOREIGN KEY (id_ancien_statut) REFERENCES Reservation_Status (id),
-    FOREIGN KEY (id_nouveau_statut) REFERENCES Reservation_Status (id)
+    FOREIGN KEY (id_ancien_statut) REFERENCES Reservation_Statut(id),
+    FOREIGN KEY (id_nouveau_statut) REFERENCES Reservation_Statut(id)
 );
 
 -- NOUVEAU : Paiements liés aux réservations

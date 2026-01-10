@@ -168,7 +168,7 @@ INSERT INTO Mode_Paiement (libelle) VALUES
 ('Virement');
 
 -- Reservation_Status
-INSERT INTO Reservation_Status (libelle, score) VALUES
+INSERT INTO Reservation_Statut (libelle, score) VALUES
 ('Confirmée', 10),
 ('Annulée', 0),
 ('En attente', 5);

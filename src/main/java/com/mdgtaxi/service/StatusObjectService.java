@@ -12,7 +12,7 @@ import java.util.List;
 public class StatusObjectService {
     private final EntityManagerFactory emf = HibernateUtil.getEntityManagerFactory();
 
-    public List<StatusObjectDto> findAllTypeObject(String tableName) {
+    public List<StatusObjectDto> findAllStatusObject(String tableName) {
         // Mapping des noms de tables vers les noms d'entités JPA
         String entityName = getEntityName(tableName);
 
