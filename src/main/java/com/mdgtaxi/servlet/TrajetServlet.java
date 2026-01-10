@@ -40,6 +40,7 @@ public class TrajetServlet extends HttpServlet {
         String idTrajetStatutStr = req.getParameter("filterStatut");
         String dateDebut = req.getParameter("filterDateDebut");
         String dateFin = req.getParameter("filterDateFin");
+        String minScoreStr = req.getParameter("filterScore");
 
         // Convertir les paramètres en Long si présents
         Long idLigne = (idLigneStr != null && !idLigneStr.isEmpty()) ? Long.valueOf(idLigneStr) : null;
@@ -48,16 +49,17 @@ public class TrajetServlet extends HttpServlet {
         Long idTrajetStatut = (idTrajetStatutStr != null && !idTrajetStatutStr.isEmpty())
                 ? Long.valueOf(idTrajetStatutStr)
                 : null;
+        Integer minScore = (minScoreStr != null && !minScoreStr.isEmpty()) ? Integer.valueOf(minScoreStr) : null;
 
         // Utiliser le filtre si au moins un critère est présent
         List<Trajet> trajets;
         boolean hasFilters = idLigne != null || idChauffeur != null || idVehicule != null ||
                 idTrajetStatut != null || (dateDebut != null && !dateDebut.isEmpty()) ||
-                (dateFin != null && !dateFin.isEmpty());
+                (dateFin != null && !dateFin.isEmpty()) || minScore != null;
 
         if (hasFilters) {
             trajets = trajetService.getFilteredTrajets(idLigne, idChauffeur, idVehicule, idTrajetStatut, dateDebut,
-                    dateFin);
+                    dateFin, minScore);
         } else {
             trajets = trajetService.getAllTrajets();
         }
@@ -80,6 +82,7 @@ public class TrajetServlet extends HttpServlet {
         req.setAttribute("filterStatut", idTrajetStatutStr);
         req.setAttribute("filterDateDebut", dateDebut);
         req.setAttribute("filterDateFin", dateFin);
+        req.setAttribute("filterScore", minScoreStr);
 
         req.getRequestDispatcher("/trajets.jsp").forward(req, resp);
     }

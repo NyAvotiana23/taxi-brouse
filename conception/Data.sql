@@ -29,10 +29,10 @@ INSERT INTO Vehicule_Type (libelle) VALUES
 ('Camion');
 
 -- Vehicule_Statut
-INSERT INTO Vehicule_Statut (libelle) VALUES
-('Disponible'),
-('En maintenance'),
-('Hors service');
+INSERT INTO Vehicule_Statut (libelle, score) VALUES
+('Disponible', 10),
+('En maintenance', 5),
+('Hors service', 0);
 
 -- Vehicule
 INSERT INTO Vehicule (id_type, id_type_carburant, marque, modele, maximum_passager, immatriculation, capacite_carburant, depense_carburant_100km) VALUES
@@ -53,10 +53,10 @@ INSERT INTO Vehicule_Entretien (id_vehicule, motif, date_debut_entretien, date_f
 (3, 'Maintenance régulière', '2026-01-01 00:00:00', '2026-01-02 00:00:00', 300.0);
 
 -- Chauffeur_Statut
-INSERT INTO Chauffeur_Statut (libelle) VALUES
-('Actif'),
-('En congé'),
-('Suspendu');
+INSERT INTO Chauffeur_Statut (libelle, score) VALUES
+('Actif', 10),
+('En congé', 5),
+('Suspendu', 0);
 
 -- Chauffeur
 INSERT INTO Chauffeur (nom, prenom, date_naissance, numero_permis) VALUES
@@ -110,10 +110,10 @@ INSERT INTO Ligne_Detail (id_ligne, ordre, id_ligne_arret) VALUES
 (3, 2, 1);
 
 -- Trajet_Statut
-INSERT INTO Trajet_Statut (libelle) VALUES
-('En cours'),
-('Terminé'),
-('Annulé');
+INSERT INTO Trajet_Statut (libelle, score) VALUES
+('En cours', 10),
+('Terminé', 20),
+('Annulé', 0);
 
 -- Trajet
 INSERT INTO Trajet (id_ligne, id_chauffeur, id_vehicule, nombre_passager, id_trajet_statut, datetime_depart, datetime_arrivee, frais_unitaire) VALUES
@@ -168,10 +168,10 @@ INSERT INTO Mode_Paiement (libelle) VALUES
 ('Virement');
 
 -- Reservation_Status
-INSERT INTO Reservation_Status (libelle) VALUES
-('Confirmée'),
-('Annulée'),
-('En attente');
+INSERT INTO Reservation_Status (libelle, score) VALUES
+('Confirmée', 10),
+('Annulée', 0),
+('En attente', 5);
 
 -- Trajet_Reservation
 INSERT INTO Trajet_Reservation (id_client, id_trajet, id_reservation_statut, numero_siege, nom_passager, date_reservation, nombre_place_reservation) VALUES

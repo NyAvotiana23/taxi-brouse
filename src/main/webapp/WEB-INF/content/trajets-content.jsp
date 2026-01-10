@@ -193,6 +193,11 @@
                             <input type="datetime-local" class="form-control" id="filterDateFin" name="filterDateFin" 
                                 value="<%= request.getAttribute("filterDateFin") != null ? request.getAttribute("filterDateFin") : "" %>">
                         </div>
+                        <div class="col-md-4">
+                            <label for="filterScore" class="form-label">Score Min</label>
+                            <input type="number" class="form-control" id="filterScore" name="filterScore" 
+                                value="<%= request.getAttribute("filterScore") != null ? request.getAttribute("filterScore") : "" %>">
+                        </div>
                         <div class="col-12">
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-filter"></i> Filtrer
@@ -221,6 +226,7 @@
                                     <th>Départ</th>
                                     <th>Arrivee</th>
                                     <th>Statut</th>
+                                    <th>Score</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -234,6 +240,7 @@
                                             <td><%= t.getDatetimeDepart() %></td>
                                             <td><%= t.getDatetimeArrivee() %></td>
                                             <td><%= t.getTrajetStatut().getLibelle() %></td>
+                                            <td><%= t.getTrajetStatut().getScore() %></td>
                                             <td>
                                                 <a href="<%= request.getContextPath() %>/trajets/detail?id=<%= t.getId() %>" class="btn btn-sm btn-success">Détails</a>
                                                 <a href="<%= request.getContextPath() %>/trajets?action=edit&id=<%= t.getId() %>" class="btn btn-sm btn-info">Modifier</a>

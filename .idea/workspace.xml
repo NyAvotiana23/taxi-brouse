@@ -5,24 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c1c861f5-aebe-49fb-9999-4ef53b312464" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/dto/StatusObjectDto.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/service/StatusObjectService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/util/StaticUtil.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/ChauffeurStatut.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/ChauffeurStatut.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/ReservationStatus.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/ReservationStatut.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/TrajetReservation.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/TrajetReservation.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/TrajetReservationMouvementStatus.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/TrajetReservationMouvementStatus.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/TrajetStatut.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/TrajetStatut.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/VehiculeStatut.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/VehiculeStatut.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/service/TypeObjectDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/dto/TypeObjectDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/service/TypeObjectService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/service/TypeObjectService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/servlet/ReservationServlet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/servlet/ReservationServlet.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/servlet/TrajetDetailServlet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/servlet/TrajetDetailServlet.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/servlet/TrajetServlet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/servlet/TrajetServlet.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/servlet/VehiculeServlet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/servlet/VehiculeServlet.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/reservations-content.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/reservations-content.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/trajets-content.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/trajets-content.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/trajet/trajet-detail.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/trajet/trajet-detail.jsp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/util/TableUtil.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -145,7 +129,7 @@
       <option name="presentableId" value="Default" />
       <updated>1767935751393</updated>
       <workItem from="1767935752598" duration="26509000" />
-      <workItem from="1768031458536" duration="1509000" />
+      <workItem from="1768031458536" duration="2674000" />
     </task>
     <servers />
   </component>

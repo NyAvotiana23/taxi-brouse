@@ -63,7 +63,7 @@ public class TrajetService {
     }
 
     public List<Trajet> getFilteredTrajets(Long idLigne, Long idChauffeur, Long idVehicule,
-            Long idTrajetStatut, String dateDebut, String dateFin) {
+            Long idTrajetStatut, String dateDebut, String dateFin, Integer minScore) {
         EntityManager em = emf.createEntityManager();
         try {
             StringBuilder jpql = new StringBuilder("SELECT t FROM Trajet t WHERE 1=1");
@@ -85,6 +85,9 @@ public class TrajetService {
             }
             if (dateFin != null && !dateFin.isEmpty()) {
                 jpql.append(" AND t.datetimeDepart <= :dateFin");
+            }
+            if (minScore != null) {
+                jpql.append(" AND t.trajetStatut.score >= :minScore");
             }
 
             jpql.append(" ORDER BY t.datetimeDepart DESC");
@@ -108,6 +111,9 @@ public class TrajetService {
             }
             if (dateFin != null && !dateFin.isEmpty()) {
                 query.setParameter("dateFin", java.time.LocalDateTime.parse(dateFin));
+            }
+            if (minScore != null) {
+                query.setParameter("minScore", minScore);
             }
 
             return query.getResultList();
