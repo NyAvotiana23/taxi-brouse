@@ -1,7 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.mdgtaxi.entity.*" %>
 <%@ page import="java.util.List" %>
-<%@ page import="com.mdgtaxi.service.TypeObjectDTO" %>
+<%@ page import="com.mdgtaxi.dto.TypeObjectDTO" %>
 <%
     Trajet trajet = (Trajet) request.getAttribute("trajet");
     List<Trajet> trajets = (List<Trajet>) request.getAttribute("trajets");

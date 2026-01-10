@@ -25,7 +25,7 @@ public class TrajetReservation implements Serializable {
 
     @ManyToOne
     @JoinColumn(name = "id_reservation_statut", nullable = false)
-    private ReservationStatus reservationStatut;
+    private ReservationStatut reservationStatut;
 
     @Column(name = "numero_siege")
     private String numeroSiege;

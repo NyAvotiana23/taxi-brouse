@@ -1,5 +1,6 @@
 package com.mdgtaxi.servlet;
 
+import com.mdgtaxi.dto.TypeObjectDTO;
 import com.mdgtaxi.entity.*;
 import com.mdgtaxi.service.*;
 import jakarta.servlet.ServletException;
@@ -9,7 +10,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -120,7 +120,7 @@ public class ReservationServlet extends HttpServlet {
         client.setId(idClient);
         reservation.setClient(client);
 
-        ReservationStatus statut = new ReservationStatus();
+        ReservationStatut statut = new ReservationStatut();
         statut.setId(idReservationStatut);
         reservation.setReservationStatut(statut);
 

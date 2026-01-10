@@ -7,12 +7,15 @@ import java.io.Serializable;
 
 @Data
 @Entity
-@Table(name = "Reservation_Status")
-public class ReservationStatus implements Serializable {
+@Table(name = "Reservation_Statut")
+public class ReservationStatut implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "libelle", nullable = false, unique = true)
     private String libelle;
+
+    @Column(name = "score", nullable = false, unique = true)
+    private int score;
 }

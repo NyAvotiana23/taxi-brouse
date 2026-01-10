@@ -2,7 +2,7 @@
 <%@ page import="com.mdgtaxi.entity.*" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Map" %>
-<%@ page import="com.mdgtaxi.service.TypeObjectDTO" %>
+<%@ page import="com.mdgtaxi.dto.TypeObjectDTO" %>
 <%
     TrajetReservation reservation = (TrajetReservation) request.getAttribute("reservation");
     List<TrajetReservation> reservations = (List<TrajetReservation>) request.getAttribute("reservations");

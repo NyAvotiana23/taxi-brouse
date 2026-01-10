@@ -1,12 +1,14 @@
-package com.mdgtaxi.service;
+package com.mdgtaxi.dto;
 
-public class TypeObjectDTO {
+public class StatusObjectDto {
     private Long id;
     private String libelle;
+    private int score;
 
-    public TypeObjectDTO(Long id, String libelle) {
+    public StatusObjectDto(Long id, String libelle, int score) {
         this.id = id;
         this.libelle = libelle;
+        this.score = score;
     }
 
     // Getters et setters
@@ -24,5 +26,13 @@ public class TypeObjectDTO {
 
     public void setLibelle(String libelle) {
         this.libelle = libelle;
+    }
+
+    public int getScore() {
+        return score;
+    }
+
+    public void setScore(int score) {
+        this.score = score;
     }
 }

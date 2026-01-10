@@ -23,11 +23,11 @@ public class TrajetReservationMouvementStatus implements Serializable {
 
     @ManyToOne
     @JoinColumn(name = "id_ancien_statut")
-    private ReservationStatus ancienStatut;
+    private ReservationStatut ancienStatut;
 
     @ManyToOne
     @JoinColumn(name = "id_nouveau_statut", nullable = false)
-    private ReservationStatus nouveauStatut;
+    private ReservationStatut nouveauStatut;
 
     @Column(name = "observation")
     private String observation;

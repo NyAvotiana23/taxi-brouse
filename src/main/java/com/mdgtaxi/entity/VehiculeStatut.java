@@ -15,4 +15,7 @@ public class VehiculeStatut implements Serializable {
 
     @Column(name = "libelle", nullable = false, unique = true)
     private String libelle;
+
+    @Column(name = "score", nullable = false, unique = true)
+    private int score;
 }

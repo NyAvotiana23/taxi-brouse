@@ -1,5 +1,6 @@
 package com.mdgtaxi.servlet;
 
+import com.mdgtaxi.dto.TypeObjectDTO;
 import com.mdgtaxi.entity.*;
 import com.mdgtaxi.service.*;
 import jakarta.servlet.ServletException;

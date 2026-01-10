@@ -3,7 +3,7 @@ package com.mdgtaxi.servlet;
 import com.mdgtaxi.entity.CarburantType;
 import com.mdgtaxi.entity.Vehicule;
 import com.mdgtaxi.entity.VehiculeType;
-import com.mdgtaxi.service.TypeObjectDTO;
+import com.mdgtaxi.dto.TypeObjectDTO;
 import com.mdgtaxi.service.TypeObjectService;
 import com.mdgtaxi.service.VehiculeService;
 import jakarta.servlet.ServletException;

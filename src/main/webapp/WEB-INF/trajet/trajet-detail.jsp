@@ -1,7 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.mdgtaxi.entity.*" %>
 <%@ page import="java.util.List" %>
-<%@ page import="com.mdgtaxi.service.TypeObjectDTO" %>
+<%@ page import="com.mdgtaxi.dto.TypeObjectDTO" %>
 <%@ page import="java.math.BigDecimal" %>
 <%
     Trajet trajet = (Trajet) request.getAttribute("trajet");
