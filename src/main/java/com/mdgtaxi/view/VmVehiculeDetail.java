@@ -2,6 +2,8 @@ package com.mdgtaxi.view;
 
 import lombok.Data;
 import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.Subselect;
+import org.hibernate.annotations.Synchronize;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -11,7 +13,25 @@ import java.time.LocalDateTime;
 @Data
 @Entity
 @Immutable
-@Table(name = "VM_Vehicule_Detail")
+@Subselect("""
+    SELECT
+        v.id AS id_vehicule,
+        v.immatriculation,
+        v.marque,
+        v.modele,
+        v.maximum_passager,
+        v.capacite_carburant,
+        v.depense_carburant_100km,
+        vt.libelle AS libelle_type,
+        ct.libelle AS type_carburant,
+        vsa.libelle_statut,
+        vsa.date_mouvement AS date_dernier_statut
+    FROM Vehicule v
+             INNER JOIN Vehicule_Type vt ON v.id_type = vt.id
+             INNER JOIN Carburant_Type ct ON v.id_type_carburant = ct.id
+             LEFT JOIN VM_Vehicule_Statut_Actuel vsa ON v.id = vsa.id_vehicule
+""")
+@Synchronize({"Vehicule", "Vehicule_Type", "Carburant_Type", "VM_Vehicule_Statut_Actuel"})
 public class VmVehiculeDetail implements Serializable {
     @Id
     @Column(name = "id_vehicule")

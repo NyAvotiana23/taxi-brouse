@@ -1,13 +1,16 @@
 # 📌 Fonctionnalités — Système de Gestion Taxi-Brousse (Interne)
 
 ## 1. Gestion des Carburants
+
 ### Fonctionnalités
+
 - Création et gestion des types de carburant
 - Suivi des taux actuels
 - Historique des changements de taux
 - Consultation via `Carburant_Mouvement_Taux`
 
 ### Informations suivies
+
 - Libellé du carburant (Essence, Diesel, etc.)
 - Dernier taux appliqué
 - Historique complet des variations
@@ -15,13 +18,16 @@
 ---
 
 ## 2. Gestion des Devises
+
 ### Fonctionnalités
+
 - Création et gestion des devises
 - Suivi des taux de change
 - Historique des fluctuations
 - Consultation via `Devise_Mouvement_Taux`
 
 ### Informations suivies
+
 - Libellé de la devise
 - Dernier taux de change
 - Historique des variations
@@ -29,7 +35,9 @@
 ---
 
 ## 3. Gestion des Véhicules
+
 ### Fonctionnalités
+
 - Création et mise à jour des véhicules
 - Affectation d'un type de véhicule et type de carburant
 - Gestion de la capacité maximale de passagers
@@ -41,6 +49,7 @@
 - Vue détaillée consolidée via `VM_Vehicule_Detail`
 
 ### Statuts possibles (Vehicule_Statut)
+
 - Disponible
 - En circulation
 - En maintenance
@@ -48,6 +57,7 @@
 - Hors service
 
 ### Flux de statut
+
 - Changement de statut tracé dans `Vehicule_Mouvement_Statut`
 - Historique consultable par véhicule
 - Statut actuel accessible via `VM_Vehicule_Statut_Actuel`
@@ -55,7 +65,9 @@
 ---
 
 ## 4. Gestion des Chauffeurs
+
 ### Fonctionnalités
+
 - Création et mise à jour des fiches chauffeurs
 - Gestion des informations personnelles (nom, prénom, date de naissance)
 - Gestion des permis de conduire
@@ -65,19 +77,23 @@
 - Vue détaillée avec calcul d'âge via `VM_Chauffeur_Detail`
 
 ### Statuts possibles (Chauffeur_Statut)
+
 - Actif
 - Inactif
 - Suspendu
 - En congé
 
 ### Flux de statut
+
 - Tout changement est enregistré dans `Chauffeur_Mouvement_Statut`
 - Statut actuel accessible via `VM_Chauffeur_Statut_Actuel`
 
 ---
 
 ## 5. Gestion Géographique
+
 ### Fonctionnalités
+
 - Gestion des provinces
 - Gestion des régions rattachées aux provinces
 - Gestion des villes rattachées aux régions
@@ -87,7 +103,9 @@
 ---
 
 ## 6. Gestion des Lignes et Itinéraires
+
 ### Fonctionnalités
+
 - Création des lignes (ville départ → ville arrivée)
 - Définition de la distance en kilomètres
 - Définition des arrêts intermédiaires via `Ligne_Arret`
@@ -98,7 +116,9 @@
 ---
 
 ## 7. Gestion des Trajets
+
 ### Fonctionnalités
+
 - Planification des trajets
 - Affectation du chauffeur et du véhicule
 - Définition du tarif unitaire
@@ -110,6 +130,7 @@
 - Suivi du taux de remplissage via `VM_Trajet_Remplissage`
 
 ### Statuts possibles (Trajet_Statut)
+
 - Prévu
 - Ouvert
 - En cours
@@ -118,13 +139,16 @@
 - Annulé
 
 ### Flux de statut
+
 - Tous les changements sont enregistrés dans `Trajet_Mouvement_Statut`
 - Statut actuel accessible via `VM_Trajet_Statut_Actuel`
 
 ---
 
 ## 8. Gestion des Incidents et Arrêts
+
 ### Fonctionnalités
+
 - Déclaration d'arrêts imprévus via `Trajet_Arret_Detail`
 - Association d'un motif d'arrêt
 - Localisation de l'arrêt (ville)
@@ -134,6 +158,7 @@
 - Historique des incidents par trajet via `VM_Trajet_Incident`
 
 ### Motifs possibles (Trajet_Motif_Arret)
+
 - Panne mécanique
 - Accident
 - Contrôle
@@ -143,7 +168,9 @@
 ---
 
 ## 9. Gestion du Carburant
+
 ### Fonctionnalités
+
 - Enregistrement des ravitaillements via `Trajet_Carburant_Detail`
 - Suivi de la quantité ajoutée
 - Enregistrement du taux au moment du ravitaillement
@@ -155,20 +182,25 @@
 ---
 
 ## 10. Gestion des Clients
+
 ### Fonctionnalités
+
 - Création et gestion des clients
 - Classification par type (Entreprise, Client Simple)
 - Gestion des coordonnées (téléphone, email)
 - Client par défaut pour réservations sans client spécifique
 
 ### Types de client (Type_Client)
+
 - Client Simple (par défaut)
 - Entreprise
 
 ---
 
 ## 11. Gestion des Réservations (Interne)
+
 ### Fonctionnalités
+
 - Enregistrement manuel des réservations
 - Association au client
 - Attribution des sièges
@@ -177,7 +209,8 @@
 - Historique des changements de statut via `Trajet_Reservation_Mouvement_Status`
 - Vue détaillée via `VM_Reservation_Detail`
 
-### Statuts possibles (Reservation_Status)
+### Statuts possibles (Reservation_Statut)
+
 - Réservé
 - Confirmé
 - Annulé
@@ -186,7 +219,9 @@
 ---
 
 ## 12. Gestion des Paiements
+
 ### Fonctionnalités
+
 - Enregistrement des paiements liés aux réservations via `Trajet_Reservation_Paiement`
 - Association d'un mode de paiement
 - Association à une caisse pour traçabilité
@@ -195,6 +230,7 @@
 - Identification du dernier paiement
 
 ### Modes de paiement (Mode_Paiement)
+
 - Espèces
 - Mobile Money
 - Carte bancaire
@@ -204,7 +240,9 @@
 ---
 
 ## 13. Gestion Financière des Trajets
+
 ### Fonctionnalités
+
 - Enregistrement des mouvements financiers via `Trajet_Finance`
 - Distinction recette / dépense
 - Calcul automatique du bénéfice par trajet via `VM_Trajet_Finance`
@@ -213,13 +251,16 @@
 - Suivi des tendances
 
 ### Types de mouvement (Type_Mouvement)
+
 - Recette
 - Dépense
 
 ---
 
 ## 14. Prévisions et Planification
+
 ### Fonctionnalités
+
 - Prévision des recettes et dépenses par trajet via `Prevision_Finance`
 - Traçabilité de l'origine des prévisions via `id_entite_origine` et `table_origine`
 - Association des prévisions aux entités sources :
@@ -234,6 +275,7 @@
 - Vue détaillée des prévisions via `VM_Prevision_Detail`
 
 ### Sources de prévisions
+
 - **Trajet** : prévision initiale automatique à la création
 - **Trajet_Reservation** : prévision de recettes basée sur les réservations
 - **Trajet_Arret_Detail** : prévision de dépenses basée sur incidents planifiés
@@ -243,7 +285,9 @@
 ---
 
 ## 15. Gestion de la Caisse
+
 ### Fonctionnalités
+
 - Création de caisses (principale, secondaire, gare) via `Caisse`
 - Définition du solde initial
 - Enregistrement des mouvements de caisse avec traçabilité complète via `Caisse_Mouvement`
@@ -254,12 +298,15 @@
 - Vue détaillée des caisses via `VM_Caisse_Detail`
 
 ### Types de caisse (Caisse_Type)
+
 - Caisse principale
 - Caisse secondaire
 - Caisse de gare
 
 ### Traçabilité des mouvements
+
 Chaque mouvement de caisse est lié à son origine :
+
 - **Trajet_Reservation_Paiement** : entrée d'argent suite à un paiement
 - **Trajet_Arret_Detail** : sortie d'argent pour incident/arrêt
 - **Vehicule_Entretien** : sortie d'argent pour entretien
@@ -269,7 +316,9 @@ Chaque mouvement de caisse est lié à son origine :
 ---
 
 ## 16. Tableaux de Bord & Supervision
+
 ### Fonctionnalités
+
 - Tableau de bord exploitation
 - Tableau de bord financier
 - Suivi du taux de remplissage par trajet
@@ -281,6 +330,7 @@ Chaque mouvement de caisse est lié à son origine :
 - Suivi de la consommation carburant
 
 ### Indicateurs de performance
+
 - Taux de remplissage moyen par ligne
 - Bénéfice moyen par trajet
 - Coût d'entretien par véhicule
@@ -290,7 +340,9 @@ Chaque mouvement de caisse est lié à son origine :
 ---
 
 ## 17. Traçabilité & Audit
+
 ### Fonctionnalités
+
 - Historique des statuts (véhicules, chauffeurs, trajets, réservations)
 - Journal des mouvements financiers
 - **Traçabilité complète de l'origine des transactions** via `id_entite_origine` et `table_origine`
@@ -301,6 +353,7 @@ Chaque mouvement de caisse est lié à son origine :
 - Suivi des variations de taux (carburant, devises)
 
 ### Capacités d'audit renforcées
+
 - Identification de l'origine de chaque mouvement financier
 - Suivi des enchaînements d'événements (réservation → paiement → caisse)
 - Détection des incohérences dans les flux financiers
@@ -310,7 +363,9 @@ Chaque mouvement de caisse est lié à son origine :
 ---
 
 ## 18. Analyse et Reporting
+
 ### Fonctionnalités
+
 - Analyse financière par période (jour, mois)
 - Comparaison prévision vs réalisation
 - Performance par ligne de transport
@@ -321,6 +376,7 @@ Chaque mouvement de caisse est lié à son origine :
 - Taux de remplissage par trajet/ligne
 
 ### Rapports disponibles
+
 - Bilan financier journalier/mensuel
 - Écarts prévision/réalisation
 - Classement des lignes par rentabilité
@@ -330,7 +386,9 @@ Chaque mouvement de caisse est lié à son origine :
 ---
 
 ## 19. Performance & Accès Rapide
+
 ### Fonctionnalités
+
 - Utilisation de vues matérialisées pour optimiser les performances
 - Lecture rapide sans jointures complexes
 - Rafraîchissement contrôlé des données
@@ -339,6 +397,7 @@ Chaque mouvement de caisse est lié à son origine :
 - Vues simples pour données en temps réel
 
 ### Vues matérialisées principales
+
 - `VM_Vehicule_Detail`
 - `VM_Chauffeur_Detail`
 - `VM_Trajet_Detail`

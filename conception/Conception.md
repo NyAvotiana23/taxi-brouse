@@ -1,4 +1,3 @@
-
 # Tables : Système de Gestion Taxi-Brousse
 
 ## 1. GESTION DES CARBURANTS
@@ -73,7 +72,7 @@
 
 **Mode_Paiement** : id, libelle
 
-**Reservation_Status** : id, libelle
+**Reservation_Statut** : id, libelle
 
 **Trajet_Reservation** : id, id_client, id_trajet, id_reservation_statut, numero_siege, nom_passager, montant, date_reservation, nombre_place_reservation
 

@@ -2,6 +2,8 @@ package com.mdgtaxi.view;
 
 import lombok.Data;
 import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.Subselect;
+import org.hibernate.annotations.Synchronize;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -11,7 +13,21 @@ import java.time.LocalDateTime;
 @Data
 @Entity
 @Immutable
-@Table(name = "VM_Prevision_Detail")
+@Subselect("""
+    SELECT
+        pf.id,
+        pf.id_trajet,
+        pf.table_origine,
+        pf.id_entite_origine,
+        tm.libelle AS type_mouvement,
+        pf.montant,
+        pf.date,
+        pf.description
+    FROM Prevision_Finance pf
+             INNER JOIN Type_Mouvement tm ON pf.id_type_mouvement = tm.id
+    ORDER BY pf.date DESC
+""")
+@Synchronize({"Prevision_Finance", "Type_Mouvement"})
 public class VmPrevisionDetail implements Serializable {
     @Id
     @Column(name = "id")

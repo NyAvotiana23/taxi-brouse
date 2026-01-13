@@ -1,0 +1,2066 @@
+﻿package com.mdgtaxi.service;
+
+import com.mdgtaxi.entity.Chauffeur;
+import com.mdgtaxi.entity.ChauffeurMouvementStatut;
+import com.mdgtaxi.entity.ChauffeurStatut;
+import com.mdgtaxi.util.HibernateUtil;
+import com.mdgtaxi.view.VmChauffeurActivite;
+import com.mdgtaxi.view.VmChauffeurDetail;
+import com.mdgtaxi.view.VmChauffeurHistoriqueStatut;
+import com.mdgtaxi.view.VmChauffeurStatutActuel;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+public class ChauffeurService {
+
+    private final EntityManagerFactory emf = HibernateUtil.getEntityManagerFactory();
+
+    // CRUD Operations for Chauffeur
+
+    public Chauffeur createChauffeur(Chauffeur chauffeur) {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            em.persist(chauffeur);
+            tx.commit();
+            return chauffeur;
+        } catch (Exception e) {
+            if (tx.isActive()) tx.rollback();
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
+
+    public Chauffeur getChauffeurById(Long id) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            return em.find(Chauffeur.class, id);
+        } finally {
+            em.close();
+        }
+    }
+
+    public List<Chauffeur> getAllChauffeurs() {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<Chauffeur> query = em.createQuery("SELECT c FROM Chauffeur c", Chauffeur.class);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    public Chauffeur updateChauffeur(Chauffeur chauffeur) {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            Chauffeur updated = em.merge(chauffeur);
+            tx.commit();
+            return updated;
+        } catch (Exception e) {
+            if (tx.isActive()) tx.rollback();
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
+
+    public void deleteChauffeur(Long id) {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            Chauffeur chauffeur = em.find(Chauffeur.class, id);
+            if (chauffeur != null) {
+                em.remove(chauffeur);
+            }
+            tx.commit();
+        } catch (Exception e) {
+            if (tx.isActive()) tx.rollback();
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
+
+    // Operations using Views
+
+    public VmChauffeurDetail getChauffeurDetail(Long idChauffeur) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            return em.find(VmChauffeurDetail.class, idChauffeur);
+        } finally {
+            em.close();
+        }
+    }
+
+    public List<VmChauffeurDetail> getAllChauffeurDetails() {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<VmChauffeurDetail> query = em.createQuery("SELECT cd FROM VmChauffeurDetail cd", VmChauffeurDetail.class);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    public VmChauffeurStatutActuel getCurrentStatut(Long idChauffeur) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            return em.find(VmChauffeurStatutActuel.class, idChauffeur);
+        } finally {
+            em.close();
+        }
+    }
+
+    public List<VmChauffeurHistoriqueStatut> getHistoriqueStatut(Long idChauffeur) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<VmChauffeurHistoriqueStatut> query = em.createQuery(
+                    "SELECT hs FROM VmChauffeurHistoriqueStatut hs WHERE hs.idChauffeur = :idChauffeur ORDER BY hs.dateMouvement DESC",
+                    VmChauffeurHistoriqueStatut.class);
+            query.setParameter("idChauffeur", idChauffeur);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    public VmChauffeurActivite getActivite(Long idChauffeur) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            return em.find(VmChauffeurActivite.class, idChauffeur);
+        } finally {
+            em.close();
+        }
+    }
+
+    // Operations for Related Entities
+
+    public ChauffeurMouvementStatut changeStatut(ChauffeurMouvementStatut mouvement) {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            em.persist(mouvement);
+            tx.commit();
+            return mouvement;
+        } catch (Exception e) {
+            if (tx.isActive()) tx.rollback();
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
+
+    public List<ChauffeurMouvementStatut> getMouvementsByChauffeur(Long idChauffeur) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<ChauffeurMouvementStatut> query = em.createQuery(
+                    "SELECT cms FROM ChauffeurMouvementStatut cms WHERE cms.chauffeur.id = :idChauffeur ORDER BY cms.dateMouvement DESC",
+                    ChauffeurMouvementStatut.class);
+            query.setParameter("idChauffeur", idChauffeur);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    // Multi-filter criteria function for Chauffeur (using Criteria API)
+    // Filters are provided as a Map<String, Object> where keys are field names like "nom", "prenom", "numeroPermis", etc.
+
+    public List<Chauffeur> searchChauffeursWithFilters(Map<String, Object> filters) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<Chauffeur> cq = cb.createQuery(Chauffeur.class);
+            Root<Chauffeur> root = cq.from(Chauffeur.class);
+
+            List<Predicate> predicates = new ArrayList<>();
+
+            for (Map.Entry<String, Object> entry : filters.entrySet()) {
+                String key = entry.getKey();
+                Object value = entry.getValue();
+
+                if (value == null) continue;
+
+                switch (key) {
+                    case "nom":
+                        predicates.add(cb.equal(root.get("nom"), value));
+                        break;
+                    case "prenom":
+                        predicates.add(cb.equal(root.get("prenom"), value));
+                        break;
+                    case "dateNaissance":
+                        predicates.add(cb.equal(root.get("dateNaissance"), value));
+                        break;
+                    case "numeroPermis":
+                        predicates.add(cb.equal(root.get("numeroPermis"), value));
+                        break;
+                    // Add more fields as needed
+                    default:
+                        // Ignore unknown filters
+                        break;
+                }
+            }
+
+            if (!predicates.isEmpty()) {
+                cq.where(cb.and(predicates.toArray(new Predicate[0])));
+            }
+
+            TypedQuery<Chauffeur> query = em.createQuery(cq);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    // Similar multi-filter for VmChauffeurDetail (since it's a view, we can filter on its fields)
+
+    public List<VmChauffeurDetail> searchChauffeurDetailsWithFilters(Map<String, Object> filters) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<VmChauffeurDetail> cq = cb.createQuery(VmChauffeurDetail.class);
+            Root<VmChauffeurDetail> root = cq.from(VmChauffeurDetail.class);
+
+            List<Predicate> predicates = new ArrayList<>();
+
+            for (Map.Entry<String, Object> entry : filters.entrySet()) {
+                String key = entry.getKey();
+                Object value = entry.getValue();
+
+                if (value == null) continue;
+
+                switch (key) {
+                    case "nom":
+                        predicates.add(cb.equal(root.get("nom"), value));
+                        break;
+                    case "prenom":
+                        predicates.add(cb.equal(root.get("prenom"), value));
+                        break;
+                    case "nomComplet":
+                        predicates.add(cb.equal(root.get("nomComplet"), value));
+                        break;
+                    case "dateNaissance":
+                        predicates.add(cb.equal(root.get("dateNaissance"), value));
+                        break;
+                    case "age":
+                        predicates.add(cb.equal(root.get("age"), value));
+                        break;
+                    case "numeroPermis":
+                        predicates.add(cb.equal(root.get("numeroPermis"), value));
+                        break;
+                    case "libelleStatut":
+                        predicates.add(cb.equal(root.get("libelleStatut"), value));
+                        break;
+                    // Add more as needed
+                    default:
+                        break;
+                }
+            }
+
+            if (!predicates.isEmpty()) {
+                cq.where(cb.and(predicates.toArray(new Predicate[0])));
+            }
+
+            TypedQuery<VmChauffeurDetail> query = em.createQuery(cq);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+}
+package com.mdgtaxi.service;
+
+import com.mdgtaxi.entity.Client;
+import com.mdgtaxi.util.HibernateUtil;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
+import javax.persistence.TypedQuery;
+import java.util.List;
+
+public class ClientService {
+
+    private final EntityManagerFactory emf = HibernateUtil.getEntityManagerFactory();
+
+    public List<Client> getAllClients() {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<Client> query = em.createQuery("SELECT c FROM Client c", Client.class);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    public Client createClient(Client client) {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            em.persist(client);
+            tx.commit();
+            return client;
+        } catch (Exception e) {
+            if (tx.isActive())
+                tx.rollback();
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
+}
+package com.mdgtaxi.service;
+
+import com.mdgtaxi.dto.EntityDetailWithStatusDto;
+import com.mdgtaxi.dto.EntityListWithStatusDto;
+import com.mdgtaxi.dto.EntityStatusCriteria;
+import com.mdgtaxi.util.HibernateUtil;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.TypedQuery;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Service pour rÃ©cupÃ©rer des entitÃ©s avec leurs statuts selon diffÃ©rents critÃ¨res
+ * Supporte: Chauffeur, Vehicule, Trajet, Trajet_Reservation
+ */
+public class EntityStatusService {
+
+    private final EntityManagerFactory emf = HibernateUtil.getEntityManagerFactory();
+
+    /**
+     * RÃ©cupÃ¨re toutes les entitÃ©s avec leur statut Ã  une date donnÃ©e
+     * @param tableName Nom de la table (Chauffeur, Vehicule, Trajet, Trajet_Reservation)
+     * @param date Date (null = maintenant)
+     * @return EntityListWithStatusDto contenant toutes les entitÃ©s avec leurs statuts
+     */
+    public EntityListWithStatusDto getAllEntitiesWithStatusAtDate(String tableName, LocalDateTime date) {
+        if (date == null) {
+            date = LocalDateTime.now();
+        }
+
+        String entityName = getEntityName(tableName);
+        String mouvementEntity = getMouvementEntityName(tableName);
+        String statusEntity = getStatusEntityName(tableName);
+        String idField = getIdFieldName(tableName);
+
+        EntityManager em = emf.createEntityManager();
+        try {
+            // RequÃªte pour rÃ©cupÃ©rer les entitÃ©s avec leur statut actuel
+            String jpql = "SELECT e, s.id, s.libelle, s.score, s.spanHtml " +
+                    "FROM " + entityName + " e " +
+                    "LEFT JOIN " + mouvementEntity + " m ON e.id = m." + idField + " " +
+                    "LEFT JOIN " + statusEntity + " s ON m.nouveauStatut.id = s.id " +
+                    "WHERE m.dateMouvement = (" +
+                    "  SELECT MAX(m2.dateMouvement) " +
+                    "  FROM " + mouvementEntity + " m2 " +
+                    "  WHERE m2." + idField + " = e.id " +
+                    "  AND m2.dateMouvement <= :date" +
+                    ") " +
+                    "OR NOT EXISTS (" +
+                    "  SELECT 1 FROM " + mouvementEntity + " m3 " +
+                    "  WHERE m3." + idField + " = e.id" +
+                    ")";
+
+            TypedQuery<Object[]> query = em.createQuery(jpql, Object[].class);
+            query.setParameter("date", date);
+            List<Object[]> results = query.getResultList();
+
+            List<EntityDetailWithStatusDto> entities = new ArrayList<>();
+            for (Object[] row : results) {
+                entities.add(new EntityDetailWithStatusDto(
+                        row[0],  // entity
+                        (Long) row[1],  // idStatut
+                        (String) row[2],  // libelleStatut
+                        (Integer) row[3],  // scoreStatut
+                        (String) row[4]  // spanHtmlStatut
+                ));
+            }
+
+            return new EntityListWithStatusDto(entities, date, (long) entities.size());
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * RÃ©cupÃ¨re les entitÃ©s selon des critÃ¨res de statut multiples
+     * @param tableName Nom de la table
+     * @param criteria CritÃ¨res de recherche (libellÃ©, score min/max, date)
+     * @return EntityListWithStatusDto contenant les entitÃ©s filtrÃ©es
+     */
+    public EntityListWithStatusDto getEntitiesByCriteria(String tableName, EntityStatusCriteria criteria) {
+        LocalDateTime effectiveDate = criteria.getEffectiveDate();
+
+        String entityName = getEntityName(tableName);
+        String mouvementEntity = getMouvementEntityName(tableName);
+        String statusEntity = getStatusEntityName(tableName);
+        String idField = getIdFieldName(tableName);
+
+        EntityManager em = emf.createEntityManager();
+        try {
+            // Construction dynamique de la requÃªte avec les critÃ¨res
+            StringBuilder jpql = new StringBuilder();
+            jpql.append("SELECT e, s.id, s.libelle, s.score, s.spanHtml ")
+                    .append("FROM ").append(entityName).append(" e ")
+                    .append("INNER JOIN ").append(mouvementEntity).append(" m ON e.id = m.").append(idField).append(" ")
+                    .append("INNER JOIN ").append(statusEntity).append(" s ON m.nouveauStatut.id = s.id ")
+                    .append("WHERE m.dateMouvement <= :date ")
+                    .append("AND m.dateMouvement = (")
+                    .append("  SELECT MAX(m2.dateMouvement) ")
+                    .append("  FROM ").append(mouvementEntity).append(" m2 ")
+                    .append("  WHERE m2.").append(idField).append(" = e.id ")
+                    .append("  AND m2.dateMouvement <= :date")
+                    .append(") ");
+
+            // Ajout des critÃ¨res de filtre
+            boolean hasStatusCriteria = false;
+
+            if (criteria.getLibelleStatut() != null && !criteria.getLibelleStatut().isEmpty()) {
+                jpql.append("AND s.libelle = :libelle ");
+                hasStatusCriteria = true;
+            }
+
+            if (criteria.getExactScore() != null) {
+                jpql.append("AND s.score = :exactScore ");
+                hasStatusCriteria = true;
+            } else {
+                if (criteria.getMinScore() != null) {
+                    jpql.append("AND s.score >= :minScore ");
+                    hasStatusCriteria = true;
+                }
+                if (criteria.getMaxScore() != null) {
+                    jpql.append("AND s.score <= :maxScore ");
+                    hasStatusCriteria = true;
+                }
+            }
+
+            TypedQuery<Object[]> query = em.createQuery(jpql.toString(), Object[].class);
+            query.setParameter("date", effectiveDate);
+
+            if (criteria.getLibelleStatut() != null && !criteria.getLibelleStatut().isEmpty()) {
+                query.setParameter("libelle", criteria.getLibelleStatut());
+            }
+            if (criteria.getExactScore() != null) {
+                query.setParameter("exactScore", criteria.getExactScore());
+            } else {
+                if (criteria.getMinScore() != null) {
+                    query.setParameter("minScore", criteria.getMinScore());
+                }
+                if (criteria.getMaxScore() != null) {
+                    query.setParameter("maxScore", criteria.getMaxScore());
+                }
+            }
+
+            List<Object[]> results = query.getResultList();
+            List<EntityDetailWithStatusDto> entities = new ArrayList<>();
+
+            for (Object[] row : results) {
+                entities.add(new EntityDetailWithStatusDto(
+                        row[0],  // entity
+                        (Long) row[1],  // idStatut
+                        (String) row[2],  // libelleStatut
+                        (Integer) row[3],  // scoreStatut
+                        (String) row[4]  // spanHtmlStatut
+                ));
+            }
+
+            return new EntityListWithStatusDto(entities, effectiveDate, (long) entities.size());
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * RÃ©cupÃ¨re les entitÃ©s par libellÃ© de statut Ã  une date donnÃ©e
+     * @param tableName Nom de la table
+     * @param libelleStatut LibellÃ© du statut
+     * @param date Date (null = maintenant)
+     * @return EntityListWithStatusDto
+     */
+    public EntityListWithStatusDto getEntitiesByLibelleStatut(String tableName, String libelleStatut, LocalDateTime date) {
+        EntityStatusCriteria criteria = EntityStatusCriteria.builder()
+                .libelleStatut(libelleStatut)
+                .atDate(date)
+                .build();
+        return getEntitiesByCriteria(tableName, criteria);
+    }
+
+    /**
+     * RÃ©cupÃ¨re les entitÃ©s par score exact Ã  une date donnÃ©e
+     * @param tableName Nom de la table
+     * @param score Score exact
+     * @param date Date (null = maintenant)
+     * @return EntityListWithStatusDto
+     */
+    public EntityListWithStatusDto getEntitiesByExactScore(String tableName, int score, LocalDateTime date) {
+        EntityStatusCriteria criteria = EntityStatusCriteria.builder()
+                .exactScore(score)
+                .atDate(date)
+                .build();
+        return getEntitiesByCriteria(tableName, criteria);
+    }
+
+    /**
+     * RÃ©cupÃ¨re les entitÃ©s par plage de scores Ã  une date donnÃ©e
+     * @param tableName Nom de la table
+     * @param minScore Score minimum (null = pas de minimum)
+     * @param maxScore Score maximum (null = pas de maximum)
+     * @param date Date (null = maintenant)
+     * @return EntityListWithStatusDto
+     */
+    public EntityListWithStatusDto getEntitiesByScoreRange(String tableName, Integer minScore, Integer maxScore, LocalDateTime date) {
+        EntityStatusCriteria criteria = EntityStatusCriteria.builder()
+                .minScore(minScore)
+                .maxScore(maxScore)
+                .atDate(date)
+                .build();
+        return getEntitiesByCriteria(tableName, criteria);
+    }
+
+    /**
+     * Compte le nombre d'entitÃ©s par statut Ã  une date donnÃ©e
+     * @param tableName Nom de la table
+     * @param date Date (null = maintenant)
+     * @return Liste de tableaux [libelle_statut, count]
+     */
+    public List<Object[]> countEntitiesByStatusAtDate(String tableName, LocalDateTime date) {
+        if (date == null) {
+            date = LocalDateTime.now();
+        }
+
+        String mouvementEntity = getMouvementEntityName(tableName);
+        String statusEntity = getStatusEntityName(tableName);
+        String idField = getIdFieldName(tableName);
+
+        EntityManager em = emf.createEntityManager();
+        try {
+            String jpql = "SELECT s.libelle, COUNT(DISTINCT m." + idField + ") " +
+                    "FROM " + mouvementEntity + " m " +
+                    "INNER JOIN " + statusEntity + " s ON m.nouveauStatut.id = s.id " +
+                    "WHERE m.dateMouvement <= :date " +
+                    "AND m.dateMouvement = (" +
+                    "  SELECT MAX(m2.dateMouvement) " +
+                    "  FROM " + mouvementEntity + " m2 " +
+                    "  WHERE m2." + idField + " = m." + idField + " " +
+                    "  AND m2.dateMouvement <= :date" +
+                    ") " +
+                    "GROUP BY s.libelle, s.score " +
+                    "ORDER BY s.score";
+
+            TypedQuery<Object[]> query = em.createQuery(jpql, Object[].class);
+            query.setParameter("date", date);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    // MÃ©thodes de mapping
+
+    private String getEntityName(String tableName) {
+        return switch (tableName) {
+            case "Chauffeur" -> "Chauffeur";
+            case "Vehicule" -> "Vehicule";
+            case "Trajet" -> "Trajet";
+            case "Trajet_Reservation" -> "TrajetReservation";
+            default -> throw new IllegalArgumentException("Table non supportÃ©e: " + tableName);
+        };
+    }
+
+    private String getMouvementEntityName(String tableName) {
+        return switch (tableName) {
+            case "Chauffeur" -> "ChauffeurMouvementStatut";
+            case "Vehicule" -> "VehiculeMouvementStatut";
+            case "Trajet" -> "TrajetMouvementStatut";
+            case "Trajet_Reservation" -> "TrajetReservationMouvementStatut";
+            default -> throw new IllegalArgumentException("Table non supportÃ©e: " + tableName);
+        };
+    }
+
+    private String getStatusEntityName(String tableName) {
+        return switch (tableName) {
+            case "Chauffeur" -> "ChauffeurStatut";
+            case "Vehicule" -> "VehiculeStatut";
+            case "Trajet" -> "TrajetStatut";
+            case "Trajet_Reservation" -> "ReservationStatut";
+            default -> throw new IllegalArgumentException("Table non supportÃ©e: " + tableName);
+        };
+    }
+
+    private String getIdFieldName(String tableName) {
+        return switch (tableName) {
+            case "Chauffeur" -> "chauffeur.id";
+            case "Vehicule" -> "vehicule.id";
+            case "Trajet" -> "trajet.id";
+            case "Trajet_Reservation" -> "trajetReservation.id";
+            default -> throw new IllegalArgumentException("Table non supportÃ©e: " + tableName);
+        };
+    }
+}
+package com.mdgtaxi.service;
+
+import com.mdgtaxi.entity.Ligne;
+import com.mdgtaxi.util.HibernateUtil;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
+import javax.persistence.TypedQuery;
+import java.util.List;
+
+public class LigneService {
+
+    private final EntityManagerFactory emf = HibernateUtil.getEntityManagerFactory();
+
+    public Ligne createLigne(Ligne ligne) {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            em.persist(ligne);
+            tx.commit();
+            return ligne;
+        } catch (Exception e) {
+            if (tx.isActive())
+                tx.rollback();
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
+
+    public Ligne getLigneById(Long id) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            return em.find(Ligne.class, id);
+        } finally {
+            em.close();
+        }
+    }
+
+    public List<Ligne> getAllLignes() {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<Ligne> query = em.createQuery("SELECT l FROM Ligne l", Ligne.class);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    public Ligne updateLigne(Ligne ligne) {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            Ligne updated = em.merge(ligne);
+            tx.commit();
+            return updated;
+        } catch (Exception e) {
+            if (tx.isActive())
+                tx.rollback();
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
+
+    public void deleteLigne(Long id) {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            Ligne ligne = em.find(Ligne.class, id);
+            if (ligne != null) {
+                em.remove(ligne);
+            }
+            tx.commit();
+        } catch (Exception e) {
+            if (tx.isActive())
+                tx.rollback();
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
+}
+package com.mdgtaxi.service;
+
+import com.mdgtaxi.dto.MouvementStatusCriteria;
+import com.mdgtaxi.dto.MouvementStatusDto;
+import com.mdgtaxi.util.HibernateUtil;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.TypedQuery;
+import java.time.LocalDateTime;
+import java.util.List;
+
+/**
+ * Service pour gÃ©rer les mouvements de statut individuels
+ * Supporte: Chauffeur, Vehicule, Trajet, Trajet_Reservation
+ */
+public class MouvementStatusService {
+
+    private final EntityManagerFactory emf = HibernateUtil.getEntityManagerFactory();
+
+    /**
+     * RÃ©cupÃ¨re le statut actuel d'une entitÃ©
+     * @param tableName Nom de la table (Chauffeur, Vehicule, Trajet, Trajet_Reservation)
+     * @param idEntite ID de l'entitÃ©
+     * @return Le statut actuel ou null
+     */
+    public MouvementStatusDto getCurrentStatus(String tableName, Long idEntite) {
+        return getStatusAtDate(tableName, idEntite, LocalDateTime.now());
+    }
+
+    /**
+     * RÃ©cupÃ¨re le statut d'une entitÃ© Ã  une date donnÃ©e
+     * @param tableName Nom de la table
+     * @param idEntite ID de l'entitÃ©
+     * @param date Date Ã  laquelle on veut connaÃ®tre le statut
+     * @return Le statut Ã  cette date ou null
+     */
+    public MouvementStatusDto getStatusAtDate(String tableName, Long idEntite, LocalDateTime date) {
+        String mouvementEntity = getMouvementEntityName(tableName);
+        String statusEntity = getStatusEntityName(tableName);
+        String idField = getIdFieldName(tableName);
+
+        EntityManager em = emf.createEntityManager();
+        try {
+            String jpql = "SELECT new com.mdgtaxi.dto.MouvementStatusDto(" +
+                    "m.id, " +
+                    "m." + idField + ", " +
+                    "'" + tableName + "', " +
+                    "CASE WHEN m.ancienStatut IS NOT NULL THEN m.ancienStatut.id ELSE NULL END, " +
+                    "CASE WHEN m.ancienStatut IS NOT NULL THEN m.ancienStatut.libelle ELSE NULL END, " +
+                    "CASE WHEN m.ancienStatut IS NOT NULL THEN m.ancienStatut.score ELSE NULL END, " +
+                    "CASE WHEN m.ancienStatut IS NOT NULL THEN m.ancienStatut.spanHtml ELSE NULL END, " +
+                    "s.id, " +
+                    "s.libelle, " +
+                    "s.score, " +
+                    "s.spanHtml, " +
+                    "m.dateMouvement, " +
+                    "m.observation) " +
+                    "FROM " + mouvementEntity + " m " +
+                    "INNER JOIN " + statusEntity + " s ON m.nouveauStatut.id = s.id " +
+                    "WHERE m." + idField + " = :idEntite " +
+                    "AND m.dateMouvement <= :date " +
+                    "ORDER BY m.dateMouvement DESC";
+
+            TypedQuery<MouvementStatusDto> query = em.createQuery(jpql, MouvementStatusDto.class);
+            query.setParameter("idEntite", idEntite);
+            query.setParameter("date", date);
+            query.setMaxResults(1);
+
+            List<MouvementStatusDto> results = query.getResultList();
+            return results.isEmpty() ? null : results.get(0);
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * RÃ©cupÃ¨re l'historique complet des mouvements de statut
+     * @param tableName Nom de la table
+     * @param idEntite ID de l'entitÃ©
+     * @return Liste des mouvements ordonnÃ©s par date dÃ©croissante
+     */
+    public List<MouvementStatusDto> getStatusHistory(String tableName, Long idEntite) {
+        String mouvementEntity = getMouvementEntityName(tableName);
+        String statusEntity = getStatusEntityName(tableName);
+        String idField = getIdFieldName(tableName);
+
+        EntityManager em = emf.createEntityManager();
+        try {
+            String jpql = "SELECT new com.mdgtaxi.dto.MouvementStatusDto(" +
+                    "m.id, " +
+                    "m." + idField + ", " +
+                    "'" + tableName + "', " +
+                    "CASE WHEN m.ancienStatut IS NOT NULL THEN m.ancienStatut.id ELSE NULL END, " +
+                    "CASE WHEN m.ancienStatut IS NOT NULL THEN m.ancienStatut.libelle ELSE NULL END, " +
+                    "CASE WHEN m.ancienStatut IS NOT NULL THEN m.ancienStatut.score ELSE NULL END, " +
+                    "CASE WHEN m.ancienStatut IS NOT NULL THEN m.ancienStatut.spanHtml ELSE NULL END, " +
+                    "s.id, " +
+                    "s.libelle, " +
+                    "s.score, " +
+                    "s.spanHtml, " +
+                    "m.dateMouvement, " +
+                    "m.observation) " +
+                    "FROM " + mouvementEntity + " m " +
+                    "INNER JOIN " + statusEntity + " s ON m.nouveauStatut.id = s.id " +
+                    "WHERE m." + idField + " = :idEntite " +
+                    "ORDER BY m.dateMouvement DESC";
+
+            TypedQuery<MouvementStatusDto> query = em.createQuery(jpql, MouvementStatusDto.class);
+            query.setParameter("idEntite", idEntite);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * RÃ©cupÃ¨re les mouvements de statut selon des critÃ¨res multiples
+     * @param tableName Nom de la table
+     * @param criteria CritÃ¨res de recherche
+     * @return Liste des mouvements filtrÃ©s ordonnÃ©s par date dÃ©croissante
+     */
+    public List<MouvementStatusDto> getMouvementsByCriteria(String tableName, MouvementStatusCriteria criteria) {
+        String mouvementEntity = getMouvementEntityName(tableName);
+        String statusEntity = getStatusEntityName(tableName);
+        String idField = getIdFieldName(tableName);
+
+        EntityManager em = emf.createEntityManager();
+        try {
+            StringBuilder jpql = new StringBuilder();
+            jpql.append("SELECT new com.mdgtaxi.dto.MouvementStatusDto(")
+                    .append("m.id, ")
+                    .append("m.").append(idField).append(", ")
+                    .append("'").append(tableName).append("', ")
+                    .append("CASE WHEN m.ancienStatut IS NOT NULL THEN m.ancienStatut.id ELSE NULL END, ")
+                    .append("CASE WHEN m.ancienStatut IS NOT NULL THEN m.ancienStatut.libelle ELSE NULL END, ")
+                    .append("CASE WHEN m.ancienStatut IS NOT NULL THEN m.ancienStatut.score ELSE NULL END, ")
+                    .append("CASE WHEN m.ancienStatut IS NOT NULL THEN m.ancienStatut.spanHtml ELSE NULL END, ")
+                    .append("s.id, ")
+                    .append("s.libelle, ")
+                    .append("s.score, ")
+                    .append("s.spanHtml, ")
+                    .append("m.dateMouvement, ")
+                    .append("m.observation) ")
+                    .append("FROM ").append(mouvementEntity).append(" m ")
+                    .append("INNER JOIN ").append(statusEntity).append(" s ON m.nouveauStatut.id = s.id ")
+                    .append("LEFT JOIN ").append(statusEntity).append(" sa ON m.ancienStatut.id = sa.id ")
+                    .append("WHERE 1=1 ");
+
+            // Filtre par ID d'entitÃ©
+            if (criteria.getIdEntite() != null) {
+                jpql.append("AND m.").append(idField).append(" = :idEntite ");
+            }
+
+            // Filtre par libellÃ© ancien statut
+            if (criteria.getLibelleAncienStatut() != null && !criteria.getLibelleAncienStatut().isEmpty()) {
+                jpql.append("AND sa.libelle = :libelleAncien ");
+            }
+
+            // Filtre par libellÃ© nouveau statut
+            if (criteria.getLibelleNouveauStatut() != null && !criteria.getLibelleNouveauStatut().isEmpty()) {
+                jpql.append("AND s.libelle = :libelleNouveau ");
+            }
+
+            // Filtres par score ancien statut
+            if (criteria.getExactScoreAncien() != null) {
+                jpql.append("AND sa.score = :exactScoreAncien ");
+            } else {
+                if (criteria.getMinScoreAncien() != null) {
+                    jpql.append("AND sa.score >= :minScoreAncien ");
+                }
+                if (criteria.getMaxScoreAncien() != null) {
+                    jpql.append("AND sa.score <= :maxScoreAncien ");
+                }
+            }
+
+            // Filtres par score nouveau statut
+            if (criteria.getExactScoreNouveau() != null) {
+                jpql.append("AND s.score = :exactScoreNouveau ");
+            } else {
+                if (criteria.getMinScoreNouveau() != null) {
+                    jpql.append("AND s.score >= :minScoreNouveau ");
+                }
+                if (criteria.getMaxScoreNouveau() != null) {
+                    jpql.append("AND s.score <= :maxScoreNouveau ");
+                }
+            }
+
+            // Filtre par plage de dates
+            if (criteria.getDateDebut() != null) {
+                jpql.append("AND m.dateMouvement >= :dateDebut ");
+            }
+            if (criteria.getDateFin() != null) {
+                jpql.append("AND m.dateMouvement <= :dateFin ");
+            }
+
+            // Filtre par observation
+            if (criteria.getObservationContains() != null && !criteria.getObservationContains().isEmpty()) {
+                jpql.append("AND LOWER(m.observation) LIKE LOWER(:observation) ");
+            }
+
+            jpql.append("ORDER BY m.dateMouvement DESC");
+
+            TypedQuery<MouvementStatusDto> query = em.createQuery(jpql.toString(), MouvementStatusDto.class);
+
+            // ParamÃ©trage de la requÃªte
+            if (criteria.getIdEntite() != null) {
+                query.setParameter("idEntite", criteria.getIdEntite());
+            }
+            if (criteria.getLibelleAncienStatut() != null && !criteria.getLibelleAncienStatut().isEmpty()) {
+                query.setParameter("libelleAncien", criteria.getLibelleAncienStatut());
+            }
+            if (criteria.getLibelleNouveauStatut() != null && !criteria.getLibelleNouveauStatut().isEmpty()) {
+                query.setParameter("libelleNouveau", criteria.getLibelleNouveauStatut());
+            }
+            if (criteria.getExactScoreAncien() != null) {
+                query.setParameter("exactScoreAncien", criteria.getExactScoreAncien());
+            } else {
+                if (criteria.getMinScoreAncien() != null) {
+                    query.setParameter("minScoreAncien", criteria.getMinScoreAncien());
+                }
+                if (criteria.getMaxScoreAncien() != null) {
+                    query.setParameter("maxScoreAncien", criteria.getMaxScoreAncien());
+                }
+            }
+            if (criteria.getExactScoreNouveau() != null) {
+                query.setParameter("exactScoreNouveau", criteria.getExactScoreNouveau());
+            } else {
+                if (criteria.getMinScoreNouveau() != null) {
+                    query.setParameter("minScoreNouveau", criteria.getMinScoreNouveau());
+                }
+                if (criteria.getMaxScoreNouveau() != null) {
+                    query.setParameter("maxScoreNouveau", criteria.getMaxScoreNouveau());
+                }
+            }
+            if (criteria.getDateDebut() != null) {
+                query.setParameter("dateDebut", criteria.getDateDebut());
+            }
+            if (criteria.getDateFin() != null) {
+                query.setParameter("dateFin", criteria.getDateFin());
+            }
+            if (criteria.getObservationContains() != null && !criteria.getObservationContains().isEmpty()) {
+                query.setParameter("observation", "%" + criteria.getObservationContains() + "%");
+            }
+
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * RÃ©cupÃ¨re tous les mouvements pour une table (sans filtre d'entitÃ© spÃ©cifique)
+     * @param tableName Nom de la table
+     * @return Liste de tous les mouvements
+     */
+    public List<MouvementStatusDto> getAllMouvements(String tableName) {
+        MouvementStatusCriteria criteria = MouvementStatusCriteria.builder().build();
+        return getMouvementsByCriteria(tableName, criteria);
+    }
+
+    /**
+     * RÃ©cupÃ¨re les mouvements dans une pÃ©riode donnÃ©e
+     * @param tableName Nom de la table
+     * @param dateDebut Date de dÃ©but
+     * @param dateFin Date de fin
+     * @return Liste des mouvements dans la pÃ©riode
+     */
+    public List<MouvementStatusDto> getMouvementsByPeriod(String tableName, LocalDateTime dateDebut, LocalDateTime dateFin) {
+        MouvementStatusCriteria criteria = MouvementStatusCriteria.builder()
+                .dateDebut(dateDebut)
+                .dateFin(dateFin)
+                .build();
+        return getMouvementsByCriteria(tableName, criteria);
+    }
+
+    /**
+     * RÃ©cupÃ¨re les mouvements vers un statut spÃ©cifique
+     * @param tableName Nom de la table
+     * @param libelleNouveauStatut LibellÃ© du nouveau statut
+     * @return Liste des mouvements vers ce statut
+     */
+    public List<MouvementStatusDto> getMouvementsToStatus(String tableName, String libelleNouveauStatut) {
+        MouvementStatusCriteria criteria = MouvementStatusCriteria.builder()
+                .libelleNouveauStatut(libelleNouveauStatut)
+                .build();
+        return getMouvementsByCriteria(tableName, criteria);
+    }
+
+    /**
+     * RÃ©cupÃ¨re les mouvements depuis un statut spÃ©cifique
+     * @param tableName Nom de la table
+     * @param libelleAncienStatut LibellÃ© de l'ancien statut
+     * @return Liste des mouvements depuis ce statut
+     */
+    public List<MouvementStatusDto> getMouvementsFromStatus(String tableName, String libelleAncienStatut) {
+        MouvementStatusCriteria criteria = MouvementStatusCriteria.builder()
+                .libelleAncienStatut(libelleAncienStatut)
+                .build();
+        return getMouvementsByCriteria(tableName, criteria);
+    }
+
+    /**
+     * RÃ©cupÃ¨re les mouvements avec amÃ©lioration de score (nouveau > ancien)
+     * @param tableName Nom de la table
+     * @return Liste des mouvements avec amÃ©lioration
+     */
+    public List<MouvementStatusDto> getMouvementsWithScoreImprovement(String tableName) {
+        String mouvementEntity = getMouvementEntityName(tableName);
+        String statusEntity = getStatusEntityName(tableName);
+        String idField = getIdFieldName(tableName);
+
+        EntityManager em = emf.createEntityManager();
+        try {
+            String jpql = "SELECT new com.mdgtaxi.dto.MouvementStatusDto(" +
+                    "m.id, " +
+                    "m." + idField + ", " +
+                    "'" + tableName + "', " +
+                    "sa.id, " +
+                    "sa.libelle, " +
+                    "sa.score, " +
+                    "sa.spanHtml, " +
+                    "s.id, " +
+                    "s.libelle, " +
+                    "s.score, " +
+                    "s.spanHtml, " +
+                    "m.dateMouvement, " +
+                    "m.observation) " +
+                    "FROM " + mouvementEntity + " m " +
+                    "INNER JOIN " + statusEntity + " s ON m.nouveauStatut.id = s.id " +
+                    "INNER JOIN " + statusEntity + " sa ON m.ancienStatut.id = sa.id " +
+                    "WHERE s.score > sa.score " +
+                    "ORDER BY m.dateMouvement DESC";
+
+            TypedQuery<MouvementStatusDto> query = em.createQuery(jpql, MouvementStatusDto.class);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * RÃ©cupÃ¨re les mouvements avec dÃ©gradation de score (nouveau < ancien)
+     * @param tableName Nom de la table
+     * @return Liste des mouvements avec dÃ©gradation
+     */
+    public List<MouvementStatusDto> getMouvementsWithScoreDegradation(String tableName) {
+        String mouvementEntity = getMouvementEntityName(tableName);
+        String statusEntity = getStatusEntityName(tableName);
+        String idField = getIdFieldName(tableName);
+
+        EntityManager em = emf.createEntityManager();
+        try {
+            String jpql = "SELECT new com.mdgtaxi.dto.MouvementStatusDto(" +
+                    "m.id, " +
+                    "m." + idField + ", " +
+                    "'" + tableName + "', " +
+                    "sa.id, " +
+                    "sa.libelle, " +
+                    "sa.score, " +
+                    "sa.spanHtml, " +
+                    "s.id, " +
+                    "s.libelle, " +
+                    "s.score, " +
+                    "s.spanHtml, " +
+                    "m.dateMouvement, " +
+                    "m.observation) " +
+                    "FROM " + mouvementEntity + " m " +
+                    "INNER JOIN " + statusEntity + " s ON m.nouveauStatut.id = s.id " +
+                    "INNER JOIN " + statusEntity + " sa ON m.ancienStatut.id = sa.id " +
+                    "WHERE s.score < sa.score " +
+                    "ORDER BY m.dateMouvement DESC";
+
+            TypedQuery<MouvementStatusDto> query = em.createQuery(jpql, MouvementStatusDto.class);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    // MÃ©thodes de mapping
+
+    private String getMouvementEntityName(String tableName) {
+        return switch (tableName) {
+            case "Chauffeur" -> "ChauffeurMouvementStatut";
+            case "Vehicule" -> "VehiculeMouvementStatut";
+            case "Trajet" -> "TrajetMouvementStatut";
+            case "Trajet_Reservation" -> "TrajetReservationMouvementStatut";
+            default -> throw new IllegalArgumentException("Table non supportÃ©e: " + tableName);
+        };
+    }
+
+    private String getStatusEntityName(String tableName) {
+        return switch (tableName) {
+            case "Chauffeur" -> "ChauffeurStatut";
+            case "Vehicule" -> "VehiculeStatut";
+            case "Trajet" -> "TrajetStatut";
+            case "Trajet_Reservation" -> "ReservationStatut";
+            default -> throw new IllegalArgumentException("Table non supportÃ©e: " + tableName);
+        };
+    }
+
+    private String getIdFieldName(String tableName) {
+        return switch (tableName) {
+            case "Chauffeur" -> "chauffeur.id";
+            case "Vehicule" -> "vehicule.id";
+            case "Trajet" -> "trajet.id";
+            case "Trajet_Reservation" -> "trajetReservation.id";
+            default -> throw new IllegalArgumentException("Table non supportÃ©e: " + tableName);
+        };
+    }
+}
+package com.mdgtaxi.service;
+
+import com.mdgtaxi.entity.Trajet;
+import com.mdgtaxi.entity.TrajetReservation;
+import com.mdgtaxi.util.HibernateUtil;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
+import javax.persistence.TypedQuery;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public class ReservationService {
+
+    private final EntityManagerFactory emf = HibernateUtil.getEntityManagerFactory();
+
+    public TrajetReservation createReservation(TrajetReservation reservation) {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            em.persist(reservation);
+            tx.commit();
+            return reservation;
+        } catch (Exception e) {
+            if (tx.isActive())
+                tx.rollback();
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
+
+    public TrajetReservation getReservationById(Long id) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            return em.find(TrajetReservation.class, id);
+        } finally {
+            em.close();
+        }
+    }
+
+    public List<TrajetReservation> getAllReservations() {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<TrajetReservation> query = em.createQuery("SELECT r FROM TrajetReservation r",
+                    TrajetReservation.class);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    public List<TrajetReservation> getReservationsByTrajetId(Long trajetId) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<TrajetReservation> query = em.createQuery(
+                    "SELECT r FROM TrajetReservation r WHERE r.trajet.id = :trajetId",
+                    TrajetReservation.class);
+            query.setParameter("trajetId", trajetId);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    public TrajetReservation updateReservation(TrajetReservation reservation) {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            TrajetReservation updated = em.merge(reservation);
+            tx.commit();
+            return updated;
+        } catch (Exception e) {
+            if (tx.isActive())
+                tx.rollback();
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
+
+    public void deleteReservation(Long id) {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            TrajetReservation reservation = em.find(TrajetReservation.class, id);
+            if (reservation != null) {
+                em.remove(reservation);
+            }
+            tx.commit();
+        } catch (Exception e) {
+            if (tx.isActive())
+                tx.rollback();
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * Obtient les statistiques de rÃ©servations par statut
+     * 
+     * @return Map avec le libellÃ© du statut comme clÃ© et le nombre de rÃ©servations
+     *         comme valeur
+     */
+    public Map<String, Long> getReservationStatsByStatus() {
+        EntityManager em = emf.createEntityManager();
+        try {
+            String jpql = "SELECT r.reservationStatut.libelle, COUNT(r) FROM TrajetReservation r GROUP BY r.reservationStatut.libelle";
+            TypedQuery<Object[]> query = em.createQuery(jpql, Object[].class);
+            List<Object[]> results = query.getResultList();
+
+            Map<String, Long> stats = new HashMap<>();
+            for (Object[] result : results) {
+                stats.put((String) result[0], (Long) result[1]);
+            }
+            return stats;
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * Calcule le nombre total de places rÃ©servÃ©es pour un trajet
+     * 
+     * @param trajetId ID du trajet
+     * @return Nombre total de places rÃ©servÃ©es
+     */
+    public int getPlacesPrisesForTrajet(Long trajetId) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            String jpql = "SELECT COALESCE(SUM(r.nombrePlaceReservation), 0) FROM TrajetReservation r " +
+                    "WHERE r.trajet.id = :trajetId AND r.reservationStatut.libelle != 'AnnulÃ©e'";
+            TypedQuery<Long> query = em.createQuery(jpql, Long.class);
+            query.setParameter("trajetId", trajetId);
+            Long result = query.getSingleResult();
+            return result != null ? result.intValue() : 0;
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * Calcule le nombre de places restantes pour un trajet
+     * 
+     * @param trajetId ID du trajet
+     * @return Nombre de places restantes
+     */
+    public int getPlacesRestantesForTrajet(Long trajetId) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            Trajet trajet = em.find(Trajet.class, trajetId);
+            if (trajet == null) {
+                return 0;
+            }
+
+            int capaciteMax = trajet.getVehicule().getMaximumPassager();
+            int placesPrises = getPlacesPrisesForTrajet(trajetId);
+
+            return capaciteMax - placesPrises;
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * Calcule le total de places prises pour tous les trajets
+     * 
+     * @return Nombre total de places rÃ©servÃ©es
+     */
+    public int getTotalPlacesPrises() {
+        EntityManager em = emf.createEntityManager();
+        try {
+            String jpql = "SELECT COALESCE(SUM(r.nombrePlaceReservation), 0) FROM TrajetReservation r " +
+                    "WHERE r.reservationStatut.libelle != 'AnnulÃ©e'";
+            TypedQuery<Long> query = em.createQuery(jpql, Long.class);
+            Long result = query.getSingleResult();
+            return result != null ? result.intValue() : 0;
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * Calcule le total de places restantes pour tous les trajets
+     * 
+     * @return Nombre total de places restantes
+     */
+    public int getTotalPlacesRestantes() {
+        EntityManager em = emf.createEntityManager();
+        try {
+            String jpql = "SELECT t FROM Trajet t";
+            TypedQuery<Trajet> query = em.createQuery(jpql, Trajet.class);
+            List<Trajet> trajets = query.getResultList();
+
+            int totalCapacite = 0;
+            for (Trajet trajet : trajets) {
+                totalCapacite += trajet.getVehicule().getMaximumPassager();
+            }
+
+            int totalPlacesPrises = getTotalPlacesPrises();
+            return totalCapacite - totalPlacesPrises;
+        } finally {
+            em.close();
+        }
+    }
+}
+package com.mdgtaxi.service;
+
+import com.mdgtaxi.dto.StatusObjectDto;
+import com.mdgtaxi.util.HibernateUtil;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.TypedQuery;
+import java.util.List;
+
+/**
+ * Service gÃ©nÃ©rique pour gÃ©rer les statuts (Chauffeur, Vehicule, Trajet, Reservation)
+ */
+public class StatusService {
+    private final EntityManagerFactory emf = HibernateUtil.getEntityManagerFactory();
+
+    /**
+     * RÃ©cupÃ¨re tous les statuts pour une table donnÃ©e
+     * @param tableName Nom de la table (Chauffeur_Statut, Vehicule_Statut, Trajet_Statut, Reservation_Statut)
+     * @return Liste des statuts
+     */
+    public List<StatusObjectDto> findAllStatuses(String tableName) {
+        String entityName = getStatusEntityName(tableName);
+
+        EntityManager em = emf.createEntityManager();
+        try {
+            String jpql = "SELECT new com.mdgtaxi.dto.StatusObjectDto(s.id, s.libelle, s.score, s.spanHtml) " +
+                    "FROM " + entityName + " s ORDER BY s.score";
+            TypedQuery<StatusObjectDto> query = em.createQuery(jpql, StatusObjectDto.class);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * Trouve un statut par son libellÃ©
+     * @param tableName Nom de la table
+     * @param libelle LibellÃ© du statut
+     * @return Le statut ou null
+     */
+    public StatusObjectDto findStatusByLibelle(String tableName, String libelle) {
+        String entityName = getStatusEntityName(tableName);
+
+        EntityManager em = emf.createEntityManager();
+        try {
+            String jpql = "SELECT new com.mdgtaxi.dto.StatusObjectDto(s.id, s.libelle, s.score, s.spanHtml) " +
+                    "FROM " + entityName + " s WHERE s.libelle = :libelle";
+            TypedQuery<StatusObjectDto> query = em.createQuery(jpql, StatusObjectDto.class);
+            query.setParameter("libelle", libelle);
+            List<StatusObjectDto> results = query.getResultList();
+            return results.isEmpty() ? null : results.get(0);
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * Trouve un statut par son score
+     * @param tableName Nom de la table
+     * @param score Score du statut
+     * @return Le statut ou null
+     */
+    public StatusObjectDto findStatusByScore(String tableName, int score) {
+        String entityName = getStatusEntityName(tableName);
+
+        EntityManager em = emf.createEntityManager();
+        try {
+            String jpql = "SELECT new com.mdgtaxi.dto.StatusObjectDto(s.id, s.libelle, s.score, s.spanHtml) " +
+                    "FROM " + entityName + " s WHERE s.score = :score";
+            TypedQuery<StatusObjectDto> query = em.createQuery(jpql, StatusObjectDto.class);
+            query.setParameter("score", score);
+            List<StatusObjectDto> results = query.getResultList();
+            return results.isEmpty() ? null : results.get(0);
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * Trouve un statut par son ID
+     * @param tableName Nom de la table
+     * @param id ID du statut
+     * @return Le statut ou null
+     */
+    public StatusObjectDto findStatusById(String tableName, Long id) {
+        String entityName = getStatusEntityName(tableName);
+
+        EntityManager em = emf.createEntityManager();
+        try {
+            String jpql = "SELECT new com.mdgtaxi.dto.StatusObjectDto(s.id, s.libelle, s.score, s.spanHtml) " +
+                    "FROM " + entityName + " s WHERE s.id = :id";
+            TypedQuery<StatusObjectDto> query = em.createQuery(jpql, StatusObjectDto.class);
+            query.setParameter("id", id);
+            List<StatusObjectDto> results = query.getResultList();
+            return results.isEmpty() ? null : results.get(0);
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * RÃ©cupÃ¨re les statuts avec un score minimum
+     * @param tableName Nom de la table
+     * @param minScore Score minimum
+     * @return Liste des statuts
+     */
+    public List<StatusObjectDto> findStatusesByMinScore(String tableName, int minScore) {
+        String entityName = getStatusEntityName(tableName);
+
+        EntityManager em = emf.createEntityManager();
+        try {
+            String jpql = "SELECT new com.mdgtaxi.dto.StatusObjectDto(s.id, s.libelle, s.score, s.spanHtml) " +
+                    "FROM " + entityName + " s WHERE s.score >= :minScore ORDER BY s.score";
+            TypedQuery<StatusObjectDto> query = em.createQuery(jpql, StatusObjectDto.class);
+            query.setParameter("minScore", minScore);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * RÃ©cupÃ¨re les statuts avec un score maximum
+     * @param tableName Nom de la table
+     * @param maxScore Score maximum
+     * @return Liste des statuts
+     */
+    public List<StatusObjectDto> findStatusesByMaxScore(String tableName, int maxScore) {
+        String entityName = getStatusEntityName(tableName);
+
+        EntityManager em = emf.createEntityManager();
+        try {
+            String jpql = "SELECT new com.mdgtaxi.dto.StatusObjectDto(s.id, s.libelle, s.score, s.spanHtml) " +
+                    "FROM " + entityName + " s WHERE s.score <= :maxScore ORDER BY s.score";
+            TypedQuery<StatusObjectDto> query = em.createQuery(jpql, StatusObjectDto.class);
+            query.setParameter("maxScore", maxScore);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * RÃ©cupÃ¨re les statuts dans une plage de scores
+     * @param tableName Nom de la table
+     * @param minScore Score minimum
+     * @param maxScore Score maximum
+     * @return Liste des statuts
+     */
+    public List<StatusObjectDto> findStatusesByScoreRange(String tableName, int minScore, int maxScore) {
+        String entityName = getStatusEntityName(tableName);
+
+        EntityManager em = emf.createEntityManager();
+        try {
+            String jpql = "SELECT new com.mdgtaxi.dto.StatusObjectDto(s.id, s.libelle, s.score, s.spanHtml) " +
+                    "FROM " + entityName + " s WHERE s.score BETWEEN :minScore AND :maxScore ORDER BY s.score";
+            TypedQuery<StatusObjectDto> query = em.createQuery(jpql, StatusObjectDto.class);
+            query.setParameter("minScore", minScore);
+            query.setParameter("maxScore", maxScore);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * Mapping des noms de tables vers les noms d'entitÃ©s de statut
+     */
+    private String getStatusEntityName(String tableName) {
+        return switch (tableName) {
+            case "Chauffeur" -> "ChauffeurStatut";
+            case "Vehicule" -> "VehiculeStatut";
+            case "Trajet" -> "TrajetStatut";
+            case "Trajet_Reservation" -> "ReservationStatut";
+            default -> throw new IllegalArgumentException("Table non supportÃ©e: " + tableName);
+        };
+    }
+}
+package com.mdgtaxi.service;
+
+import com.mdgtaxi.entity.Trajet;
+import com.mdgtaxi.util.HibernateUtil;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
+import javax.persistence.TypedQuery;
+import java.util.List;
+
+public class TrajetService {
+
+    private final EntityManagerFactory emf = HibernateUtil.getEntityManagerFactory();
+
+    public Trajet createTrajet(Trajet trajet) {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            em.persist(trajet);
+            tx.commit();
+            return trajet;
+        } catch (Exception e) {
+            if (tx.isActive())
+                tx.rollback();
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
+
+    public Trajet getTrajetById(Long id) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            return em.find(Trajet.class, id);
+        } finally {
+            em.close();
+        }
+    }
+
+    public List<Trajet> getAllTrajets() {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<Trajet> query = em.createQuery("SELECT t FROM Trajet t", Trajet.class);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    public List<Trajet> getTrajetsByLigneId(Long ligneId) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<Trajet> query = em.createQuery(
+                    "SELECT t FROM Trajet t WHERE t.ligne.id = :ligneId ORDER BY t.datetimeDepart DESC",
+                    Trajet.class);
+            query.setParameter("ligneId", ligneId);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    public List<Trajet> getFilteredTrajets(Long idLigne, Long idChauffeur, Long idVehicule,
+            Long idTrajetStatut, String dateDebut, String dateFin, Integer minScore) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            StringBuilder jpql = new StringBuilder("SELECT t FROM Trajet t WHERE 1=1");
+
+            if (idLigne != null) {
+                jpql.append(" AND t.ligne.id = :idLigne");
+            }
+            if (idChauffeur != null) {
+                jpql.append(" AND t.chauffeur.id = :idChauffeur");
+            }
+            if (idVehicule != null) {
+                jpql.append(" AND t.vehicule.id = :idVehicule");
+            }
+            if (idTrajetStatut != null) {
+                jpql.append(" AND t.trajetStatut.id = :idTrajetStatut");
+            }
+            if (dateDebut != null && !dateDebut.isEmpty()) {
+                jpql.append(" AND t.datetimeDepart >= :dateDebut");
+            }
+            if (dateFin != null && !dateFin.isEmpty()) {
+                jpql.append(" AND t.datetimeDepart <= :dateFin");
+            }
+            if (minScore != null) {
+                jpql.append(" AND t.trajetStatut.score >= :minScore");
+            }
+
+            jpql.append(" ORDER BY t.datetimeDepart DESC");
+
+            TypedQuery<Trajet> query = em.createQuery(jpql.toString(), Trajet.class);
+
+            if (idLigne != null) {
+                query.setParameter("idLigne", idLigne);
+            }
+            if (idChauffeur != null) {
+                query.setParameter("idChauffeur", idChauffeur);
+            }
+            if (idVehicule != null) {
+                query.setParameter("idVehicule", idVehicule);
+            }
+            if (idTrajetStatut != null) {
+                query.setParameter("idTrajetStatut", idTrajetStatut);
+            }
+            if (dateDebut != null && !dateDebut.isEmpty()) {
+                query.setParameter("dateDebut", java.time.LocalDateTime.parse(dateDebut));
+            }
+            if (dateFin != null && !dateFin.isEmpty()) {
+                query.setParameter("dateFin", java.time.LocalDateTime.parse(dateFin));
+            }
+            if (minScore != null) {
+                query.setParameter("minScore", minScore);
+            }
+
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    public Trajet updateTrajet(Trajet trajet) {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            Trajet updated = em.merge(trajet);
+            tx.commit();
+            return updated;
+        } catch (Exception e) {
+            if (tx.isActive())
+                tx.rollback();
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
+
+    public void deleteTrajet(Long id) {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            Trajet trajet = em.find(Trajet.class, id);
+            if (trajet != null) {
+                em.remove(trajet);
+            }
+            tx.commit();
+        } catch (Exception e) {
+            if (tx.isActive())
+                tx.rollback();
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
+}
+package com.mdgtaxi.service;
+
+import com.mdgtaxi.dto.TypeObjectDTO;
+import com.mdgtaxi.util.HibernateUtil;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.TypedQuery;
+import java.util.List;
+
+public class TypeObjectService {
+
+    private final EntityManagerFactory emf = HibernateUtil.getEntityManagerFactory();
+
+    public List<TypeObjectDTO> findAllTypeObject(String tableName) {
+        // Mapping des noms de tables vers les noms d'entitÃ©s JPA
+        String entityName = getEntityName(tableName);
+
+        EntityManager em = emf.createEntityManager();
+        try {
+            String jpql = "SELECT new com.mdgtaxi.dto.TypeObjectDTO(e.id, e.libelle) FROM " + entityName + " e";
+            TypedQuery<TypeObjectDTO> query = em.createQuery(jpql, TypeObjectDTO.class);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    public TypeObjectDTO findTypeObjectByLibelle(String tableName, String libelle) {
+        String entityName = getEntityName(tableName);
+
+        EntityManager em = emf.createEntityManager();
+        try {
+            String jpql = "SELECT new com.mdgtaxi.dto.TypeObjectDTO(e.id, e.libelle) FROM " + entityName
+                    + " e WHERE e.libelle = :libelle";
+            TypedQuery<TypeObjectDTO> query = em.createQuery(jpql, TypeObjectDTO.class);
+            query.setParameter("libelle", libelle);
+            List<TypeObjectDTO> results = query.getResultList();
+            return results.isEmpty() ? null : results.get(0);
+        } finally {
+            em.close();
+        }
+    }
+
+    private String getEntityName(String tableName) {
+        return tableName.replace("_", "");
+    }
+}
+package com.mdgtaxi.service;
+
+import com.mdgtaxi.entity.CarburantType;
+import com.mdgtaxi.entity.Vehicule;
+import com.mdgtaxi.entity.VehiculeEntretien;
+import com.mdgtaxi.entity.VehiculeMouvementStatut;
+import com.mdgtaxi.entity.VehiculeStatut;
+import com.mdgtaxi.entity.VehiculeType;
+import com.mdgtaxi.util.HibernateUtil;
+import com.mdgtaxi.view.VmVehiculeCoutEntretien;
+import com.mdgtaxi.view.VmVehiculeDetail;
+import com.mdgtaxi.view.VmVehiculeHistoriqueStatut;
+import com.mdgtaxi.view.VmVehiculeStatutActuel;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+public class VehiculeService {
+
+    private final EntityManagerFactory emf = HibernateUtil.getEntityManagerFactory();
+
+    // CRUD Operations for Vehicule
+
+    public Vehicule createVehicule(Vehicule vehicule) {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            em.persist(vehicule);
+            tx.commit();
+            return vehicule;
+        } catch (Exception e) {
+            if (tx.isActive()) tx.rollback();
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
+
+    public Vehicule getVehiculeById(Long id) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            return em.find(Vehicule.class, id);
+        } finally {
+            em.close();
+        }
+    }
+
+    public List<Vehicule> getAllVehicules() {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<Vehicule> query = em.createQuery("SELECT v FROM Vehicule v", Vehicule.class);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    public Vehicule updateVehicule(Vehicule vehicule) {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            Vehicule updated = em.merge(vehicule);
+            tx.commit();
+            return updated;
+        } catch (Exception e) {
+            if (tx.isActive()) tx.rollback();
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
+
+    public void deleteVehicule(Long id) {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            Vehicule vehicule = em.find(Vehicule.class, id);
+            if (vehicule != null) {
+                em.remove(vehicule);
+            }
+            tx.commit();
+        } catch (Exception e) {
+            if (tx.isActive()) tx.rollback();
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
+
+    // Operations using Views
+
+    public VmVehiculeDetail getVehiculeDetail(Long idVehicule) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            return em.find(VmVehiculeDetail.class, idVehicule);
+        } finally {
+            em.close();
+        }
+    }
+
+    public List<VmVehiculeDetail> getAllVehiculeDetails() {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<VmVehiculeDetail> query = em.createQuery("SELECT vd FROM VmVehiculeDetail vd", VmVehiculeDetail.class);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    public VmVehiculeStatutActuel getCurrentStatut(Long idVehicule) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            return em.find(VmVehiculeStatutActuel.class, idVehicule);
+        } finally {
+            em.close();
+        }
+    }
+
+    public List<VmVehiculeHistoriqueStatut> getHistoriqueStatut(Long idVehicule) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<VmVehiculeHistoriqueStatut> query = em.createQuery(
+                    "SELECT hs FROM VmVehiculeHistoriqueStatut hs WHERE hs.idVehicule = :idVehicule ORDER BY hs.dateMouvement DESC",
+                    VmVehiculeHistoriqueStatut.class);
+            query.setParameter("idVehicule", idVehicule);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    public VmVehiculeCoutEntretien getCoutEntretien(Long idVehicule) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            return em.find(VmVehiculeCoutEntretien.class, idVehicule);
+        } finally {
+            em.close();
+        }
+    }
+
+    // Operations for Related Entities
+
+    public VehiculeEntretien addEntretien(VehiculeEntretien entretien) {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            em.persist(entretien);
+            tx.commit();
+            return entretien;
+        } catch (Exception e) {
+            if (tx.isActive()) tx.rollback();
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
+
+    public List<VehiculeEntretien> getEntretiensByVehicule(Long idVehicule) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<VehiculeEntretien> query = em.createQuery(
+                    "SELECT ve FROM VehiculeEntretien ve WHERE ve.vehicule.id = :idVehicule ORDER BY ve.dateDebutEntretien DESC",
+                    VehiculeEntretien.class);
+            query.setParameter("idVehicule", idVehicule);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    public VehiculeMouvementStatut changeStatut(VehiculeMouvementStatut mouvement) {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            em.persist(mouvement);
+            tx.commit();
+            return mouvement;
+        } catch (Exception e) {
+            if (tx.isActive()) tx.rollback();
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
+
+    // Multi-filter criteria function for Vehicule (using Criteria API)
+    // Filters are provided as a Map<String, Object> where keys are field names like "marque", "modele", "immatriculation", etc.
+    // For relationships, use "vehiculeType.libelle", "carburantType.libelle"
+    // Supports exact match for strings, equality for numbers, etc.
+
+    public List<Vehicule> searchVehiculesWithFilters(Map<String, Object> filters) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<Vehicule> cq = cb.createQuery(Vehicule.class);
+            Root<Vehicule> root = cq.from(Vehicule.class);
+
+            List<Predicate> predicates = new ArrayList<>();
+
+            for (Map.Entry<String, Object> entry : filters.entrySet()) {
+                String key = entry.getKey();
+                Object value = entry.getValue();
+
+                if (value == null) continue;
+
+                switch (key) {
+                    case "marque":
+                        predicates.add(cb.equal(root.get("marque"), value));
+                        break;
+                    case "modele":
+                        predicates.add(cb.equal(root.get("modele"), value));
+                        break;
+                    case "immatriculation":
+                        predicates.add(cb.equal(root.get("immatriculation"), value));
+                        break;
+                    case "maximumPassager":
+                        predicates.add(cb.equal(root.get("maximumPassager"), value));
+                        break;
+                    case "capaciteCarburant":
+                        predicates.add(cb.equal(root.get("capaciteCarburant"), value));
+                        break;
+                    case "depenseCarburant100km":
+                        predicates.add(cb.equal(root.get("depenseCarburant100km"), value));
+                        break;
+                    case "vehiculeType.libelle":
+                        predicates.add(cb.equal(root.get("vehiculeType").get("libelle"), value));
+                        break;
+                    case "carburantType.libelle":
+                        predicates.add(cb.equal(root.get("carburantType").get("libelle"), value));
+                        break;
+                    // Add more fields as needed
+                    default:
+                        // Ignore unknown filters
+                        break;
+                }
+            }
+
+            if (!predicates.isEmpty()) {
+                cq.where(cb.and(predicates.toArray(new Predicate[0])));
+            }
+
+            TypedQuery<Vehicule> query = em.createQuery(cq);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    // Similar multi-filter for VmVehiculeDetail (since it's a view, we can filter on its fields)
+    public List<VmVehiculeDetail> searchVehiculeDetailsWithFilters(Map<String, Object> filters) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<VmVehiculeDetail> cq = cb.createQuery(VmVehiculeDetail.class);
+            Root<VmVehiculeDetail> root = cq.from(VmVehiculeDetail.class);
+
+            List<Predicate> predicates = new ArrayList<>();
+
+            for (Map.Entry<String, Object> entry : filters.entrySet()) {
+                String key = entry.getKey();
+                Object value = entry.getValue();
+
+                if (value == null) continue;
+
+                switch (key) {
+                    case "immatriculation":
+                        predicates.add(cb.equal(root.get("immatriculation"), value));
+                        break;
+                    case "marque":
+                        predicates.add(cb.equal(root.get("marque"), value));
+                        break;
+                    case "modele":
+                        predicates.add(cb.equal(root.get("modele"), value));
+                        break;
+                    case "maximumPassager":
+                        predicates.add(cb.equal(root.get("maximumPassager"), value));
+                        break;
+                    case "capaciteCarburant":
+                        predicates.add(cb.equal(root.get("capaciteCarburant"), value));
+                        break;
+                    case "depenseCarburant100km":
+                        predicates.add(cb.equal(root.get("depenseCarburant100km"), value));
+                        break;
+                    case "libelleType":
+                        predicates.add(cb.equal(root.get("libelleType"), value));
+                        break;
+                    case "typeCarburant":
+                        predicates.add(cb.equal(root.get("typeCarburant"), value));
+                        break;
+                    case "libelleStatut":
+                        predicates.add(cb.equal(root.get("libelleStatut"), value));
+                        break;
+                    // Add more as needed
+                    default:
+                        break;
+                }
+            }
+
+            if (!predicates.isEmpty()) {
+                cq.where(cb.and(predicates.toArray(new Predicate[0])));
+            }
+
+            TypedQuery<VmVehiculeDetail> query = em.createQuery(cq);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+}
+package com.mdgtaxi.service;
+
+import com.mdgtaxi.entity.Ville;
+import com.mdgtaxi.util.HibernateUtil;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.TypedQuery;
+import java.util.List;
+
+public class VilleService {
+
+    private final EntityManagerFactory emf = HibernateUtil.getEntityManagerFactory();
+
+    public List<Ville> getAllVilles() {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<Ville> query = em.createQuery("SELECT v FROM Ville v", Ville.class);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+}

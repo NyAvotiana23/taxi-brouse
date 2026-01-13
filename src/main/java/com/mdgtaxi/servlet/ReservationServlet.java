@@ -61,7 +61,7 @@ public class ReservationServlet extends HttpServlet {
 
         // Récupérer dynamiquement le statut "En attente" au lieu d'utiliser un ID
         // hardcodé
-        TypeObjectDTO statutEnAttente = typeObjectService.findTypeObjectByLibelle("Reservation_Status", "En attente");
+        TypeObjectDTO statutEnAttente = typeObjectService.findTypeObjectByLibelle("Reservation_Statut", "En attente");
         Long idReservationStatut = (statutEnAttente != null) ? statutEnAttente.getId() : 3L;
 
         String nomPassager = req.getParameter("nomPassager");
@@ -90,7 +90,7 @@ public class ReservationServlet extends HttpServlet {
             List<TrajetReservation> reservations = reservationService.getAllReservations();
             List<Trajet> trajets = trajetService.getAllTrajets();
             List<Client> clients = clientService.getAllClients();
-            List<TypeObjectDTO> reservationStatuts = typeObjectService.findAllTypeObject("Reservation_Status");
+            List<TypeObjectDTO> reservationStatuts = typeObjectService.findAllTypeObject("Reservation_Statut");
             Map<String, Long> statsByStatus = reservationService.getReservationStatsByStatus();
             int totalPlacesPrises = reservationService.getTotalPlacesPrises();
             int totalPlacesRestantes = reservationService.getTotalPlacesRestantes();

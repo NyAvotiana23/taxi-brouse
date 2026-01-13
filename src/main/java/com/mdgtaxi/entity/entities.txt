@@ -1,0 +1,1109 @@
+﻿package com.mdgtaxi.entity;
+
+import lombok.Data;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.math.BigDecimal;
+
+@Data
+@Entity
+@Table(name = "Caisse")
+public class Caisse implements Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "id_caisse_type", nullable = false)
+    private CaisseType caisseType;
+
+    @Column(name = "nom", nullable = false, unique = true)
+    private String nom;
+
+    @Column(name = "solde_initial", nullable = false, precision = 15, scale = 2)
+    private BigDecimal soldeInitial;
+}
+package com.mdgtaxi.entity;
+
+import lombok.Data;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Data
+@Entity
+@Table(name = "Caisse_Mouvement")
+public class CaisseMouvement implements Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "id_caisse", nullable = false)
+    private Caisse caisse;
+
+    @Column(name = "id_entite_origine")
+    private Long idEntiteOrigine;
+
+    @Column(name = "table_origine")
+    private String tableOrigine;
+
+    @ManyToOne
+    @JoinColumn(name = "id_type_mouvement", nullable = false)
+    private TypeMouvement typeMouvement;
+
+    @Column(name = "montant", nullable = false, precision = 15, scale = 2)
+    private BigDecimal montant;
+
+    @Column(name = "motif")
+    private String motif;
+
+    @Column(name = "date_mouvement", nullable = false)
+    private LocalDateTime dateMouvement;
+}
+package com.mdgtaxi.entity;
+
+import lombok.Data;
+
+import javax.persistence.*;
+import java.io.Serializable;
+
+@Data
+@Entity
+@Table(name = "Caisse_Type")
+public class CaisseType implements Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "libelle", nullable = false, unique = true)
+    private String libelle;
+}
+package com.mdgtaxi.entity;
+
+import lombok.Data;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Data
+@Entity
+@Table(name = "Carburant_Mouvement_Taux")
+public class CarburantMouvementTaux implements Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "id_carburant_type", nullable = false)
+    private CarburantType carburantType;
+
+    @Column(name = "ancien_taux", nullable = false, precision = 15, scale = 2)
+    private BigDecimal ancienTaux;
+
+    @Column(name = "nouveau_taux", nullable = false, precision = 15, scale = 2)
+    private BigDecimal nouveauTaux;
+
+    @Column(name = "date_mouvement", nullable = false)
+    private LocalDateTime dateMouvement;
+}
+package com.mdgtaxi.entity;
+
+import lombok.Data;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Data
+@Entity
+@Table(name = "Carburant_Type")
+public class CarburantType implements Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "libelle", nullable = false, unique = true)
+    private String libelle;
+
+    @Column(name = "dernier_taux", nullable = false, precision = 15, scale = 2)
+    private BigDecimal dernierTaux;
+}
+package com.mdgtaxi.entity;
+
+import lombok.Data;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.time.LocalDate;
+
+@Data
+@Entity
+@Table(name = "Chauffeur")
+public class Chauffeur implements Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "nom", nullable = false)
+    private String nom;
+
+    @Column(name = "prenom", nullable = false)
+    private String prenom;
+
+    @Column(name = "date_naissance", nullable = false)
+    private LocalDate dateNaissance;
+
+    @Column(name = "numero_permis", nullable = false, unique = true)
+    private String numeroPermis;
+}
+package com.mdgtaxi.entity;
+
+import lombok.Data;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.time.LocalDateTime;
+
+@Data
+@Entity
+@Table(name = "Chauffeur_Mouvement_Statut")
+public class ChauffeurMouvementStatut implements Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "id_chauffeur", nullable = false)
+    private Chauffeur chauffeur;
+
+    @Column(name = "date_mouvement", nullable = false)
+    private LocalDateTime dateMouvement;
+
+    @ManyToOne
+    @JoinColumn(name = "id_ancien_statut")
+    private ChauffeurStatut ancienStatut;
+
+    @ManyToOne
+    @JoinColumn(name = "id_nouveau_statut", nullable = false)
+    private ChauffeurStatut nouveauStatut;
+
+    @Column(name = "observation")
+    private String observation;
+}
+package com.mdgtaxi.entity;
+
+import lombok.Data;
+
+import javax.persistence.*;
+import java.io.Serializable;
+
+@Data
+@Entity
+@Table(name = "Chauffeur_Statut")
+public class ChauffeurStatut implements Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "libelle", nullable = false, unique = true)
+    private String libelle;
+
+    @Column(name = "score", nullable = false)
+    private int score;
+
+    @Column(name = "span_html", nullable= false)
+    private String spanHtml;
+
+}
+package com.mdgtaxi.entity;
+
+import lombok.Data;
+
+import javax.persistence.*;
+import java.io.Serializable;
+
+@Data
+@Entity
+@Table(name = "Client")
+public class Client implements Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "id_type_client", nullable = false)
+    private TypeClient typeClient;
+
+    @Column(name = "nom_client", nullable = false)
+    private String nomClient;
+
+    @Column(name = "telephone")
+    private String telephone;
+
+    @Column(name = "email")
+    private String email;
+}
+package com.mdgtaxi.entity;
+
+import lombok.Data;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.math.BigDecimal;
+
+@Data
+@Entity
+@Table(name = "Devise")
+public class Devise implements Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "libelle", nullable = false, unique = true)
+    private String libelle;
+
+    @Column(name = "dernier_taux", nullable = false, precision = 15, scale = 4)
+    private BigDecimal dernierTaux;
+}
+package com.mdgtaxi.entity;
+
+import lombok.Data;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Data
+@Entity
+@Table(name = "Devise_Mouvement_Taux")
+public class DeviseMouvementTaux implements Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "id_devise", nullable = false)
+    private Devise devise;
+
+    @Column(name = "ancien_taux", nullable = false, precision = 15, scale = 4)
+    private BigDecimal ancienTaux;
+
+    @Column(name = "nouveau_taux", nullable = false, precision = 15, scale = 4)
+    private BigDecimal nouveauTaux;
+
+    @Column(name = "date_mouvement", nullable = false)
+    private LocalDateTime dateMouvement;
+}
+package com.mdgtaxi.entity;
+
+import lombok.Data;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.math.BigDecimal;
+
+@Data
+@Entity
+@Table(name = "Ligne")
+public class Ligne implements Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "id_ville_depart", nullable = false)
+    private Ville villeDepart;
+
+    @ManyToOne
+    @JoinColumn(name = "id_ville_arrivee", nullable = false)
+    private Ville villeArrivee;
+
+    @Column(name = "distance_km", precision = 10, scale = 2)
+    private BigDecimal distanceKm;
+}
+package com.mdgtaxi.entity;
+
+import lombok.Data;
+
+import javax.persistence.*;
+import java.io.Serializable;
+
+@Data
+@Entity
+@Table(name = "Ligne_Arret")
+public class LigneArret implements Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "id_ville", nullable = false)
+    private Ville ville;
+
+    @Column(name = "nom_arret", nullable = false)
+    private String nomArret;
+}
+package com.mdgtaxi.entity;
+
+import lombok.Data;
+
+import javax.persistence.*;
+import java.io.Serializable;
+
+@Data
+@Entity
+@Table(name = "Ligne_Detail")
+public class LigneDetail implements Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "id_ligne", nullable = false)
+    private Ligne ligne;
+
+    @Column(name = "ordre", nullable = false)
+    private Integer ordre;
+
+    @ManyToOne
+    @JoinColumn(name = "id_ligne_arret", nullable = false)
+    private LigneArret ligneArret;
+}
+package com.mdgtaxi.entity;
+
+import lombok.Data;
+
+import javax.persistence.*;
+import java.io.Serializable;
+
+@Data
+@Entity
+@Table(name = "Mode_Paiement")
+public class ModePaiement implements Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "libelle", nullable = false, unique = true)
+    private String libelle;
+}
+package com.mdgtaxi.entity;
+
+import lombok.Data;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Data
+@Entity
+@Table(name = "Prevision_Finance")
+public class PrevisionFinance implements Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "id_trajet")
+    private Trajet trajet;
+
+    @Column(name = "id_entite_origine")
+    private Long idEntiteOrigine;
+
+    @Column(name = "table_origine")
+    private String tableOrigine;
+
+    @Column(name = "montant", nullable = false, precision = 15, scale = 2)
+    private BigDecimal montant;
+
+    @ManyToOne
+    @JoinColumn(name = "id_type_mouvement", nullable = false)
+    private TypeMouvement typeMouvement;
+
+    @Column(name = "date", nullable = false)
+    private LocalDateTime date;
+
+    @Column(name = "description")
+    private String description;
+}
+package com.mdgtaxi.entity;
+
+import lombok.Data;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Data
+@Entity
+@Table(name = "Prevision_Trajet")
+public class PrevisionTrajet implements Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "id_ligne", nullable = false)
+    private Ligne ligne;
+
+    @ManyToOne
+    @JoinColumn(name = "id_chauffeur", nullable = false)
+    private Chauffeur chauffeur;
+
+    @ManyToOne
+    @JoinColumn(name = "id_vehicule", nullable = false)
+    private Vehicule vehicule;
+
+    @Column(name = "nombre_passager", nullable = false)
+    private Integer nombrePassager;
+
+    @ManyToOne
+    @JoinColumn(name = "id_trajet_statut", nullable = false)
+    private TrajetStatut trajetStatut;
+
+    @Column(name = "datetime_depart", nullable = false)
+    private LocalDateTime datetimeDepart;
+
+    @Column(name = "datetime_arrivee")
+    private LocalDateTime datetimeArrivee;
+
+    @Column(name = "frais_unitaire", nullable = false, precision = 15, scale = 2)
+    private BigDecimal fraisUnitaire;
+}
+package com.mdgtaxi.entity;
+
+import lombok.Data;
+
+import javax.persistence.*;
+import java.io.Serializable;
+
+@Data
+@Entity
+@Table(name = "Province")
+public class Province implements Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "nom", nullable = false, unique = true)
+    private String nom;
+}
+package com.mdgtaxi.entity;
+
+import lombok.Data;
+
+import javax.persistence.*;
+import java.io.Serializable;
+
+@Data
+@Entity
+@Table(name = "Region")
+public class Region implements Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "id_province", nullable = false)
+    private Province province;
+
+    @Column(name = "nom", nullable = false)
+    private String nom;
+}
+package com.mdgtaxi.entity;
+
+import lombok.Data;
+
+import javax.persistence.*;
+import java.io.Serializable;
+
+@Data
+@Entity
+@Table(name = "Reservation_Statut")
+public class ReservationStatut implements Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "libelle", nullable = false, unique = true)
+    private String libelle;
+
+    @Column(name = "score", nullable = false)
+    private int score;
+
+    @Column(name = "span_html", nullable= false)
+    private String spanHtml;
+}
+package com.mdgtaxi.entity;
+
+import lombok.Data;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Data
+@Entity
+@Table(name = "Trajet")
+public class Trajet implements Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "id_ligne", nullable = false)
+    private Ligne ligne;
+
+    @ManyToOne
+    @JoinColumn(name = "id_chauffeur", nullable = false)
+    private Chauffeur chauffeur;
+
+    @ManyToOne
+    @JoinColumn(name = "id_vehicule", nullable = false)
+    private Vehicule vehicule;
+
+    @Column(name = "nombre_passager", nullable = false)
+    private Integer nombrePassager;
+
+    @ManyToOne
+    @JoinColumn(name = "id_trajet_statut", nullable = false)
+    private TrajetStatut trajetStatut;
+
+    @Column(name = "datetime_depart", nullable = false)
+    private LocalDateTime datetimeDepart;
+
+    @Column(name = "datetime_arrivee")
+    private LocalDateTime datetimeArrivee;
+
+    @Column(name = "frais_unitaire", nullable = false, precision = 15, scale = 2)
+    private BigDecimal fraisUnitaire;
+}
+package com.mdgtaxi.entity;
+
+import lombok.Data;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Data
+@Entity
+@Table(name = "Trajet_Arret_Detail")
+public class TrajetArretDetail implements Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "id_trajet", nullable = false)
+    private Trajet trajet;
+
+    @ManyToOne
+    @JoinColumn(name = "id_caisse")
+    private Caisse caisse;
+
+    @ManyToOne
+    @JoinColumn(name = "id_ville", nullable = false)
+    private Ville ville;
+
+    @ManyToOne
+    @JoinColumn(name = "id_trajet_motif_arret", nullable = false)
+    private TrajetMotifArret trajetMotifArret;
+
+    @Column(name = "montant_depense", precision = 15, scale = 2)
+    private BigDecimal montantDepense;
+
+    @Column(name = "datetime_debut", nullable = false)
+    private LocalDateTime datetimeDebut;
+
+    @Column(name = "datetime_fin")
+    private LocalDateTime datetimeFin;
+}
+package com.mdgtaxi.entity;
+
+import lombok.Data;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Data
+@Entity
+@Table(name = "Trajet_Carburant_Detail")
+public class TrajetCarburantDetail implements Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "id_trajet", nullable = false)
+    private Trajet trajet;
+
+    @ManyToOne
+    @JoinColumn(name = "id_caisse")
+    private Caisse caisse;
+
+    @ManyToOne
+    @JoinColumn(name = "id_ville", nullable = false)
+    private Ville ville;
+
+    @ManyToOne
+    @JoinColumn(name = "id_carburant_type", nullable = false)
+    private CarburantType carburantType;
+
+    @Column(name = "datetime", nullable = false)
+    private LocalDateTime datetime;
+
+    @Column(name = "quantite_carburant_ajoute", nullable = false, precision = 10, scale = 2)
+    private BigDecimal quantiteCarburantAjoute;
+
+    @Column(name = "taux_carburant", nullable = false, precision = 15, scale = 2)
+    private BigDecimal tauxCarburant;
+}
+package com.mdgtaxi.entity;
+
+import lombok.Data;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Data
+@Entity
+@Table(name = "Trajet_Finance")
+public class TrajetFinance implements Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "id_trajet", nullable = false)
+    private Trajet trajet;
+
+    @Column(name = "montant", nullable = false, precision = 15, scale = 2)
+    private BigDecimal montant;
+
+    @ManyToOne
+    @JoinColumn(name = "id_type_mouvement", nullable = false)
+    private TypeMouvement typeMouvement;
+
+    @Column(name = "date_mouvement", nullable = false)
+    private LocalDateTime dateMouvement;
+}
+package com.mdgtaxi.entity;
+
+import lombok.Data;
+
+import javax.persistence.*;
+import java.io.Serializable;
+
+@Data
+@Entity
+@Table(name = "Trajet_Motif_Arret")
+public class TrajetMotifArret implements Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "libelle", nullable = false, unique = true)
+    private String libelle;
+}
+package com.mdgtaxi.entity;
+
+import lombok.Data;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.time.LocalDateTime;
+
+@Data
+@Entity
+@Table(name = "Trajet_Mouvement_Statut")
+public class TrajetMouvementStatut implements Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "id_trajet", nullable = false)
+    private Trajet trajet;
+
+    @Column(name = "date_mouvement", nullable = false)
+    private LocalDateTime dateMouvement;
+
+    @ManyToOne
+    @JoinColumn(name = "id_ancien_statut")
+    private TrajetStatut ancienStatut;
+
+    @ManyToOne
+    @JoinColumn(name = "id_nouveau_statut", nullable = false)
+    private TrajetStatut nouveauStatut;
+
+    @Column(name = "observation")
+    private String observation;
+}
+package com.mdgtaxi.entity;
+
+import lombok.Data;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Data
+@Entity
+@Table(name = "Trajet_Reservation")
+public class TrajetReservation implements Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "id_client", nullable = false)
+    private Client client;
+
+    @ManyToOne
+    @JoinColumn(name = "id_trajet", nullable = false)
+    private Trajet trajet;
+
+    @ManyToOne
+    @JoinColumn(name = "id_reservation_statut", nullable = false)
+    private ReservationStatut reservationStatut;
+
+    @Column(name = "numero_siege")
+    private String numeroSiege;
+
+    @Column(name = "nom_passager", nullable = false)
+    private String nomPassager;
+
+
+    @Column(name = "date_reservation", nullable = false)
+    private LocalDateTime dateReservation;
+
+    @Column(name = "nombre_place_reservation", nullable = false)
+    private Integer nombrePlaceReservation;
+}
+package com.mdgtaxi.entity;
+
+import lombok.Data;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.time.LocalDateTime;
+
+@Data
+@Entity
+@Table(name = "Trajet_Reservation_Mouvement_Statut")
+public class TrajetReservationMouvementStatut implements Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "id_trajet_reservation", nullable = false)
+    private TrajetReservation trajetReservation;
+
+    @Column(name = "date_mouvement", nullable = false)
+    private LocalDateTime dateMouvement;
+
+    @ManyToOne
+    @JoinColumn(name = "id_ancien_statut")
+    private ReservationStatut ancienStatut;
+
+    @ManyToOne
+    @JoinColumn(name = "id_nouveau_statut", nullable = false)
+    private ReservationStatut nouveauStatut;
+
+    @Column(name = "observation")
+    private String observation;
+}
+package com.mdgtaxi.entity;
+
+import lombok.Data;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Data
+@Entity
+@Table(name = "Trajet_Reservation_Paiement")
+public class TrajetReservationPaiement implements Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "id_client", nullable = false)
+    private Client client;
+
+    @ManyToOne
+    @JoinColumn(name = "id_trajet_reservation", nullable = false)
+    private TrajetReservation trajetReservation;
+
+    @ManyToOne
+    @JoinColumn(name = "id_caisse")
+    private Caisse caisse;
+
+    @Column(name = "montant", nullable = false, precision = 15, scale = 2)
+    private BigDecimal montant;
+
+    @ManyToOne
+    @JoinColumn(name = "id_mode_paiement", nullable = false)
+    private ModePaiement modePaiement;
+
+    @Column(name = "date_paiement", nullable = false)
+    private LocalDateTime datePaiement;
+}
+package com.mdgtaxi.entity;
+
+import lombok.Data;
+
+import javax.persistence.*;
+import java.io.Serializable;
+
+@Data
+@Entity
+@Table(name = "Trajet_Statut")
+public class TrajetStatut implements Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "libelle", nullable = false, unique = true)
+    private String libelle;
+
+    @Column(name = "score", nullable = false)
+    private int score;
+
+    @Column(name = "span_html", nullable= false)
+    private String spanHtml;
+
+}
+package com.mdgtaxi.entity;
+
+import lombok.Data;
+
+import javax.persistence.*;
+import java.io.Serializable;
+
+@Data
+@Entity
+@Table(name = "Type_Client")
+public class TypeClient implements Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "libelle", nullable = false, unique = true)
+    private String libelle;
+}
+package com.mdgtaxi.entity;
+
+import lombok.Data;
+
+import javax.persistence.*;
+import java.io.Serializable;
+
+@Data
+@Entity
+@Table(name = "Type_Mouvement")
+public class TypeMouvement implements Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "libelle", nullable = false, unique = true)
+    private String libelle;
+}
+package com.mdgtaxi.entity;
+
+import lombok.Data;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.math.BigDecimal;
+
+@Data
+@Entity
+@Table(name = "Vehicule")
+public class Vehicule implements Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "id_type", nullable = false)
+    private VehiculeType vehiculeType;
+
+    @ManyToOne
+    @JoinColumn(name = "id_type_carburant", nullable = false)
+    private CarburantType carburantType;
+
+    @Column(name = "marque", nullable = false)
+    private String marque;
+
+    @Column(name = "modele", nullable = false)
+    private String modele;
+
+    @Column(name = "maximum_passager", nullable = false)
+    private Integer maximumPassager;
+
+    @Column(name = "immatriculation", nullable = false, unique = true)
+    private String immatriculation;
+
+    @Column(name = "capacite_carburant", precision = 10, scale = 2)
+    private BigDecimal capaciteCarburant;
+
+    @Column(name = "depense_carburant_100km", precision = 10, scale = 2)
+    private BigDecimal depenseCarburant100km;
+}
+package com.mdgtaxi.entity;
+
+import lombok.Data;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Data
+@Entity
+@Table(name = "Vehicule_Entretien")
+public class VehiculeEntretien implements Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "id_vehicule", nullable = false)
+    private Vehicule vehicule;
+
+    @Column(name = "motif", nullable = false)
+    private String motif;
+
+    @Column(name = "date_debut_entretien", nullable = false)
+    private LocalDateTime dateDebutEntretien;
+
+    @Column(name = "date_fin_entretien")
+    private LocalDateTime dateFinEntretien;
+
+    @Column(name = "montant_depense", nullable = false, precision = 15, scale = 2)
+    private BigDecimal montantDepense;
+}
+package com.mdgtaxi.entity;
+
+import lombok.Data;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.time.LocalDateTime;
+
+@Data
+@Entity
+@Table(name = "Vehicule_Mouvement_Statut")
+public class VehiculeMouvementStatut implements Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "id_vehicule", nullable = false)
+    private Vehicule vehicule;
+
+    @Column(name = "date_mouvement", nullable = false)
+    private LocalDateTime dateMouvement;
+
+    @ManyToOne
+    @JoinColumn(name = "id_ancien_statut")
+    private VehiculeStatut ancienStatut;
+
+    @ManyToOne
+    @JoinColumn(name = "id_nouveau_statut", nullable = false)
+    private VehiculeStatut nouveauStatut;
+
+    @Column(name = "observation")
+    private String observation;
+}
+package com.mdgtaxi.entity;
+
+import lombok.Data;
+
+import javax.persistence.*;
+import java.io.Serializable;
+
+@Data
+@Entity
+@Table(name = "Vehicule_Statut")
+public class VehiculeStatut implements Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "libelle", nullable = false, unique = true)
+    private String libelle;
+
+    @Column(name = "score", nullable = false)
+    private int score;
+
+    @Column(name = "span_html", nullable= false)
+    private String spanHtml;
+
+
+}
+package com.mdgtaxi.entity;
+
+import lombok.Data;
+
+import javax.persistence.*;
+import java.io.Serializable;
+
+@Data
+@Entity
+@Table(name = "Vehicule_Type")
+public class VehiculeType implements Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "libelle", nullable = false, unique = true)
+    private String libelle;
+}
+package com.mdgtaxi.entity;
+
+import lombok.Data;
+
+import javax.persistence.*;
+import java.io.Serializable;
+
+@Data
+@Entity
+@Table(name = "Ville")
+public class Ville implements Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "id_region", nullable = false)
+    private Region region;
+
+    @Column(name = "nom", nullable = false)
+    private String nom;
+}

@@ -42,7 +42,7 @@ public class TrajetDetailServlet extends HttpServlet {
 
         List<TrajetReservation> reservations = reservationService.getReservationsByTrajetId(trajetId);
         List<Client> clients = clientService.getAllClients();
-        List<TypeObjectDTO> reservationStatuts = typeObjectService.findAllTypeObject("Reservation_Status");
+        List<TypeObjectDTO> reservationStatuts = typeObjectService.findAllTypeObject("Reservation_Statut");
 
         req.setAttribute("trajet", trajet);
         req.setAttribute("reservations", reservations);

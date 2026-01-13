@@ -1,0 +1,183 @@
+﻿package com.mdgtaxi.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+/**
+ * DTO pour reprÃ©senter une entitÃ© individuelle avec son statut
+ */
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class EntityDetailWithStatusDto {
+    private Object entity;
+    private Long idStatut;
+    private String libelleStatut;
+    private Integer scoreStatut;
+    private String spanHtmlStatut;
+}
+package com.mdgtaxi.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+/**
+ * DTO pour reprÃ©senter une liste d'entitÃ©s avec leurs statuts Ã  une date donnÃ©e
+ */
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class EntityListWithStatusDto {
+    private List<EntityDetailWithStatusDto> entities;
+    private LocalDateTime atDate;
+    private Long totalCount;
+}
+package com.mdgtaxi.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+
+/**
+ * CritÃ¨res de filtre pour rechercher des entitÃ©s par statut
+ */
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class EntityStatusCriteria {
+    private String libelleStatut;
+    private Integer minScore;
+    private Integer maxScore;
+    private Integer exactScore;
+    private LocalDateTime atDate;
+
+    public LocalDateTime getEffectiveDate() {
+        return atDate != null ? atDate : LocalDateTime.now();
+    }
+}
+package com.mdgtaxi.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+
+/**
+ * CritÃ¨res de filtre pour rechercher des mouvements de statut
+ */
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class MouvementStatusCriteria {
+    private Long idEntite;
+    private String libelleAncienStatut;
+    private String libelleNouveauStatut;
+    private Integer minScoreAncien;
+    private Integer maxScoreAncien;
+    private Integer exactScoreAncien;
+    private Integer minScoreNouveau;
+    private Integer maxScoreNouveau;
+    private Integer exactScoreNouveau;
+    private LocalDateTime dateDebut;
+    private LocalDateTime dateFin;
+    private String observationContains;
+
+    public LocalDateTime getEffectiveDateDebut() {
+        return dateDebut;
+    }
+
+    public LocalDateTime getEffectiveDateFin() {
+        return dateFin != null ? dateFin : LocalDateTime.now();
+    }
+}
+package com.mdgtaxi.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+
+/**
+ * DTO pour reprÃ©senter un mouvement de statut gÃ©nÃ©rique
+ */
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class MouvementStatusDto {
+    private Long idMouvement;
+    private Long idEntite;
+    private String entityTableName;
+    private Long idAncienStatut;
+    private String libelleAncienStatut;
+    private Integer scoreAncienStatut;
+    private String spanHtmlAncienStatut;
+
+    private Long idNouveauStatut;
+    private String libelleNouveauStatut;
+    private Integer scoreNouveauStatut;
+    private String spanHtmlNouveauStatut;
+
+
+
+
+    private LocalDateTime dateMouvement;
+    private String observation;
+
+}
+package com.mdgtaxi.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class StatusObjectDto {
+    private Long id;
+    private String libelle;
+    private Integer score;
+    private String spanHtml;
+
+}
+package com.mdgtaxi.dto;
+
+public class TypeObjectDTO {
+    private Long id;
+    private String libelle;
+
+    public TypeObjectDTO(Long id, String libelle) {
+        this.id = id;
+        this.libelle = libelle;
+    }
+
+    // Getters et setters
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getLibelle() {
+        return libelle;
+    }
+
+    public void setLibelle(String libelle) {
+        this.libelle = libelle;
+    }
+}

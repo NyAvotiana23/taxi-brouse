@@ -8,8 +8,8 @@ import java.time.LocalDateTime;
 
 @Data
 @Entity
-@Table(name = "Trajet_Reservation_Mouvement_Status")
-public class TrajetReservationMouvementStatus implements Serializable {
+@Table(name = "Trajet_Reservation_Mouvement_Statut")
+public class TrajetReservationMouvementStatut implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

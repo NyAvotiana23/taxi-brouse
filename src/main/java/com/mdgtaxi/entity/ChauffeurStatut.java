@@ -18,4 +18,8 @@ public class ChauffeurStatut implements Serializable {
 
     @Column(name = "score", nullable = false)
     private int score;
+
+    @Column(name = "span_html", nullable= false)
+    private String spanHtml;
+
 }

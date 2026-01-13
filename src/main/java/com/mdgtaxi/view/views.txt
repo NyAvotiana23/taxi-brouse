@@ -1,0 +1,1069 @@
+﻿package com.mdgtaxi.view;
+
+import lombok.Data;
+import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.Subselect;
+import org.hibernate.annotations.Synchronize;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.math.BigDecimal;
+
+@Data
+@Entity
+@Immutable
+@Subselect("""
+    SELECT
+        c.id AS id_caisse,
+        ct.libelle AS libelle_type,
+        c.nom,
+        c.solde_initial
+    FROM Caisse c
+             INNER JOIN Caisse_Type ct ON c.id_caisse_type = ct.id
+""")
+@Synchronize({"Caisse", "Caisse_Type"})
+public class VmCaisseDetail implements Serializable {
+    @Id
+    @Column(name = "id_caisse")
+    private Long idCaisse;
+
+    @Column(name = "libelle_type")
+    private String libelleType;
+
+    @Column(name = "nom")
+    private String nom;
+
+    @Column(name = "solde_initial")
+    private BigDecimal soldeInitial;
+}
+package com.mdgtaxi.view;
+
+import lombok.Data;
+import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.Subselect;
+import org.hibernate.annotations.Synchronize;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Data
+@Entity
+@Immutable
+@Subselect("""
+    SELECT
+        cm.id,
+        cm.id_caisse,
+        c.nom AS nom_caisse,
+        cm.date_mouvement,
+        tm.libelle AS libelle_type_mouvement,
+        cm.montant,
+        cm.motif,
+        cm.table_origine,
+        cm.id_entite_origine
+    FROM Caisse_Mouvement cm
+             INNER JOIN Caisse c ON cm.id_caisse = c.id
+             INNER JOIN Type_Mouvement tm ON cm.id_type_mouvement = tm.id
+    ORDER BY cm.date_mouvement DESC
+""")
+@Synchronize({"Caisse_Mouvement", "Caisse", "Type_Mouvement"})
+public class VmCaisseMouvementHistorique implements Serializable {
+    @Id
+    @Column(name = "id")
+    private Long id;
+
+    @Column(name = "id_caisse")
+    private Long idCaisse;
+
+    @Column(name = "nom_caisse")
+    private String nomCaisse;
+
+    @Column(name = "date_mouvement")
+    private LocalDateTime dateMouvement;
+
+    @Column(name = "libelle_type_mouvement")
+    private String libelleTypeMouvement;
+
+    @Column(name = "montant")
+    private BigDecimal montant;
+
+    @Column(name = "motif")
+    private String motif;
+
+    @Column(name = "table_origine")
+    private String tableOrigine;
+
+    @Column(name = "id_entite_origine")
+    private Long idEntiteOrigine;
+}
+package com.mdgtaxi.view;
+
+import lombok.Data;
+import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.Subselect;
+import org.hibernate.annotations.Synchronize;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Data
+@Entity
+@Immutable
+@Subselect("""
+    SELECT
+        c.id AS id_caisse,
+        c.solde_initial + COALESCE(SUM(
+                                           CASE
+                                               WHEN tm.libelle = 'Recette' THEN cm.montant
+                                               WHEN tm.libelle = 'DÃ©pense' THEN -cm.montant
+                                               ELSE 0
+                                               END
+                                   ), 0) AS solde_actuel,
+        COUNT(cm.id) AS nombre_mouvements,
+        MAX(cm.date_mouvement) AS dernier_mouvement
+    FROM Caisse c
+             LEFT JOIN Caisse_Mouvement cm ON c.id = cm.id_caisse
+             LEFT JOIN Type_Mouvement tm ON cm.id_type_mouvement = tm.id
+    GROUP BY c.id, c.solde_initial
+""")
+@Synchronize({"Caisse", "Caisse_Mouvement", "Type_Mouvement"})
+public class VmCaisseSoldeActuel implements Serializable {
+    @Id
+    @Column(name = "id_caisse")
+    private Long idCaisse;
+
+    @Column(name = "solde_actuel")
+    private BigDecimal soldeActuel;
+
+    @Column(name = "nombre_mouvements")
+    private Long nombreMouvements;
+
+    @Column(name = "dernier_mouvement")
+    private LocalDateTime dernierMouvement;
+}
+package com.mdgtaxi.view;
+
+import lombok.Data;
+import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.Subselect;
+import org.hibernate.annotations.Synchronize;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Data
+@Entity
+@Immutable
+@Subselect("""
+    SELECT
+        cm.id AS id_mouvement,
+        cm.id_caisse,
+        c.nom AS caisse,
+        cm.table_origine,
+        cm.id_entite_origine,
+        tm.libelle AS type_mouvement,
+        cm.montant,
+        cm.date_mouvement,
+        CASE cm.table_origine
+            WHEN 'Trajet_Reservation_Paiement' THEN
+                (SELECT CONCAT('Paiement rÃ©servation #', trp.id, ' - ', tr.nom_passager)
+                 FROM Trajet_Reservation_Paiement trp
+                          INNER JOIN Trajet_Reservation tr ON trp.id_trajet_reservation = tr.id
+                 WHERE trp.id = cm.id_entite_origine)
+            WHEN 'Trajet_Arret_Detail' THEN
+                (SELECT CONCAT('Incident trajet #', tad.id_trajet, ' - ', tma.libelle)
+                 FROM Trajet_Arret_Detail tad
+                          INNER JOIN Trajet_Motif_Arret tma ON tad.id_trajet_motif_arret = tma.id
+                 WHERE tad.id = cm.id_entite_origine)
+            WHEN 'Vehicule_Entretien' THEN
+                (SELECT CONCAT('Entretien vÃ©hicule #', ve.id_vehicule, ' - ', ve.motif)
+                 FROM Vehicule_Entretien ve
+                 WHERE ve.id = cm.id_entite_origine)
+            WHEN 'Trajet_Carburant_Detail' THEN
+                (SELECT CONCAT('Carburant trajet #', tcd.id_trajet, ' - ', tcd.quantite_carburant_ajoute, 'L')
+                 FROM Trajet_Carburant_Detail tcd
+                 WHERE tcd.id = cm.id_entite_origine)
+            ELSE 'Autre opÃ©ration'
+            END AS description_origine
+    FROM Caisse_Mouvement cm
+             INNER JOIN Caisse c ON cm.id_caisse = c.id
+             INNER JOIN Type_Mouvement tm ON cm.id_type_mouvement = tm.id
+    ORDER BY cm.date_mouvement DESC
+""")
+@Synchronize({"Caisse_Mouvement", "Caisse", "Type_Mouvement", "Trajet_Reservation_Paiement", "Trajet_Reservation", "Trajet_Arret_Detail", "Trajet_Motif_Arret", "Vehicule_Entretien", "Trajet_Carburant_Detail"})
+public class VmCaisseTracabilite implements Serializable {
+    @Id
+    @Column(name = "id_mouvement")
+    private Long idMouvement;
+
+    @Column(name = "id_caisse")
+    private Long idCaisse;
+
+    @Column(name = "caisse")
+    private String caisse;
+
+    @Column(name = "table_origine")
+    private String tableOrigine;
+
+    @Column(name = "id_entite_origine")
+    private Long idEntiteOrigine;
+
+    @Column(name = "type_mouvement")
+    private String typeMouvement;
+
+    @Column(name = "montant")
+    private BigDecimal montant;
+
+    @Column(name = "date_mouvement")
+    private LocalDateTime dateMouvement;
+
+    @Column(name = "description_origine")
+    private String descriptionOrigine;
+}
+package com.mdgtaxi.view;
+
+import lombok.Data;
+import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.Subselect;
+import org.hibernate.annotations.Synchronize;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.time.LocalDateTime;
+
+@Data
+@Entity
+@Immutable
+@Subselect("""
+    SELECT
+        c.id AS id_chauffeur,
+        COUNT(t.id) AS nombre_trajets,
+        COUNT(CASE WHEN t.id_trajet_statut IN (
+            SELECT id FROM Trajet_Statut WHERE libelle = 'TerminÃ©'
+        ) THEN 1 END) AS trajets_termines,
+        MAX(t.datetime_depart) AS dernier_trajet,
+        MIN(t.datetime_depart) AS premier_trajet
+    FROM Chauffeur c
+             LEFT JOIN Trajet t ON c.id = t.id_chauffeur
+    GROUP BY c.id
+""")
+@Synchronize({"Chauffeur", "Trajet", "Trajet_Statut"})
+public class VmChauffeurActivite implements Serializable {
+    @Id
+    @Column(name = "id_chauffeur")
+    private Long idChauffeur;
+
+    @Column(name = "nombre_trajets")
+    private Long nombreTrajets;
+
+    @Column(name = "trajets_termines")
+    private Long trajetsTermines;
+
+    @Column(name = "dernier_trajet")
+    private LocalDateTime dernierTrajet;
+
+    @Column(name = "premier_trajet")
+    private LocalDateTime premierTrajet;
+}
+package com.mdgtaxi.view;
+
+import lombok.Data;
+import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.Subselect;
+import org.hibernate.annotations.Synchronize;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+@Data
+@Entity
+@Immutable
+@Subselect("""
+    SELECT
+        c.id AS id_chauffeur,
+        c.nom,
+        c.prenom,
+        c.nom || ' ' || c.prenom AS nom_complet,
+        c.date_naissance,
+        EXTRACT(YEAR FROM AGE(c.date_naissance)) AS age,
+        c.numero_permis,
+        csa.libelle_statut,
+        csa.date_mouvement AS date_dernier_statut
+    FROM Chauffeur c
+             LEFT JOIN VM_Chauffeur_Statut_Actuel csa ON c.id = csa.id_chauffeur
+""")
+@Synchronize({"Chauffeur", "VM_Chauffeur_Statut_Actuel"})
+public class VmChauffeurDetail implements Serializable {
+    @Id
+    @Column(name = "id_chauffeur")
+    private Long idChauffeur;
+
+    @Column(name = "nom")
+    private String nom;
+
+    @Column(name = "prenom")
+    private String prenom;
+
+    @Column(name = "nom_complet")
+    private String nomComplet;
+
+    @Column(name = "date_naissance")
+    private LocalDate dateNaissance;
+
+    @Column(name = "age")
+    private Integer age;
+
+    @Column(name = "numero_permis")
+    private String numeroPermis;
+
+    @Column(name = "libelle_statut")
+    private String libelleStatut;
+
+    @Column(name = "date_dernier_statut")
+    private LocalDateTime dateDernierStatut;
+}
+package com.mdgtaxi.view;
+
+import lombok.Data;
+import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.Subselect;
+import org.hibernate.annotations.Synchronize;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.time.LocalDateTime;
+
+@Data
+@Entity
+@Immutable
+@Subselect("""
+    SELECT
+        cms.id,
+        cms.id_chauffeur,
+        c.nom || ' ' || c.prenom AS chauffeur,
+        cs_ancien.libelle AS ancien_statut,
+        cs_nouveau.libelle AS nouveau_statut,
+        cms.date_mouvement,
+        cms.observation
+    FROM Chauffeur_Mouvement_Statut cms
+             INNER JOIN Chauffeur c ON cms.id_chauffeur = c.id
+             LEFT JOIN Chauffeur_Statut cs_ancien ON cms.id_ancien_statut = cs_ancien.id
+             INNER JOIN Chauffeur_Statut cs_nouveau ON cms.id_nouveau_statut = cs_nouveau.id
+    ORDER BY cms.date_mouvement DESC
+""")
+@Synchronize({"Chauffeur_Mouvement_Statut", "Chauffeur", "Chauffeur_Statut"})
+public class VmChauffeurHistoriqueStatut implements Serializable {
+    @Id
+    @Column(name = "id")
+    private Long id;
+
+    @Column(name = "id_chauffeur")
+    private Long idChauffeur;
+
+    @Column(name = "chauffeur")
+    private String chauffeur;
+
+    @Column(name = "ancien_statut")
+    private String ancienStatut;
+
+    @Column(name = "nouveau_statut")
+    private String nouveauStatut;
+
+    @Column(name = "date_mouvement")
+    private LocalDateTime dateMouvement;
+
+    @Column(name = "observation")
+    private String observation;
+}
+package com.mdgtaxi.view;
+
+import lombok.Data;
+import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.Subselect;
+import org.hibernate.annotations.Synchronize;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.time.LocalDateTime;
+
+@Data
+@Entity
+@Immutable
+@Subselect("""
+    SELECT DISTINCT ON (cms.id_chauffeur)
+        cms.id_chauffeur,
+        cs.libelle AS libelle_statut,
+        cms.date_mouvement
+    FROM Chauffeur_Mouvement_Statut cms
+             INNER JOIN Chauffeur_Statut cs ON cms.id_nouveau_statut = cs.id
+    ORDER BY cms.id_chauffeur, cms.date_mouvement DESC
+""")
+@Synchronize({"Chauffeur_Mouvement_Statut", "Chauffeur_Statut"})
+public class VmChauffeurStatutActuel implements Serializable {
+    @Id
+    @Column(name = "id_chauffeur")
+    private Long idChauffeur;
+
+    @Column(name = "libelle_statut")
+    private String libelleStatut;
+
+    @Column(name = "date_mouvement")
+    private LocalDateTime dateMouvement;
+}
+package com.mdgtaxi.view;
+
+import lombok.Data;
+import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.Subselect;
+import org.hibernate.annotations.Synchronize;
+
+import javax.persistence.*;
+import java.io.Serializable;
+
+@Data
+@Entity
+@Immutable
+@Subselect("""
+    SELECT
+        ld.id_ligne,
+        ld.ordre,
+        la.nom_arret,
+        v.nom AS nom_ville,
+        r.nom AS nom_region
+    FROM Ligne_Detail ld
+             INNER JOIN Ligne_Arret la ON ld.id_ligne_arret = la.id
+             INNER JOIN Ville v ON la.id_ville = v.id
+             INNER JOIN Region r ON v.id_region = r.id
+    ORDER BY ld.id_ligne, ld.ordre
+""")
+@Synchronize({"Ligne_Detail", "Ligne_Arret", "Ville", "Region"})
+public class VmLigneItineraire implements Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+
+    @Column(name = "id_ligne")
+    private Long idLigne;
+
+    @Column(name = "ordre")
+    private Integer ordre;
+
+    @Column(name = "nom_arret")
+    private String nomArret;
+
+    @Column(name = "nom_ville")
+    private String nomVille;
+
+    @Column(name = "nom_region")
+    private String nomRegion;
+}
+package com.mdgtaxi.view;
+
+import lombok.Data;
+import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.Subselect;
+import org.hibernate.annotations.Synchronize;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.math.BigDecimal;
+
+@Data
+@Entity
+@Immutable
+@Subselect("""
+    SELECT
+        l.id AS id_ligne,
+        ld.ville_depart,
+        ld.ville_arrivee,
+        COUNT(DISTINCT t.id) AS nombre_trajets,
+        COALESCE(AVG(vr.taux_remplissage_pct), 0) AS taux_remplissage_moyen,
+        COALESCE(SUM(vtf.total_recette), 0) AS recette_totale,
+        COALESCE(SUM(vtf.benefice), 0) AS benefice_total,
+        COALESCE(AVG(vtf.benefice), 0) AS benefice_moyen_par_trajet
+    FROM Ligne l
+             INNER JOIN VM_Ligne_Detail ld ON l.id = ld.id_ligne
+             LEFT JOIN Trajet t ON l.id = t.id_ligne
+             LEFT JOIN VM_Trajet_Remplissage vr ON t.id = vr.id_trajet
+             LEFT JOIN VM_Trajet_Finance vtf ON t.id = vtf.id_trajet
+    GROUP BY l.id, ld.ville_depart, ld.ville_arrivee
+""")
+@Synchronize({"Ligne", "VM_Ligne_Detail", "Trajet", "VM_Trajet_Remplissage", "VM_Trajet_Finance"})
+public class VmPerformanceLigne implements Serializable {
+    @Id
+    @Column(name = "id_ligne")
+    private Long idLigne;
+
+    @Column(name = "ville_depart")
+    private String villeDepart;
+
+    @Column(name = "ville_arrivee")
+    private String villeArrivee;
+
+    @Column(name = "nombre_trajets")
+    private Long nombreTrajets;
+
+    @Column(name = "taux_remplissage_moyen")
+    private BigDecimal tauxRemplissageMoyen;
+
+    @Column(name = "recette_totale")
+    private BigDecimal recetteTotale;
+
+    @Column(name = "benefice_total")
+    private BigDecimal beneficeTotal;
+
+    @Column(name = "benefice_moyen_par_trajet")
+    private BigDecimal beneficeMoyenParTrajet;
+}
+package com.mdgtaxi.view;
+
+import lombok.Data;
+import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.Subselect;
+import org.hibernate.annotations.Synchronize;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.math.BigDecimal;
+
+@Data
+@Entity
+@Immutable
+@Subselect("""
+    SELECT
+        v.id AS id_vehicule,
+        v.immatriculation,
+        v.marque,
+        v.modele,
+        COUNT(DISTINCT t.id) AS nombre_trajets,
+        COALESCE(SUM(vce.total_depense_entretien), 0) AS cout_entretien_total,
+        COALESCE(SUM(vtf.total_recette), 0) AS recette_totale,
+        COALESCE(SUM(vtf.benefice), 0) AS benefice_total,
+        COALESCE(AVG(EXTRACT(EPOCH FROM (t.datetime_arrivee - t.datetime_depart))/3600), 0) AS duree_moyenne_trajet_heures
+    FROM Vehicule v
+             LEFT JOIN Trajet t ON v.id = t.id_vehicule
+             LEFT JOIN VM_Vehicule_Cout_Entretien vce ON v.id = vce.id_vehicule
+             LEFT JOIN VM_Trajet_Finance vtf ON t.id = vtf.id_trajet
+    GROUP BY v.id, v.immatriculation, v.marque, v.modele
+""")
+@Synchronize({"Vehicule", "Trajet", "VM_Vehicule_Cout_Entretien", "VM_Trajet_Finance"})
+public class VmPerformanceVehicule implements Serializable {
+    @Id
+    @Column(name = "id_vehicule")
+    private Long idVehicule;
+
+    @Column(name = "immatriculation")
+    private String immatriculation;
+
+    @Column(name = "marque")
+    private String marque;
+
+    @Column(name = "modele")
+    private String modele;
+
+    @Column(name = "nombre_trajets")
+    private Long nombreTrajets;
+
+    @Column(name = "cout_entretien_total")
+    private BigDecimal coutEntretienTotal;
+
+    @Column(name = "recette_totale")
+    private BigDecimal recetteTotale;
+
+    @Column(name = "benefice_total")
+    private BigDecimal beneficeTotal;
+
+    @Column(name = "duree_moyenne_trajet_heures")
+    private BigDecimal dureeMoyenneTrajetHeures;
+}
+package com.mdgtaxi.view;
+
+import lombok.Data;
+import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.Subselect;
+import org.hibernate.annotations.Synchronize;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Data
+@Entity
+@Immutable
+@Subselect("""
+    SELECT
+        pf.id,
+        pf.id_trajet,
+        pf.table_origine,
+        pf.id_entite_origine,
+        tm.libelle AS type_mouvement,
+        pf.montant,
+        pf.date,
+        pf.description
+    FROM Prevision_Finance pf
+             INNER JOIN Type_Mouvement tm ON pf.id_type_mouvement = tm.id
+    ORDER BY pf.date DESC
+""")
+@Synchronize({"Prevision_Finance", "Type_Mouvement"})
+public class VmPrevisionDetail implements Serializable {
+    @Id
+    @Column(name = "id")
+    private Long id;
+
+    @Column(name = "id_trajet")
+    private Long idTrajet;
+
+    @Column(name = "table_origine")
+    private String tableOrigine;
+
+    @Column(name = "id_entite_origine")
+    private Long idEntiteOrigine;
+
+    @Column(name = "type_mouvement")
+    private String typeMouvement;
+
+    @Column(name = "montant")
+    private BigDecimal montant;
+
+    @Column(name = "date")
+    private LocalDateTime date;
+
+    @Column(name = "description")
+    private String description;
+}
+package com.mdgtaxi.view;
+
+import lombok.Data;
+import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.Subselect;
+import org.hibernate.annotations.Synchronize;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.math.BigDecimal;
+
+@Data
+@Entity
+@Immutable
+@Subselect("""
+    SELECT
+        t.id AS id_trajet,
+        COALESCE(SUM(CASE WHEN pf.id_type_mouvement = (SELECT id FROM Type_Mouvement WHERE libelle = 'Recette')
+                              THEN pf.montant ELSE 0 END), 0) AS recette_prevue,
+        COALESCE(SUM(CASE WHEN pf.id_type_mouvement = (SELECT id FROM Type_Mouvement WHERE libelle = 'DÃ©pense')
+                              THEN pf.montant ELSE 0 END), 0) AS depense_prevue,
+        COALESCE(vtf.total_recette, 0) AS recette_reelle,
+        COALESCE(vtf.total_depense, 0) AS depense_reelle,
+        COALESCE(vtf.total_recette, 0) - COALESCE(SUM(CASE WHEN pf.id_type_mouvement = (SELECT id FROM Type_Mouvement WHERE libelle = 'Recette')
+                                                               THEN pf.montant ELSE 0 END), 0) AS ecart_recette,
+        COALESCE(vtf.total_depense, 0) - COALESCE(SUM(CASE WHEN pf.id_type_mouvement = (SELECT id FROM Type_Mouvement WHERE libelle = 'DÃ©pense')
+                                                               THEN pf.montant ELSE 0 END), 0) AS ecart_depense,
+        COALESCE(vtf.benefice, 0) - (
+            COALESCE(SUM(CASE WHEN pf.id_type_mouvement = (SELECT id FROM Type_Mouvement WHERE libelle = 'Recette')
+                                  THEN pf.montant ELSE 0 END), 0) -
+            COALESCE(SUM(CASE WHEN pf.id_type_mouvement = (SELECT id FROM Type_Mouvement WHERE libelle = 'DÃ©pense')
+                                  THEN pf.montant ELSE 0 END), 0)
+            ) AS ecart_benefice
+    FROM Trajet t
+             LEFT JOIN Prevision_Finance pf ON t.id = pf.id_trajet
+             LEFT JOIN VM_Trajet_Finance vtf ON t.id = vtf.id_trajet
+    GROUP BY t.id, vtf.total_recette, vtf.total_depense, vtf.benefice
+""")
+@Synchronize({"Trajet", "Prevision_Finance", "VM_Trajet_Finance", "Type_Mouvement"})
+public class VmPrevisionVsReel implements Serializable {
+    @Id
+    @Column(name = "id_trajet")
+    private Long idTrajet;
+
+    @Column(name = "recette_prevue")
+    private BigDecimal recettePrevue;
+
+    @Column(name = "depense_prevue")
+    private BigDecimal depensePrevue;
+
+    @Column(name = "recette_reelle")
+    private BigDecimal recetteReelle;
+
+    @Column(name = "depense_reelle")
+    private BigDecimal depenseReelle;
+
+    @Column(name = "ecart_recette")
+    private BigDecimal ecartRecette;
+
+    @Column(name = "ecart_depense")
+    private BigDecimal ecartDepense;
+
+    @Column(name = "ecart_benefice")
+    private BigDecimal ecartBenefice;
+}
+package com.mdgtaxi.view;
+
+import lombok.Data;
+import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.Subselect;
+import org.hibernate.annotations.Synchronize;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Data
+@Entity
+@Immutable
+@Subselect("""
+    SELECT
+        t.id AS id_trajet,
+        t.id_ligne,
+        ld.ville_depart,
+        ld.ville_arrivee,
+        c.nom || ' ' || c.prenom AS chauffeur,
+        t.id_chauffeur,
+        v.immatriculation AS vehicule,
+        v.marque || ' ' || v.modele AS modele_vehicule,
+        t.id_vehicule,
+        tsa.libelle_statut AS statut_trajet,
+        t.datetime_depart,
+        t.datetime_arrivee,
+        t.nombre_passager,
+        v.maximum_passager,
+        t.frais_unitaire,
+        CASE
+            WHEN t.datetime_arrivee IS NOT NULL
+                THEN EXTRACT(EPOCH FROM (t.datetime_arrivee - t.datetime_depart))/3600
+            END AS duree_heures
+    FROM Trajet t
+             INNER JOIN VM_Ligne_Detail ld ON t.id_ligne = ld.id_ligne
+             INNER JOIN Chauffeur c ON t.id_chauffeur = c.id
+             INNER JOIN Vehicule v ON t.id_vehicule = v.id
+             LEFT JOIN VM_Trajet_Statut_Actuel tsa ON t.id = tsa.id_trajet
+""")
+@Synchronize({"Trajet", "VM_Ligne_Detail", "Chauffeur", "Vehicule", "VM_Trajet_Statut_Actuel"})
+public class VmTrajetDetail implements Serializable {
+    @Id
+    @Column(name = "id_trajet")
+    private Long idTrajet;
+
+    @Column(name = "id_ligne")
+    private Long idLigne;
+
+    @Column(name = "id_chauffeur")
+    private Long idChauffeur;
+
+    @Column(name = "id_vehicule")
+    private Long idVehicule;
+
+    @Column(name = "nombre_passager")
+    private Integer nombrePassager;
+
+    @Column(name = "libelle_statut")
+    private String libelleStatut;
+
+    @Column(name = "datetime_depart")
+    private LocalDateTime datetimeDepart;
+
+    @Column(name = "datetime_arrivee")
+    private LocalDateTime datetimeArrivee;
+
+    @Column(name = "frais_unitaire")
+    private BigDecimal fraisUnitaire;
+
+    @Column(name = "ville_depart")
+    private String villeDepart;
+
+    @Column(name = "ville_arrivee")
+    private String villeArrivee;
+
+    @Column(name = "immatriculation")
+    private String immatriculation;
+
+    @Column(name = "nom_chauffeur")
+    private String nomChauffeur;
+
+}
+package com.mdgtaxi.view;
+
+import lombok.Data;
+import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.Subselect;
+import org.hibernate.annotations.Synchronize;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.time.LocalDateTime;
+
+@Data
+@Entity
+@Immutable
+@Subselect("""
+    SELECT DISTINCT ON (tms.id_trajet)
+        tms.id_trajet,
+        ts.libelle AS libelle_statut,
+        tms.date_mouvement
+    FROM Trajet_Mouvement_Statut tms
+             INNER JOIN Trajet_Statut ts ON tms.id_nouveau_statut = ts.id
+    ORDER BY tms.id_trajet, tms.date_mouvement DESC
+""")
+@Synchronize({"Trajet_Mouvement_Statut", "Trajet_Statut"})
+public class VmTrajetStatutActuel implements Serializable {
+    @Id
+    @Column(name = "id_trajet")
+    private Long idTrajet;
+
+    @Column(name = "libelle_statut")
+    private String libelleStatut;
+
+    @Column(name = "date_mouvement")
+    private LocalDateTime dateMouvement;
+}
+package com.mdgtaxi.view;
+
+import lombok.Data;
+import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.Subselect;
+import org.hibernate.annotations.Synchronize;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Data
+@Entity
+@Immutable
+@Subselect("""
+    SELECT
+        v.id AS id_vehicule,
+        COALESCE(SUM(ve.montant_depense), 0) AS total_depense_entretien,
+        COUNT(ve.id) AS nombre_entretiens,
+        MAX(ve.date_debut_entretien) AS dernier_entretien
+    FROM Vehicule v
+             LEFT JOIN Vehicule_Entretien ve ON v.id = ve.id_vehicule
+    GROUP BY v.id
+""")
+@Synchronize({"Vehicule", "Vehicule_Entretien"})
+public class VmVehiculeCoutEntretien implements Serializable {
+    @Id
+    @Column(name = "id_vehicule")
+    private Long idVehicule;
+
+    @Column(name = "total_depense_entretien")
+    private BigDecimal totalDepenseEntretien;
+
+    @Column(name = "nombre_entretiens")
+    private Long nombreEntretiens;
+
+    @Column(name = "dernier_entretien")
+    private LocalDateTime dernierEntretien;
+}
+package com.mdgtaxi.view;
+
+import lombok.Data;
+import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.Subselect;
+import org.hibernate.annotations.Synchronize;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Data
+@Entity
+@Immutable
+@Subselect("""
+    SELECT
+        v.id AS id_vehicule,
+        v.immatriculation,
+        v.marque,
+        v.modele,
+        v.maximum_passager,
+        v.capacite_carburant,
+        v.depense_carburant_100km,
+        vt.libelle AS libelle_type,
+        ct.libelle AS type_carburant,
+        vsa.libelle_statut,
+        vsa.date_mouvement AS date_dernier_statut
+    FROM Vehicule v
+             INNER JOIN Vehicule_Type vt ON v.id_type = vt.id
+             INNER JOIN Carburant_Type ct ON v.id_type_carburant = ct.id
+             LEFT JOIN VM_Vehicule_Statut_Actuel vsa ON v.id = vsa.id_vehicule
+""")
+@Synchronize({"Vehicule", "Vehicule_Type", "Carburant_Type", "VM_Vehicule_Statut_Actuel"})
+public class VmVehiculeDetail implements Serializable {
+    @Id
+    @Column(name = "id_vehicule")
+    private Long idVehicule;
+
+    @Column(name = "immatriculation")
+    private String immatriculation;
+
+    @Column(name = "marque")
+    private String marque;
+
+    @Column(name = "modele")
+    private String modele;
+
+    @Column(name = "maximum_passager")
+    private Integer maximumPassager;
+
+    @Column(name = "capacite_carburant")
+    private BigDecimal capaciteCarburant;
+
+    @Column(name = "depense_carburant_100km")
+    private BigDecimal depenseCarburant100km;
+
+    @Column(name = "libelle_type")
+    private String libelleType;
+
+    @Column(name = "type_carburant")
+    private String typeCarburant;
+
+    @Column(name = "libelle_statut")
+    private String libelleStatut;
+
+    @Column(name = "date_dernier_statut")
+    private LocalDateTime dateDernierStatut;
+}
+package com.mdgtaxi.view;
+
+import lombok.Data;
+import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.Subselect;
+import org.hibernate.annotations.Synchronize;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.time.LocalDateTime;
+
+@Data
+@Entity
+@Immutable
+@Subselect("""
+    SELECT
+        vms.id,
+        vms.id_vehicule,
+        v.immatriculation,
+        vs_ancien.libelle AS ancien_statut,
+        vs_nouveau.libelle AS nouveau_statut,
+        vms.date_mouvement,
+        vms.observation
+    FROM Vehicule_Mouvement_Statut vms
+             INNER JOIN Vehicule v ON vms.id_vehicule = v.id
+             LEFT JOIN Vehicule_Statut vs_ancien ON vms.id_ancien_statut = vs_ancien.id
+             INNER JOIN Vehicule_Statut vs_nouveau ON vms.id_nouveau_statut = vs_nouveau.id
+    ORDER BY vms.date_mouvement DESC
+""")
+@Synchronize({"Vehicule_Mouvement_Statut", "Vehicule", "Vehicule_Statut"})
+public class VmVehiculeHistoriqueStatut implements Serializable {
+    @Id
+    @Column(name = "id")
+    private Long id;
+
+    @Column(name = "id_vehicule")
+    private Long idVehicule;
+
+    @Column(name = "immatriculation")
+    private String immatriculation;
+
+    @Column(name = "ancien_statut")
+    private String ancienStatut;
+
+    @Column(name = "nouveau_statut")
+    private String nouveauStatut;
+
+    @Column(name = "date_mouvement")
+    private LocalDateTime dateMouvement;
+
+    @Column(name = "observation")
+    private String observation;
+}
+package com.mdgtaxi.view;
+
+import lombok.Data;
+import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.Subselect;
+import org.hibernate.annotations.Synchronize;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.time.LocalDateTime;
+
+@Data
+@Entity
+@Immutable
+@Subselect("""
+    SELECT DISTINCT ON (vms.id_vehicule)
+        vms.id_vehicule,
+        vs.libelle AS libelle_statut,
+        vms.date_mouvement
+    FROM Vehicule_Mouvement_Statut vms
+             INNER JOIN Vehicule_Statut vs ON vms.id_nouveau_statut = vs.id
+    ORDER BY vms.id_vehicule, vms.date_mouvement DESC
+""")
+@Synchronize({"Vehicule_Mouvement_Statut", "Vehicule_Statut"})
+public class VmVehiculeStatutActuel implements Serializable {
+    @Id
+    @Column(name = "id_vehicule")
+    private Long idVehicule;
+
+    @Column(name = "libelle_statut")
+    private String libelleStatut;
+
+    @Column(name = "date_mouvement")
+    private LocalDateTime dateMouvement;
+}
+package com.mdgtaxi.view;
+
+import lombok.Data;
+import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.Subselect;
+import org.hibernate.annotations.Synchronize;
+
+import javax.persistence.*;
+import java.io.Serializable;
+
+@Data
+@Entity
+@Immutable
+@Subselect("""
+    SELECT
+        v.id AS id_ville,
+        v.nom AS nom_ville,
+        r.nom AS nom_region,
+        p.nom AS nom_province,
+        r.id AS id_region,
+        p.id AS id_province
+    FROM Ville v
+             INNER JOIN Region r ON v.id_region = r.id
+             INNER JOIN Province p ON r.id_province = p.id
+""")
+@Synchronize({"Ville", "Region", "Province"})
+public class VmVilleDetail implements Serializable {
+    @Id
+    @Column(name = "id_ville")
+    private Long idVille;
+
+    @Column(name = "nom_ville")
+    private String nomVille;
+
+    @Column(name = "nom_region")
+    private String nomRegion;
+
+    @Column(name = "nom_province")
+    private String nomProvince;
+
+    @Column(name = "id_region")
+    private Long idRegion;
+
+    @Column(name = "id_province")
+    private Long idProvince;
+}
