@@ -1,0 +1,43 @@
+﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<% request.setAttribute("contentPage", "/WEB-INF/content/chauffeures-content.jsp"); %>
+<jsp:include page="/WEB-INF/layouts/main-layout.jsp" />
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<% request.setAttribute("contentPage", "/WEB-INF/content/dashboard-content.jsp"); %>
+<jsp:include page="/WEB-INF/layouts/main-layout.jsp" />
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<% request.setAttribute("contentPage", "/WEB-INF/content/ligne-detail-content.jsp"); %>
+<jsp:include page="/WEB-INF/layouts/main-layout.jsp" />
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<% request.setAttribute("contentPage", "/WEB-INF/content/lignes-content.jsp"); %>
+<jsp:include page="/WEB-INF/layouts/main-layout.jsp" />
+<%--
+  Created by IntelliJ IDEA.
+  User: ACER
+  Date: 13/01/2026
+  Time: 20:39
+  To change this template use File | Settings | File Templates.
+--%>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+<head>
+    <title>Title</title>
+</head>
+<body>
+
+</body>
+</html>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<% request.setAttribute("contentPage", "/WEB-INF/content/reservations-content.jsp"); %>
+<jsp:include page="/WEB-INF/layouts/main-layout.jsp" />
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<% request.setAttribute("contentPage", "/WEB-INF/content/trajet-detail-content.jsp"); %>
+<jsp:include page="/WEB-INF/layouts/main-layout.jsp" />
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<% request.setAttribute("contentPage", "/WEB-INF/content/trajets-content.jsp"); %>
+<jsp:include page="/WEB-INF/layouts/main-layout.jsp" />
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<% request.setAttribute("contentPage", "/WEB-INF/content/vehicule-detail-content.jsp"); %>
+<jsp:include page="/WEB-INF/layouts/main-layout.jsp" />
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<% request.setAttribute("contentPage", "/WEB-INF/content/vehicules-content.jsp"); %>
+<jsp:include page="/WEB-INF/layouts/main-layout.jsp" />

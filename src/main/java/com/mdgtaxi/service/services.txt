@@ -2,12 +2,8 @@
 
 import com.mdgtaxi.entity.Chauffeur;
 import com.mdgtaxi.entity.ChauffeurMouvementStatut;
-import com.mdgtaxi.entity.ChauffeurStatut;
 import com.mdgtaxi.util.HibernateUtil;
-import com.mdgtaxi.view.VmChauffeurActivite;
-import com.mdgtaxi.view.VmChauffeurDetail;
-import com.mdgtaxi.view.VmChauffeurHistoriqueStatut;
-import com.mdgtaxi.view.VmChauffeurStatutActuel;
+
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -96,57 +92,7 @@ public class ChauffeurService {
         }
     }
 
-    // Operations using Views
 
-    public VmChauffeurDetail getChauffeurDetail(Long idChauffeur) {
-        EntityManager em = emf.createEntityManager();
-        try {
-            return em.find(VmChauffeurDetail.class, idChauffeur);
-        } finally {
-            em.close();
-        }
-    }
-
-    public List<VmChauffeurDetail> getAllChauffeurDetails() {
-        EntityManager em = emf.createEntityManager();
-        try {
-            TypedQuery<VmChauffeurDetail> query = em.createQuery("SELECT cd FROM VmChauffeurDetail cd", VmChauffeurDetail.class);
-            return query.getResultList();
-        } finally {
-            em.close();
-        }
-    }
-
-    public VmChauffeurStatutActuel getCurrentStatut(Long idChauffeur) {
-        EntityManager em = emf.createEntityManager();
-        try {
-            return em.find(VmChauffeurStatutActuel.class, idChauffeur);
-        } finally {
-            em.close();
-        }
-    }
-
-    public List<VmChauffeurHistoriqueStatut> getHistoriqueStatut(Long idChauffeur) {
-        EntityManager em = emf.createEntityManager();
-        try {
-            TypedQuery<VmChauffeurHistoriqueStatut> query = em.createQuery(
-                    "SELECT hs FROM VmChauffeurHistoriqueStatut hs WHERE hs.idChauffeur = :idChauffeur ORDER BY hs.dateMouvement DESC",
-                    VmChauffeurHistoriqueStatut.class);
-            query.setParameter("idChauffeur", idChauffeur);
-            return query.getResultList();
-        } finally {
-            em.close();
-        }
-    }
-
-    public VmChauffeurActivite getActivite(Long idChauffeur) {
-        EntityManager em = emf.createEntityManager();
-        try {
-            return em.find(VmChauffeurActivite.class, idChauffeur);
-        } finally {
-            em.close();
-        }
-    }
 
     // Operations for Related Entities
 
@@ -179,8 +125,6 @@ public class ChauffeurService {
         }
     }
 
-    // Multi-filter criteria function for Chauffeur (using Criteria API)
-    // Filters are provided as a Map<String, Object> where keys are field names like "nom", "prenom", "numeroPermis", etc.
 
     public List<Chauffeur> searchChauffeursWithFilters(Map<String, Object> filters) {
         EntityManager em = emf.createEntityManager();
@@ -228,61 +172,7 @@ public class ChauffeurService {
         }
     }
 
-    // Similar multi-filter for VmChauffeurDetail (since it's a view, we can filter on its fields)
 
-    public List<VmChauffeurDetail> searchChauffeurDetailsWithFilters(Map<String, Object> filters) {
-        EntityManager em = emf.createEntityManager();
-        try {
-            CriteriaBuilder cb = em.getCriteriaBuilder();
-            CriteriaQuery<VmChauffeurDetail> cq = cb.createQuery(VmChauffeurDetail.class);
-            Root<VmChauffeurDetail> root = cq.from(VmChauffeurDetail.class);
-
-            List<Predicate> predicates = new ArrayList<>();
-
-            for (Map.Entry<String, Object> entry : filters.entrySet()) {
-                String key = entry.getKey();
-                Object value = entry.getValue();
-
-                if (value == null) continue;
-
-                switch (key) {
-                    case "nom":
-                        predicates.add(cb.equal(root.get("nom"), value));
-                        break;
-                    case "prenom":
-                        predicates.add(cb.equal(root.get("prenom"), value));
-                        break;
-                    case "nomComplet":
-                        predicates.add(cb.equal(root.get("nomComplet"), value));
-                        break;
-                    case "dateNaissance":
-                        predicates.add(cb.equal(root.get("dateNaissance"), value));
-                        break;
-                    case "age":
-                        predicates.add(cb.equal(root.get("age"), value));
-                        break;
-                    case "numeroPermis":
-                        predicates.add(cb.equal(root.get("numeroPermis"), value));
-                        break;
-                    case "libelleStatut":
-                        predicates.add(cb.equal(root.get("libelleStatut"), value));
-                        break;
-                    // Add more as needed
-                    default:
-                        break;
-                }
-            }
-
-            if (!predicates.isEmpty()) {
-                cq.where(cb.and(predicates.toArray(new Predicate[0])));
-            }
-
-            TypedQuery<VmChauffeurDetail> query = em.createQuery(cq);
-            return query.getResultList();
-        } finally {
-            em.close();
-        }
-    }
 }
 package com.mdgtaxi.service;
 
@@ -627,11 +517,60 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import java.util.List;
+import java.util.Map;
+import java.util.ArrayList;
 
 public class LigneService {
 
     private final EntityManagerFactory emf = HibernateUtil.getEntityManagerFactory();
+
+    public List<Ligne> searchLignesWithFilters(Map<String, Object> filters) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<Ligne> cq = cb.createQuery(Ligne.class);
+            Root<Ligne> root = cq.from(Ligne.class);
+
+            List<Predicate> predicates = new ArrayList<>();
+
+            for (Map.Entry<String, Object> entry : filters.entrySet()) {
+                String key = entry.getKey();
+                Object value = entry.getValue();
+
+                if (value == null) continue;
+
+                switch (key) {
+                    case "distanceKm":
+                        predicates.add(cb.equal(root.get("distanceKm"), value));
+                        break;
+                    case "villeDepart.id":
+                        predicates.add(cb.equal(root.get("villeDepart").get("id"), value));
+                        break;
+                    case "villeArrivee.id":
+                        predicates.add(cb.equal(root.get("villeArrivee").get("id"), value));
+                        break;
+                    // Add more fields as needed
+                    default:
+                        // Ignore unknown filters
+                        break;
+                }
+            }
+
+            if (!predicates.isEmpty()) {
+                cq.where(cb.and(predicates.toArray(new Predicate[0])));
+            }
+
+            TypedQuery<Ligne> query = em.createQuery(cq);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
 
     public Ligne createLigne(Ligne ligne) {
         EntityManager em = emf.createEntityManager();
@@ -707,6 +646,137 @@ public class LigneService {
 }
 package com.mdgtaxi.service;
 
+import com.mdgtaxi.entity.*;
+import com.mdgtaxi.util.HibernateUtil;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.time.LocalDateTime;
+
+public class MouvementStatusCreateService {
+    private final EntityManagerFactory emf = HibernateUtil.getEntityManagerFactory();
+
+    /**
+     * Creates a new mouvement statut for the given entity.
+     * Updates the entity's current statut field if applicable.
+     *
+     * @param tableName      Name of the table (e.g., "Chauffeur", "Vehicule",
+     *                       "Trajet", "Trajet_Reservation")
+     * @param idEntity       ID of the entity
+     * @param idNewStatut    ID of the new statut
+     * @param dateChangement Date of the changement
+     * @param observation    Optional observation
+     * @return The created mouvement statut object
+     */
+    public Object createMouvementStatut(String tableName, Long idEntity, Long idNewStatut, LocalDateTime dateChangement,
+            String observation) {
+        Class<?> entityClass = null;
+        Class<?> mouvementClass = null;
+        Class<?> statutClass = null;
+        String entityField = null;
+        boolean hasStatutField = false;
+        String statutFieldName = null;
+
+        if ("Chauffeur".equals(tableName)) {
+            entityClass = Chauffeur.class;
+            mouvementClass = ChauffeurMouvementStatut.class;
+            statutClass = ChauffeurStatut.class;
+            entityField = "chauffeur";
+            hasStatutField = false;
+        } else if ("Vehicule".equals(tableName)) {
+            entityClass = Vehicule.class;
+            mouvementClass = VehiculeMouvementStatut.class;
+            statutClass = VehiculeStatut.class;
+            entityField = "vehicule";
+            hasStatutField = false;
+        } else if ("Trajet".equals(tableName)) {
+            entityClass = Trajet.class;
+            mouvementClass = TrajetMouvementStatut.class;
+            statutClass = TrajetStatut.class;
+            entityField = "trajet";
+            hasStatutField = true;
+            statutFieldName = "trajetStatut";
+        } else if ("Trajet_Reservation".equals(tableName)) {
+            entityClass = TrajetReservation.class;
+            mouvementClass = TrajetReservationMouvementStatut.class;
+            statutClass = ReservationStatut.class;
+            entityField = "trajetReservation";
+            hasStatutField = true;
+            statutFieldName = "reservationStatut";
+        } else {
+            throw new IllegalArgumentException("Unsupported tableName: " + tableName);
+        }
+
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+
+            // Find the entity
+            Object entity = em.find(entityClass, idEntity);
+            if (entity == null) {
+                throw new IllegalArgumentException("Entity not found with id: " + idEntity);
+            }
+
+            // Find the new statut
+            Object newStatut = em.find(statutClass, idNewStatut);
+            if (newStatut == null) {
+                throw new IllegalArgumentException("Statut not found with id: " + idNewStatut);
+            }
+
+            // Create new mouvement instance
+            Object mouvement = mouvementClass.getConstructor().newInstance();
+
+            // Set entity
+            Method setEntity = mouvementClass.getMethod("set" + capitalize(entityField), entityClass);
+            setEntity.invoke(mouvement, entity);
+
+            // Set nouveauStatut
+            Method setNouveauStatut = mouvementClass.getMethod("setNouveauStatut", statutClass);
+            setNouveauStatut.invoke(mouvement, newStatut);
+
+            // Set dateMouvement
+            Method setDateMouvement = mouvementClass.getMethod("setDateMouvement", LocalDateTime.class);
+            setDateMouvement.invoke(mouvement, dateChangement);
+
+            // Set observation
+            Method setObservation = mouvementClass.getMethod("setObservation", String.class);
+            setObservation.invoke(mouvement, observation);
+
+            // Persist the mouvement
+            em.persist(mouvement);
+
+            // If the entity has a direct statut field, update it
+            if (hasStatutField) {
+                Method setStatut = entityClass.getMethod("set" + capitalize(statutFieldName), statutClass);
+                setStatut.invoke(entity, newStatut);
+            }
+
+            tx.commit();
+            return mouvement;
+        } catch (InvocationTargetException | IllegalAccessException | NoSuchMethodException
+                | InstantiationException e) {
+            if (tx.isActive())
+                tx.rollback();
+            throw new RuntimeException("Reflection error: " + e.getMessage(), e);
+        } finally {
+            em.close();
+        }
+    }
+
+    private String capitalize(String str) {
+        if (str == null || str.isEmpty()) {
+            return str;
+        }
+        return str.substring(0, 1).toUpperCase() + str.substring(1);
+    }
+
+}
+package com.mdgtaxi.service;
+
 import com.mdgtaxi.dto.MouvementStatusCriteria;
 import com.mdgtaxi.dto.MouvementStatusDto;
 import com.mdgtaxi.util.HibernateUtil;
@@ -727,8 +797,10 @@ public class MouvementStatusService {
 
     /**
      * RÃ©cupÃ¨re le statut actuel d'une entitÃ©
-     * @param tableName Nom de la table (Chauffeur, Vehicule, Trajet, Trajet_Reservation)
-     * @param idEntite ID de l'entitÃ©
+     * 
+     * @param tableName Nom de la table (Chauffeur, Vehicule, Trajet,
+     *                  Trajet_Reservation)
+     * @param idEntite  ID de l'entitÃ©
      * @return Le statut actuel ou null
      */
     public MouvementStatusDto getCurrentStatus(String tableName, Long idEntite) {
@@ -737,9 +809,10 @@ public class MouvementStatusService {
 
     /**
      * RÃ©cupÃ¨re le statut d'une entitÃ© Ã  une date donnÃ©e
+     * 
      * @param tableName Nom de la table
-     * @param idEntite ID de l'entitÃ©
-     * @param date Date Ã  laquelle on veut connaÃ®tre le statut
+     * @param idEntite  ID de l'entitÃ©
+     * @param date      Date Ã  laquelle on veut connaÃ®tre le statut
      * @return Le statut Ã  cette date ou null
      */
     public MouvementStatusDto getStatusAtDate(String tableName, Long idEntite, LocalDateTime date) {
@@ -753,10 +826,6 @@ public class MouvementStatusService {
                     "m.id, " +
                     "m." + idField + ", " +
                     "'" + tableName + "', " +
-                    "CASE WHEN m.ancienStatut IS NOT NULL THEN m.ancienStatut.id ELSE NULL END, " +
-                    "CASE WHEN m.ancienStatut IS NOT NULL THEN m.ancienStatut.libelle ELSE NULL END, " +
-                    "CASE WHEN m.ancienStatut IS NOT NULL THEN m.ancienStatut.score ELSE NULL END, " +
-                    "CASE WHEN m.ancienStatut IS NOT NULL THEN m.ancienStatut.spanHtml ELSE NULL END, " +
                     "s.id, " +
                     "s.libelle, " +
                     "s.score, " +
@@ -783,8 +852,9 @@ public class MouvementStatusService {
 
     /**
      * RÃ©cupÃ¨re l'historique complet des mouvements de statut
+     * 
      * @param tableName Nom de la table
-     * @param idEntite ID de l'entitÃ©
+     * @param idEntite  ID de l'entitÃ©
      * @return Liste des mouvements ordonnÃ©s par date dÃ©croissante
      */
     public List<MouvementStatusDto> getStatusHistory(String tableName, Long idEntite) {
@@ -798,10 +868,6 @@ public class MouvementStatusService {
                     "m.id, " +
                     "m." + idField + ", " +
                     "'" + tableName + "', " +
-                    "CASE WHEN m.ancienStatut IS NOT NULL THEN m.ancienStatut.id ELSE NULL END, " +
-                    "CASE WHEN m.ancienStatut IS NOT NULL THEN m.ancienStatut.libelle ELSE NULL END, " +
-                    "CASE WHEN m.ancienStatut IS NOT NULL THEN m.ancienStatut.score ELSE NULL END, " +
-                    "CASE WHEN m.ancienStatut IS NOT NULL THEN m.ancienStatut.spanHtml ELSE NULL END, " +
                     "s.id, " +
                     "s.libelle, " +
                     "s.score, " +
@@ -823,8 +889,9 @@ public class MouvementStatusService {
 
     /**
      * RÃ©cupÃ¨re les mouvements de statut selon des critÃ¨res multiples
+     * 
      * @param tableName Nom de la table
-     * @param criteria CritÃ¨res de recherche
+     * @param criteria  CritÃ¨res de recherche
      * @return Liste des mouvements filtrÃ©s ordonnÃ©s par date dÃ©croissante
      */
     public List<MouvementStatusDto> getMouvementsByCriteria(String tableName, MouvementStatusCriteria criteria) {
@@ -839,10 +906,6 @@ public class MouvementStatusService {
                     .append("m.id, ")
                     .append("m.").append(idField).append(", ")
                     .append("'").append(tableName).append("', ")
-                    .append("CASE WHEN m.ancienStatut IS NOT NULL THEN m.ancienStatut.id ELSE NULL END, ")
-                    .append("CASE WHEN m.ancienStatut IS NOT NULL THEN m.ancienStatut.libelle ELSE NULL END, ")
-                    .append("CASE WHEN m.ancienStatut IS NOT NULL THEN m.ancienStatut.score ELSE NULL END, ")
-                    .append("CASE WHEN m.ancienStatut IS NOT NULL THEN m.ancienStatut.spanHtml ELSE NULL END, ")
                     .append("s.id, ")
                     .append("s.libelle, ")
                     .append("s.score, ")
@@ -851,7 +914,6 @@ public class MouvementStatusService {
                     .append("m.observation) ")
                     .append("FROM ").append(mouvementEntity).append(" m ")
                     .append("INNER JOIN ").append(statusEntity).append(" s ON m.nouveauStatut.id = s.id ")
-                    .append("LEFT JOIN ").append(statusEntity).append(" sa ON m.ancienStatut.id = sa.id ")
                     .append("WHERE 1=1 ");
 
             // Filtre par ID d'entitÃ©
@@ -859,26 +921,9 @@ public class MouvementStatusService {
                 jpql.append("AND m.").append(idField).append(" = :idEntite ");
             }
 
-            // Filtre par libellÃ© ancien statut
-            if (criteria.getLibelleAncienStatut() != null && !criteria.getLibelleAncienStatut().isEmpty()) {
-                jpql.append("AND sa.libelle = :libelleAncien ");
-            }
-
             // Filtre par libellÃ© nouveau statut
             if (criteria.getLibelleNouveauStatut() != null && !criteria.getLibelleNouveauStatut().isEmpty()) {
                 jpql.append("AND s.libelle = :libelleNouveau ");
-            }
-
-            // Filtres par score ancien statut
-            if (criteria.getExactScoreAncien() != null) {
-                jpql.append("AND sa.score = :exactScoreAncien ");
-            } else {
-                if (criteria.getMinScoreAncien() != null) {
-                    jpql.append("AND sa.score >= :minScoreAncien ");
-                }
-                if (criteria.getMaxScoreAncien() != null) {
-                    jpql.append("AND sa.score <= :maxScoreAncien ");
-                }
             }
 
             // Filtres par score nouveau statut
@@ -914,21 +959,8 @@ public class MouvementStatusService {
             if (criteria.getIdEntite() != null) {
                 query.setParameter("idEntite", criteria.getIdEntite());
             }
-            if (criteria.getLibelleAncienStatut() != null && !criteria.getLibelleAncienStatut().isEmpty()) {
-                query.setParameter("libelleAncien", criteria.getLibelleAncienStatut());
-            }
             if (criteria.getLibelleNouveauStatut() != null && !criteria.getLibelleNouveauStatut().isEmpty()) {
                 query.setParameter("libelleNouveau", criteria.getLibelleNouveauStatut());
-            }
-            if (criteria.getExactScoreAncien() != null) {
-                query.setParameter("exactScoreAncien", criteria.getExactScoreAncien());
-            } else {
-                if (criteria.getMinScoreAncien() != null) {
-                    query.setParameter("minScoreAncien", criteria.getMinScoreAncien());
-                }
-                if (criteria.getMaxScoreAncien() != null) {
-                    query.setParameter("maxScoreAncien", criteria.getMaxScoreAncien());
-                }
             }
             if (criteria.getExactScoreNouveau() != null) {
                 query.setParameter("exactScoreNouveau", criteria.getExactScoreNouveau());
@@ -958,6 +990,7 @@ public class MouvementStatusService {
 
     /**
      * RÃ©cupÃ¨re tous les mouvements pour une table (sans filtre d'entitÃ© spÃ©cifique)
+     * 
      * @param tableName Nom de la table
      * @return Liste de tous les mouvements
      */
@@ -968,12 +1001,14 @@ public class MouvementStatusService {
 
     /**
      * RÃ©cupÃ¨re les mouvements dans une pÃ©riode donnÃ©e
+     * 
      * @param tableName Nom de la table
      * @param dateDebut Date de dÃ©but
-     * @param dateFin Date de fin
+     * @param dateFin   Date de fin
      * @return Liste des mouvements dans la pÃ©riode
      */
-    public List<MouvementStatusDto> getMouvementsByPeriod(String tableName, LocalDateTime dateDebut, LocalDateTime dateFin) {
+    public List<MouvementStatusDto> getMouvementsByPeriod(String tableName, LocalDateTime dateDebut,
+            LocalDateTime dateFin) {
         MouvementStatusCriteria criteria = MouvementStatusCriteria.builder()
                 .dateDebut(dateDebut)
                 .dateFin(dateFin)
@@ -983,7 +1018,8 @@ public class MouvementStatusService {
 
     /**
      * RÃ©cupÃ¨re les mouvements vers un statut spÃ©cifique
-     * @param tableName Nom de la table
+     * 
+     * @param tableName            Nom de la table
      * @param libelleNouveauStatut LibellÃ© du nouveau statut
      * @return Liste des mouvements vers ce statut
      */
@@ -992,97 +1028,6 @@ public class MouvementStatusService {
                 .libelleNouveauStatut(libelleNouveauStatut)
                 .build();
         return getMouvementsByCriteria(tableName, criteria);
-    }
-
-    /**
-     * RÃ©cupÃ¨re les mouvements depuis un statut spÃ©cifique
-     * @param tableName Nom de la table
-     * @param libelleAncienStatut LibellÃ© de l'ancien statut
-     * @return Liste des mouvements depuis ce statut
-     */
-    public List<MouvementStatusDto> getMouvementsFromStatus(String tableName, String libelleAncienStatut) {
-        MouvementStatusCriteria criteria = MouvementStatusCriteria.builder()
-                .libelleAncienStatut(libelleAncienStatut)
-                .build();
-        return getMouvementsByCriteria(tableName, criteria);
-    }
-
-    /**
-     * RÃ©cupÃ¨re les mouvements avec amÃ©lioration de score (nouveau > ancien)
-     * @param tableName Nom de la table
-     * @return Liste des mouvements avec amÃ©lioration
-     */
-    public List<MouvementStatusDto> getMouvementsWithScoreImprovement(String tableName) {
-        String mouvementEntity = getMouvementEntityName(tableName);
-        String statusEntity = getStatusEntityName(tableName);
-        String idField = getIdFieldName(tableName);
-
-        EntityManager em = emf.createEntityManager();
-        try {
-            String jpql = "SELECT new com.mdgtaxi.dto.MouvementStatusDto(" +
-                    "m.id, " +
-                    "m." + idField + ", " +
-                    "'" + tableName + "', " +
-                    "sa.id, " +
-                    "sa.libelle, " +
-                    "sa.score, " +
-                    "sa.spanHtml, " +
-                    "s.id, " +
-                    "s.libelle, " +
-                    "s.score, " +
-                    "s.spanHtml, " +
-                    "m.dateMouvement, " +
-                    "m.observation) " +
-                    "FROM " + mouvementEntity + " m " +
-                    "INNER JOIN " + statusEntity + " s ON m.nouveauStatut.id = s.id " +
-                    "INNER JOIN " + statusEntity + " sa ON m.ancienStatut.id = sa.id " +
-                    "WHERE s.score > sa.score " +
-                    "ORDER BY m.dateMouvement DESC";
-
-            TypedQuery<MouvementStatusDto> query = em.createQuery(jpql, MouvementStatusDto.class);
-            return query.getResultList();
-        } finally {
-            em.close();
-        }
-    }
-
-    /**
-     * RÃ©cupÃ¨re les mouvements avec dÃ©gradation de score (nouveau < ancien)
-     * @param tableName Nom de la table
-     * @return Liste des mouvements avec dÃ©gradation
-     */
-    public List<MouvementStatusDto> getMouvementsWithScoreDegradation(String tableName) {
-        String mouvementEntity = getMouvementEntityName(tableName);
-        String statusEntity = getStatusEntityName(tableName);
-        String idField = getIdFieldName(tableName);
-
-        EntityManager em = emf.createEntityManager();
-        try {
-            String jpql = "SELECT new com.mdgtaxi.dto.MouvementStatusDto(" +
-                    "m.id, " +
-                    "m." + idField + ", " +
-                    "'" + tableName + "', " +
-                    "sa.id, " +
-                    "sa.libelle, " +
-                    "sa.score, " +
-                    "sa.spanHtml, " +
-                    "s.id, " +
-                    "s.libelle, " +
-                    "s.score, " +
-                    "s.spanHtml, " +
-                    "m.dateMouvement, " +
-                    "m.observation) " +
-                    "FROM " + mouvementEntity + " m " +
-                    "INNER JOIN " + statusEntity + " s ON m.nouveauStatut.id = s.id " +
-                    "INNER JOIN " + statusEntity + " sa ON m.ancienStatut.id = sa.id " +
-                    "WHERE s.score < sa.score " +
-                    "ORDER BY m.dateMouvement DESC";
-
-            TypedQuery<MouvementStatusDto> query = em.createQuery(jpql, MouvementStatusDto.class);
-            return query.getResultList();
-        } finally {
-            em.close();
-        }
     }
 
     // MÃ©thodes de mapping
@@ -1127,6 +1072,11 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -1134,6 +1084,62 @@ import java.util.Map;
 public class ReservationService {
 
     private final EntityManagerFactory emf = HibernateUtil.getEntityManagerFactory();
+
+    public List<TrajetReservation> searchReservationsWithFilters(Map<String, Object> filters) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<TrajetReservation> cq = cb.createQuery(TrajetReservation.class);
+            Root<TrajetReservation> root = cq.from(TrajetReservation.class);
+
+            List<Predicate> predicates = new ArrayList<>();
+
+            for (Map.Entry<String, Object> entry : filters.entrySet()) {
+                String key = entry.getKey();
+                Object value = entry.getValue();
+
+                if (value == null) continue;
+
+                switch (key) {
+                    case "numeroSiege":
+                        predicates.add(cb.equal(root.get("numeroSiege"), value));
+                        break;
+                    case "nomPassager":
+                        predicates.add(cb.equal(root.get("nomPassager"), value));
+                        break;
+                    case "dateReservation":
+                        predicates.add(cb.equal(root.get("dateReservation"), value));
+                        break;
+                    case "nombrePlaceReservation":
+                        predicates.add(cb.equal(root.get("nombrePlaceReservation"), value));
+                        break;
+                    case "client.id":
+                        predicates.add(cb.equal(root.get("client").get("id"), value));
+                        break;
+                    case "trajet.id":
+                        predicates.add(cb.equal(root.get("trajet").get("id"), value));
+                        break;
+                    case "reservationStatut.id":
+                        predicates.add(cb.equal(root.get("reservationStatut").get("id"), value));
+                        break;
+                    // Add more fields as needed
+                    default:
+                        // Ignore unknown filters
+                        break;
+                }
+            }
+
+            if (!predicates.isEmpty()) {
+                cq.where(cb.and(predicates.toArray(new Predicate[0])));
+            }
+
+            TypedQuery<TrajetReservation> query = em.createQuery(cq);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
 
     public TrajetReservation createReservation(TrajetReservation reservation) {
         EntityManager em = emf.createEntityManager();
@@ -1223,9 +1229,9 @@ public class ReservationService {
 
     /**
      * Obtient les statistiques de rÃ©servations par statut
-     * 
+     *
      * @return Map avec le libellÃ© du statut comme clÃ© et le nombre de rÃ©servations
-     *         comme valeur
+     * comme valeur
      */
     public Map<String, Long> getReservationStatsByStatus() {
         EntityManager em = emf.createEntityManager();
@@ -1246,7 +1252,7 @@ public class ReservationService {
 
     /**
      * Calcule le nombre total de places rÃ©servÃ©es pour un trajet
-     * 
+     *
      * @param trajetId ID du trajet
      * @return Nombre total de places rÃ©servÃ©es
      */
@@ -1266,7 +1272,7 @@ public class ReservationService {
 
     /**
      * Calcule le nombre de places restantes pour un trajet
-     * 
+     *
      * @param trajetId ID du trajet
      * @return Nombre de places restantes
      */
@@ -1289,7 +1295,7 @@ public class ReservationService {
 
     /**
      * Calcule le total de places prises pour tous les trajets
-     * 
+     *
      * @return Nombre total de places rÃ©servÃ©es
      */
     public int getTotalPlacesPrises() {
@@ -1307,7 +1313,7 @@ public class ReservationService {
 
     /**
      * Calcule le total de places restantes pour tous les trajets
-     * 
+     *
      * @return Nombre total de places restantes
      */
     public int getTotalPlacesRestantes() {
@@ -1517,7 +1523,13 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class TrajetService {
 
@@ -1566,6 +1578,63 @@ public class TrajetService {
                     "SELECT t FROM Trajet t WHERE t.ligne.id = :ligneId ORDER BY t.datetimeDepart DESC",
                     Trajet.class);
             query.setParameter("ligneId", ligneId);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+    public List<Trajet> searchTrajetsWithFilters(Map<String, Object> filters) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<Trajet> cq = cb.createQuery(Trajet.class);
+            Root<Trajet> root = cq.from(Trajet.class);
+
+            List<Predicate> predicates = new ArrayList<>();
+
+            for (Map.Entry<String, Object> entry : filters.entrySet()) {
+                String key = entry.getKey();
+                Object value = entry.getValue();
+
+                if (value == null) continue;
+
+                switch (key) {
+                    case "nombrePassager":
+                        predicates.add(cb.equal(root.get("nombrePassager"), value));
+                        break;
+                    case "datetimeDepart":
+                        predicates.add(cb.equal(root.get("datetimeDepart"), value));
+                        break;
+                    case "datetimeArrivee":
+                        predicates.add(cb.equal(root.get("datetimeArrivee"), value));
+                        break;
+                    case "fraisUnitaire":
+                        predicates.add(cb.equal(root.get("fraisUnitaire"), value));
+                        break;
+                    case "ligne.id":
+                        predicates.add(cb.equal(root.get("ligne").get("id"), value));
+                        break;
+                    case "chauffeur.id":
+                        predicates.add(cb.equal(root.get("chauffeur").get("id"), value));
+                        break;
+                    case "vehicule.id":
+                        predicates.add(cb.equal(root.get("vehicule").get("id"), value));
+                        break;
+                    case "trajetStatut.id":
+                        predicates.add(cb.equal(root.get("trajetStatut").get("id"), value));
+                        break;
+                    // Add more fields as needed
+                    default:
+                        // Ignore unknown filters
+                        break;
+                }
+            }
+
+            if (!predicates.isEmpty()) {
+                cq.where(cb.and(predicates.toArray(new Predicate[0])));
+            }
+
+            TypedQuery<Trajet> query = em.createQuery(cq);
             return query.getResultList();
         } finally {
             em.close();
@@ -1978,14 +2047,43 @@ public class VehiculeService {
             em.close();
         }
     }
+}
+package com.mdgtaxi.service;
 
-    // Similar multi-filter for VmVehiculeDetail (since it's a view, we can filter on its fields)
-    public List<VmVehiculeDetail> searchVehiculeDetailsWithFilters(Map<String, Object> filters) {
+import com.mdgtaxi.entity.Ville;
+import com.mdgtaxi.util.HibernateUtil;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+public class VilleService {
+
+    private final EntityManagerFactory emf = HibernateUtil.getEntityManagerFactory();
+
+    public List<Ville> getAllVilles() {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<Ville> query = em.createQuery("SELECT v FROM Ville v", Ville.class);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    public List<Ville> searchVillesWithFilters(Map<String, Object> filters) {
         EntityManager em = emf.createEntityManager();
         try {
             CriteriaBuilder cb = em.getCriteriaBuilder();
-            CriteriaQuery<VmVehiculeDetail> cq = cb.createQuery(VmVehiculeDetail.class);
-            Root<VmVehiculeDetail> root = cq.from(VmVehiculeDetail.class);
+            CriteriaQuery<Ville> cq = cb.createQuery(Ville.class);
+            Root<Ville> root = cq.from(Ville.class);
 
             List<Predicate> predicates = new ArrayList<>();
 
@@ -1996,35 +2094,15 @@ public class VehiculeService {
                 if (value == null) continue;
 
                 switch (key) {
-                    case "immatriculation":
-                        predicates.add(cb.equal(root.get("immatriculation"), value));
+                    case "nom":
+                        predicates.add(cb.equal(root.get("nom"), value));
                         break;
-                    case "marque":
-                        predicates.add(cb.equal(root.get("marque"), value));
+                    case "region.id":
+                        predicates.add(cb.equal(root.get("region").get("id"), value));
                         break;
-                    case "modele":
-                        predicates.add(cb.equal(root.get("modele"), value));
-                        break;
-                    case "maximumPassager":
-                        predicates.add(cb.equal(root.get("maximumPassager"), value));
-                        break;
-                    case "capaciteCarburant":
-                        predicates.add(cb.equal(root.get("capaciteCarburant"), value));
-                        break;
-                    case "depenseCarburant100km":
-                        predicates.add(cb.equal(root.get("depenseCarburant100km"), value));
-                        break;
-                    case "libelleType":
-                        predicates.add(cb.equal(root.get("libelleType"), value));
-                        break;
-                    case "typeCarburant":
-                        predicates.add(cb.equal(root.get("typeCarburant"), value));
-                        break;
-                    case "libelleStatut":
-                        predicates.add(cb.equal(root.get("libelleStatut"), value));
-                        break;
-                    // Add more as needed
+                    // Add more fields as needed
                     default:
+                        // Ignore unknown filters
                         break;
                 }
             }
@@ -2033,31 +2111,7 @@ public class VehiculeService {
                 cq.where(cb.and(predicates.toArray(new Predicate[0])));
             }
 
-            TypedQuery<VmVehiculeDetail> query = em.createQuery(cq);
-            return query.getResultList();
-        } finally {
-            em.close();
-        }
-    }
-}
-package com.mdgtaxi.service;
-
-import com.mdgtaxi.entity.Ville;
-import com.mdgtaxi.util.HibernateUtil;
-
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.TypedQuery;
-import java.util.List;
-
-public class VilleService {
-
-    private final EntityManagerFactory emf = HibernateUtil.getEntityManagerFactory();
-
-    public List<Ville> getAllVilles() {
-        EntityManager em = emf.createEntityManager();
-        try {
-            TypedQuery<Ville> query = em.createQuery("SELECT v FROM Ville v", Ville.class);
+            TypedQuery<Ville> query = em.createQuery(cq);
             return query.getResultList();
         } finally {
             em.close();

@@ -1,0 +1,558 @@
+﻿package com.mdgtaxi.servlet;
+
+import com.mdgtaxi.entity.Chauffeur;
+import com.mdgtaxi.service.ChauffeurService;
+import com.mdgtaxi.view.VmChauffeurActivite;
+import com.mdgtaxi.view.VmChauffeurDetail;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+import java.io.IOException;
+
+@WebServlet("/chauffeures/detail")
+public class ChauffeurDetailServlet extends HttpServlet {
+
+    private final ChauffeurService chauffeurService = new ChauffeurService();
+
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        Long id = Long.parseLong(req.getParameter("id"));
+        Chauffeur chauffeur = chauffeurService.getChauffeurById(id);
+
+        req.setAttribute("chauffeur", chauffeur);
+
+        req.getRequestDispatcher("/chauffeur-detail.jsp").forward(req, resp);
+    }
+}
+package com.mdgtaxi.servlet;
+
+import com.mdgtaxi.entity.Chauffeur;
+import com.mdgtaxi.service.ChauffeurService;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+import java.io.IOException;
+import java.time.LocalDate;
+import java.util.List;
+
+@WebServlet("/chauffeures")
+public class ChauffeurServlet extends HttpServlet {
+
+    private final ChauffeurService chauffeurService = new ChauffeurService();
+
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String action = req.getParameter("action");
+
+        if ("edit".equals(action)) {
+            Long id = Long.valueOf(req.getParameter("id"));
+            Chauffeur chauffeur = chauffeurService.getChauffeurById(id);
+            req.setAttribute("chauffeur", chauffeur);
+        }
+
+        List<Chauffeur> chauffeurs = chauffeurService.getAllChauffeurs();
+        req.setAttribute("chauffeurs", chauffeurs);
+
+        req.getRequestDispatcher("/chauffeures.jsp").forward(req, resp);
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String idStr = req.getParameter("id");
+        String nom = req.getParameter("nom");
+        String prenom = req.getParameter("prenom");
+        LocalDate dateNaissance = LocalDate.parse(req.getParameter("dateNaissance"));
+        String numeroPermis = req.getParameter("numeroPermis");
+
+        Chauffeur chauffeur = new Chauffeur();
+        if (idStr != null && !idStr.isEmpty()) {
+            chauffeur = chauffeurService.getChauffeurById(Long.valueOf(idStr));
+        }
+
+        chauffeur.setNom(nom);
+        chauffeur.setPrenom(prenom);
+        chauffeur.setDateNaissance(dateNaissance);
+        chauffeur.setNumeroPermis(numeroPermis);
+
+        if (chauffeur.getId() == null) {
+            chauffeurService.createChauffeur(chauffeur);
+        } else {
+            chauffeurService.updateChauffeur(chauffeur);
+        }
+
+        resp.sendRedirect(req.getContextPath() + "/chauffeures");
+    }
+}
+package com.mdgtaxi.servlet;
+
+import com.mdgtaxi.entity.Ligne;
+import com.mdgtaxi.entity.Trajet;
+import com.mdgtaxi.service.LigneService;
+import com.mdgtaxi.service.TrajetService;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+import java.io.IOException;
+import java.util.List;
+
+@WebServlet("/lignes/detail")
+public class LigneDetailServlet extends HttpServlet {
+
+    private final LigneService ligneService = new LigneService();
+    private final TrajetService trajetService = new TrajetService();
+
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        Long id = Long.valueOf(req.getParameter("id"));
+        Ligne ligne = ligneService.getLigneById(id);
+        List<Trajet> trajets = trajetService.getTrajetsByLigneId(id);
+
+        req.setAttribute("ligne", ligne);
+        req.setAttribute("trajets", trajets);
+
+        req.getRequestDispatcher("/ligne-detail.jsp").forward(req, resp);
+    }
+}
+package com.mdgtaxi.servlet;
+
+import com.mdgtaxi.entity.Ligne;
+import com.mdgtaxi.entity.Ville;
+import com.mdgtaxi.service.LigneService;
+import com.mdgtaxi.service.VilleService;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.List;
+
+@WebServlet("/lignes")
+public class LigneServlet extends HttpServlet {
+
+    private final LigneService ligneService = new LigneService();
+    private final VilleService villeService = new VilleService();
+
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String action = req.getParameter("action");
+
+        if ("edit".equals(action)) {
+            Long id = Long.valueOf(req.getParameter("id"));
+            Ligne ligne = ligneService.getLigneById(id);
+            req.setAttribute("ligne", ligne);
+        }
+
+        List<Ligne> lignes = ligneService.getAllLignes();
+        List<Ville> villes = villeService.getAllVilles();
+
+        req.setAttribute("lignes", lignes);
+        req.setAttribute("villes", villes);
+
+        req.getRequestDispatcher("/lignes.jsp").forward(req, resp);
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String idStr = req.getParameter("id");
+        Long idVilleDepart = Long.valueOf(req.getParameter("idVilleDepart"));
+        Long idVilleArrivee = Long.valueOf(req.getParameter("idVilleArrivee"));
+        BigDecimal distanceKm = new BigDecimal(req.getParameter("distanceKm"));
+
+        Ligne ligne = new Ligne();
+        if (idStr != null && !idStr.isEmpty()) {
+            ligne = ligneService.getLigneById(Long.valueOf(idStr));
+        }
+
+        Ville villeDepart = new Ville();
+        villeDepart.setId(idVilleDepart);
+        ligne.setVilleDepart(villeDepart);
+
+        Ville villeArrivee = new Ville();
+        villeArrivee.setId(idVilleArrivee);
+        ligne.setVilleArrivee(villeArrivee);
+
+        ligne.setDistanceKm(distanceKm);
+
+        if (ligne.getId() == null) {
+            ligneService.createLigne(ligne);
+        } else {
+            ligneService.updateLigne(ligne);
+        }
+
+        resp.sendRedirect(req.getContextPath() + "/lignes");
+    }
+}
+package com.mdgtaxi.servlet;
+
+import com.mdgtaxi.dto.TypeObjectDTO;
+import com.mdgtaxi.entity.*;
+import com.mdgtaxi.service.ClientService;
+import com.mdgtaxi.service.ReservationService;
+import com.mdgtaxi.service.TrajetService;
+import com.mdgtaxi.service.TypeObjectService;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+
+@WebServlet("/reservations")
+public class ReservationServlet extends HttpServlet {
+
+    private final ReservationService reservationService = new ReservationService();
+    private final TrajetService trajetService = new TrajetService();
+    private final ClientService clientService = new ClientService();
+    private final TypeObjectService typeObjectService = new TypeObjectService();
+
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String action = req.getParameter("action");
+
+        if ("edit".equals(action)) {
+            Long id = Long.valueOf(req.getParameter("id"));
+            TrajetReservation reservation = reservationService.getReservationById(id);
+            req.setAttribute("reservation", reservation);
+        }
+
+        List<TrajetReservation> reservations = reservationService.getAllReservations();
+        List<Trajet> trajets = trajetService.getAllTrajets();
+        List<Client> clients = clientService.getAllClients();
+        List<TypeObjectDTO> reservationStatuts = typeObjectService.findAllTypeObject("Reservation_Statut");
+        Integer totalPlacesPrises = reservationService.getTotalPlacesPrises();
+        Integer totalPlacesRestantes = reservationService.getTotalPlacesRestantes();
+
+        req.setAttribute("reservations", reservations);
+        req.setAttribute("trajets", trajets);
+        req.setAttribute("clients", clients);
+        req.setAttribute("reservationStatuts", reservationStatuts);
+        req.setAttribute("totalPlacesPrises", totalPlacesPrises);
+        req.setAttribute("totalPlacesRestantes", totalPlacesRestantes);
+
+        req.getRequestDispatcher("/reservations.jsp").forward(req, resp);
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String idStr = req.getParameter("id");
+        Long idTrajet = Long.valueOf(req.getParameter("idTrajet"));
+        Long idClient = Long.valueOf(req.getParameter("idClient"));
+        String nomPassager = req.getParameter("nomPassager");
+        String numeroSiege = req.getParameter("numeroSiege");
+        Long idReservationStatut = Long.valueOf(req.getParameter("idReservationStatut"));
+        Integer nombrePlaceReservation = Integer.valueOf(req.getParameter("nombrePlaceReservation"));
+
+        TrajetReservation reservation = new TrajetReservation();
+        if (idStr != null && !idStr.isEmpty()) {
+            reservation = reservationService.getReservationById(Long.valueOf(idStr));
+        }
+
+        Trajet trajet = new Trajet();
+        trajet.setId(idTrajet);
+        reservation.setTrajet(trajet);
+
+        Client client = new Client();
+        client.setId(idClient);
+        reservation.setClient(client);
+
+        reservation.setNomPassager(nomPassager);
+        reservation.setNumeroSiege(numeroSiege);
+
+        ReservationStatut statut = new ReservationStatut();
+        statut.setId(idReservationStatut);
+        reservation.setReservationStatut(statut);
+
+        reservation.setNombrePlaceReservation(nombrePlaceReservation);
+
+        try {
+            if (reservation.getId() == null) {
+                reservationService.createReservation(reservation);
+            } else {
+                reservationService.updateReservation(reservation);
+            }
+            resp.sendRedirect(req.getContextPath() + "/reservations");
+        } catch (Exception e) {
+            req.setAttribute("error", "Erreur lors de l'enregistrement: " + e.getMessage());
+            doGet(req, resp);  // Re-forward to show error
+        }
+    }
+}
+package com.mdgtaxi.servlet;
+
+import com.mdgtaxi.dto.TypeObjectDTO;
+import com.mdgtaxi.entity.Client;
+import com.mdgtaxi.entity.Trajet;
+import com.mdgtaxi.entity.TrajetReservation;
+import com.mdgtaxi.service.ClientService;
+import com.mdgtaxi.service.ReservationService;
+import com.mdgtaxi.service.TrajetService;
+import com.mdgtaxi.service.TypeObjectService;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+import java.io.IOException;
+import java.util.List;
+
+@WebServlet("/trajets/detail")
+public class TrajetDetailServlet extends HttpServlet {
+
+    private final TrajetService trajetService = new TrajetService();
+    private final ReservationService reservationService = new ReservationService();
+    private final ClientService clientService = new ClientService();
+    private final TypeObjectService typeObjectService = new TypeObjectService();
+
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        Long id = Long.valueOf(req.getParameter("id"));
+        Trajet trajet = trajetService.getTrajetById(id);
+        List<TrajetReservation> reservations = reservationService.getReservationsByTrajetId(id);
+        int placesPrises = reservationService.getPlacesPrisesForTrajet(id);
+        int placesRestantes = trajet.getVehicule().getMaximumPassager() - placesPrises;
+        List<Client> clients = clientService.getAllClients();  // If needed for form, etc.
+        List<TypeObjectDTO> reservationStatuts = typeObjectService.findAllTypeObject("Reservation_Statut");
+
+        req.setAttribute("trajet", trajet);
+        req.setAttribute("placesPrises", placesPrises);
+        req.setAttribute("placesRestantes", placesRestantes);
+        req.setAttribute("reservations", reservations);
+        req.setAttribute("clients", clients);
+        req.setAttribute("reservationStatuts", reservationStatuts);
+
+        req.getRequestDispatcher("/trajet-detail.jsp").forward(req, resp);
+    }
+}
+package com.mdgtaxi.servlet;
+
+import com.mdgtaxi.dto.TypeObjectDTO;
+import com.mdgtaxi.entity.*;
+import com.mdgtaxi.service.*;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
+
+@WebServlet("/trajets")
+public class TrajetServlet extends HttpServlet {
+
+    private final TrajetService trajetService = new TrajetService();
+    private final LigneService ligneService = new LigneService();
+    private final ChauffeurService chauffeurService = new ChauffeurService();
+    private final VehiculeService vehiculeService = new VehiculeService();
+    private final TypeObjectService typeObjectService = new TypeObjectService();
+
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String action = req.getParameter("action");
+
+        if ("edit".equals(action)) {
+            Long id = Long.valueOf(req.getParameter("id"));
+            Trajet trajet = trajetService.getTrajetById(id);
+            req.setAttribute("trajet", trajet);
+        }
+
+        List<Trajet> trajets = trajetService.getAllTrajets();
+        List<Ligne> lignes = ligneService.getAllLignes();
+        List<Chauffeur> chauffeurs = chauffeurService.getAllChauffeurs();
+        List<Vehicule> vehicules = vehiculeService.getAllVehicules();
+        List<TypeObjectDTO> trajetStatuts = typeObjectService.findAllTypeObject("Trajet_Statut");
+
+        req.setAttribute("trajets", trajets);
+        req.setAttribute("lignes", lignes);
+        req.setAttribute("chauffeurs", chauffeurs);
+        req.setAttribute("vehicules", vehicules);
+        req.setAttribute("trajetStatuts", trajetStatuts);
+
+        req.getRequestDispatcher("/trajets.jsp").forward(req, resp);
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String idStr = req.getParameter("id");
+        Long idLigne = Long.valueOf(req.getParameter("idLigne"));
+        Long idChauffeur = Long.valueOf(req.getParameter("idChauffeur"));
+        Long idVehicule = Long.valueOf(req.getParameter("idVehicule"));
+        LocalDateTime datetimeDepart = LocalDateTime.parse(req.getParameter("datetimeDepart"));
+        LocalDateTime datetimeArrivee = req.getParameter("datetimeArrivee") != null && !req.getParameter("datetimeArrivee").isEmpty()
+                ? LocalDateTime.parse(req.getParameter("datetimeArrivee")) : null;
+        Long idTrajetStatut = Long.valueOf(req.getParameter("idTrajetStatut"));
+        BigDecimal fraisUnitaire = new BigDecimal(req.getParameter("fraisUnitaire"));
+
+        Trajet trajet = new Trajet();
+        if (idStr != null && !idStr.isEmpty()) {
+            trajet = trajetService.getTrajetById(Long.valueOf(idStr));
+        }
+
+        Ligne ligne = new Ligne();
+        ligne.setId(idLigne);
+        trajet.setLigne(ligne);
+
+        Chauffeur chauffeur = new Chauffeur();
+        chauffeur.setId(idChauffeur);
+        trajet.setChauffeur(chauffeur);
+
+        Vehicule vehicule = new Vehicule();
+        vehicule.setId(idVehicule);
+        trajet.setVehicule(vehicule);
+
+        trajet.setDatetimeDepart(datetimeDepart);
+        trajet.setDatetimeArrivee(datetimeArrivee);
+
+        TrajetStatut statut = new TrajetStatut();
+        statut.setId(idTrajetStatut);
+        trajet.setTrajetStatut(statut);
+
+        trajet.setFraisUnitaire(fraisUnitaire);
+
+        if (trajet.getId() == null) {
+            trajetService.createTrajet(trajet);
+        } else {
+            trajetService.updateTrajet(trajet);
+        }
+
+        resp.sendRedirect(req.getContextPath() + "/trajets");
+    }
+}
+package com.mdgtaxi.servlet;
+
+import com.mdgtaxi.entity.VehiculeEntretien;
+import com.mdgtaxi.service.VehiculeService;
+import com.mdgtaxi.view.VmVehiculeCoutEntretien;
+import com.mdgtaxi.view.VmVehiculeDetail;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+import java.io.IOException;
+import java.util.List;
+
+@WebServlet("/vehicules/detail")
+public class VehiculeDetailServlet extends HttpServlet {
+
+    private final VehiculeService vehiculeService = new VehiculeService();
+
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        Long id = Long.parseLong(req.getParameter("id"));
+        VmVehiculeDetail detail = vehiculeService.getVehiculeDetail(id);
+        VmVehiculeCoutEntretien cout = vehiculeService.getCoutEntretien(id);
+        List<VehiculeEntretien> entretiens = vehiculeService.getEntretiensByVehicule(id);
+
+        req.setAttribute("detail", detail);
+        req.setAttribute("cout", cout);
+        req.setAttribute("entretiens", entretiens);
+
+        req.getRequestDispatcher("/vehicule-detail.jsp").forward(req, resp);
+    }
+}
+package com.mdgtaxi.servlet;
+
+import com.mdgtaxi.dto.TypeObjectDTO;
+import com.mdgtaxi.entity.CarburantType;
+import com.mdgtaxi.entity.Vehicule;
+import com.mdgtaxi.entity.VehiculeType;
+import com.mdgtaxi.service.TypeObjectService;
+import com.mdgtaxi.service.VehiculeService;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.List;
+
+@WebServlet("/vehicules")
+public class VehiculeServlet extends HttpServlet {
+
+    private final VehiculeService vehiculeService = new VehiculeService();
+    private final TypeObjectService typeObjectService = new TypeObjectService();
+
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String action = req.getParameter("action");
+
+        if ("edit".equals(action)) {
+            Long id = Long.valueOf(req.getParameter("id"));
+            Vehicule vehicule = vehiculeService.getVehiculeById(id);
+            req.setAttribute("vehicule", vehicule);
+        }
+
+        List<Vehicule> vehicules = vehiculeService.getAllVehicules();
+        List<TypeObjectDTO> vehiculeTypes = typeObjectService.findAllTypeObject("Vehicule_Type");
+        List<TypeObjectDTO> carburantTypes = typeObjectService.findAllTypeObject("Carburant_Type");
+
+        req.setAttribute("vehicules", vehicules);
+        req.setAttribute("vehiculeTypes", vehiculeTypes);
+        req.setAttribute("carburantTypes", carburantTypes);
+
+        req.getRequestDispatcher("/vehicules.jsp").forward(req, resp);
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String idStr = req.getParameter("id");
+        String marque = req.getParameter("marque");
+        String modele = req.getParameter("modele");
+        String immatriculation = req.getParameter("immatriculation");
+        Integer maximumPassager = Integer.valueOf(req.getParameter("maximumPassager"));
+        BigDecimal capaciteCarburant = new BigDecimal(req.getParameter("capaciteCarburant"));
+        BigDecimal depenseCarburant100km = new BigDecimal(req.getParameter("depenseCarburant100km"));
+        Long idType = Long.valueOf(req.getParameter("idType"));
+        Long idTypeCarburant = Long.valueOf(req.getParameter("idTypeCarburant"));
+
+        Vehicule vehicule = new Vehicule();
+        if (idStr != null && !idStr.isEmpty()) {
+            vehicule = vehiculeService.getVehiculeById(Long.valueOf(idStr));
+        }
+
+        vehicule.setMarque(marque);
+        vehicule.setModele(modele);
+        vehicule.setImmatriculation(immatriculation);
+        vehicule.setMaximumPassager(maximumPassager);
+        vehicule.setCapaciteCarburant(capaciteCarburant);
+        vehicule.setDepenseCarburant100km(depenseCarburant100km);
+
+        VehiculeType type = new VehiculeType();
+        type.setId(idType);
+        vehicule.setVehiculeType(type);
+
+        CarburantType carburantType = new CarburantType();
+        carburantType.setId(idTypeCarburant);
+        vehicule.setCarburantType(carburantType);
+
+        if (vehicule.getId() == null) {
+            vehiculeService.createVehicule(vehicule);
+        } else {
+            vehiculeService.updateVehicule(vehicule);
+        }
+
+        resp.sendRedirect(req.getContextPath() + "/vehicules");
+    }
+}

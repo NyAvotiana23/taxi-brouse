@@ -8,6 +8,11 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +20,62 @@ import java.util.Map;
 public class ReservationService {
 
     private final EntityManagerFactory emf = HibernateUtil.getEntityManagerFactory();
+
+    public List<TrajetReservation> searchReservationsWithFilters(Map<String, Object> filters) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<TrajetReservation> cq = cb.createQuery(TrajetReservation.class);
+            Root<TrajetReservation> root = cq.from(TrajetReservation.class);
+
+            List<Predicate> predicates = new ArrayList<>();
+
+            for (Map.Entry<String, Object> entry : filters.entrySet()) {
+                String key = entry.getKey();
+                Object value = entry.getValue();
+
+                if (value == null) continue;
+
+                switch (key) {
+                    case "numeroSiege":
+                        predicates.add(cb.equal(root.get("numeroSiege"), value));
+                        break;
+                    case "nomPassager":
+                        predicates.add(cb.equal(root.get("nomPassager"), value));
+                        break;
+                    case "dateReservation":
+                        predicates.add(cb.equal(root.get("dateReservation"), value));
+                        break;
+                    case "nombrePlaceReservation":
+                        predicates.add(cb.equal(root.get("nombrePlaceReservation"), value));
+                        break;
+                    case "client.id":
+                        predicates.add(cb.equal(root.get("client").get("id"), value));
+                        break;
+                    case "trajet.id":
+                        predicates.add(cb.equal(root.get("trajet").get("id"), value));
+                        break;
+                    case "reservationStatut.id":
+                        predicates.add(cb.equal(root.get("reservationStatut").get("id"), value));
+                        break;
+                    // Add more fields as needed
+                    default:
+                        // Ignore unknown filters
+                        break;
+                }
+            }
+
+            if (!predicates.isEmpty()) {
+                cq.where(cb.and(predicates.toArray(new Predicate[0])));
+            }
+
+            TypedQuery<TrajetReservation> query = em.createQuery(cq);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
 
     public TrajetReservation createReservation(TrajetReservation reservation) {
         EntityManager em = emf.createEntityManager();
@@ -104,9 +165,9 @@ public class ReservationService {
 
     /**
      * Obtient les statistiques de réservations par statut
-     * 
+     *
      * @return Map avec le libellé du statut comme clé et le nombre de réservations
-     *         comme valeur
+     * comme valeur
      */
     public Map<String, Long> getReservationStatsByStatus() {
         EntityManager em = emf.createEntityManager();
@@ -127,7 +188,7 @@ public class ReservationService {
 
     /**
      * Calcule le nombre total de places réservées pour un trajet
-     * 
+     *
      * @param trajetId ID du trajet
      * @return Nombre total de places réservées
      */
@@ -147,7 +208,7 @@ public class ReservationService {
 
     /**
      * Calcule le nombre de places restantes pour un trajet
-     * 
+     *
      * @param trajetId ID du trajet
      * @return Nombre de places restantes
      */
@@ -170,7 +231,7 @@ public class ReservationService {
 
     /**
      * Calcule le total de places prises pour tous les trajets
-     * 
+     *
      * @return Nombre total de places réservées
      */
     public int getTotalPlacesPrises() {
@@ -188,7 +249,7 @@ public class ReservationService {
 
     /**
      * Calcule le total de places restantes pour tous les trajets
-     * 
+     *
      * @return Nombre total de places restantes
      */
     public int getTotalPlacesRestantes() {

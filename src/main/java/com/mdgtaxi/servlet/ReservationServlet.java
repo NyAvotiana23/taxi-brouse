@@ -2,7 +2,10 @@ package com.mdgtaxi.servlet;
 
 import com.mdgtaxi.dto.TypeObjectDTO;
 import com.mdgtaxi.entity.*;
-import com.mdgtaxi.service.*;
+import com.mdgtaxi.service.ClientService;
+import com.mdgtaxi.service.ReservationService;
+import com.mdgtaxi.service.TrajetService;
+import com.mdgtaxi.service.TypeObjectService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -10,7 +13,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -36,17 +38,13 @@ public class ReservationServlet extends HttpServlet {
         List<Trajet> trajets = trajetService.getAllTrajets();
         List<Client> clients = clientService.getAllClients();
         List<TypeObjectDTO> reservationStatuts = typeObjectService.findAllTypeObject("Reservation_Statut");
-
-        // Calculer les statistiques
-        Map<String, Long> statsByStatus = reservationService.getReservationStatsByStatus();
-        int totalPlacesPrises = reservationService.getTotalPlacesPrises();
-        int totalPlacesRestantes = reservationService.getTotalPlacesRestantes();
+        Integer totalPlacesPrises = reservationService.getTotalPlacesPrises();
+        Integer totalPlacesRestantes = reservationService.getTotalPlacesRestantes();
 
         req.setAttribute("reservations", reservations);
         req.setAttribute("trajets", trajets);
         req.setAttribute("clients", clients);
         req.setAttribute("reservationStatuts", reservationStatuts);
-        req.setAttribute("statsByStatus", statsByStatus);
         req.setAttribute("totalPlacesPrises", totalPlacesPrises);
         req.setAttribute("totalPlacesRestantes", totalPlacesRestantes);
 
@@ -58,54 +56,10 @@ public class ReservationServlet extends HttpServlet {
         String idStr = req.getParameter("id");
         Long idTrajet = Long.valueOf(req.getParameter("idTrajet"));
         Long idClient = Long.valueOf(req.getParameter("idClient"));
-
-        // Récupérer dynamiquement le statut "En attente" au lieu d'utiliser un ID
-        // hardcodé
-        TypeObjectDTO statutEnAttente = typeObjectService.findTypeObjectByLibelle("Reservation_Statut", "En attente");
-        Long idReservationStatut = (statutEnAttente != null) ? statutEnAttente.getId() : 3L;
-
         String nomPassager = req.getParameter("nomPassager");
         String numeroSiege = req.getParameter("numeroSiege");
+        Long idReservationStatut = Long.valueOf(req.getParameter("idReservationStatut"));
         Integer nombrePlaceReservation = Integer.valueOf(req.getParameter("nombrePlaceReservation"));
-        String returnToTrajet = req.getParameter("returnToTrajet");
-
-        // Validation : vérifier que les places demandées ne dépassent pas les places
-        // disponibles
-        int placesRestantes = reservationService.getPlacesRestantesForTrajet(idTrajet);
-
-        // Si on modifie une réservation existante, il faut ajouter ses places actuelles
-        // aux places restantes
-        if (idStr != null && !idStr.isEmpty()) {
-            TrajetReservation existingReservation = reservationService.getReservationById(Long.valueOf(idStr));
-            if (existingReservation != null) {
-                placesRestantes += existingReservation.getNombrePlaceReservation();
-            }
-        }
-
-        if (nombrePlaceReservation > placesRestantes) {
-            // Rediriger avec un message d'erreur
-            req.setAttribute("error", "Nombre de places insuffisant. Places restantes : " + placesRestantes);
-
-            // Recharger les données pour afficher le formulaire
-            List<TrajetReservation> reservations = reservationService.getAllReservations();
-            List<Trajet> trajets = trajetService.getAllTrajets();
-            List<Client> clients = clientService.getAllClients();
-            List<TypeObjectDTO> reservationStatuts = typeObjectService.findAllTypeObject("Reservation_Statut");
-            Map<String, Long> statsByStatus = reservationService.getReservationStatsByStatus();
-            int totalPlacesPrises = reservationService.getTotalPlacesPrises();
-            int totalPlacesRestantes = reservationService.getTotalPlacesRestantes();
-
-            req.setAttribute("reservations", reservations);
-            req.setAttribute("trajets", trajets);
-            req.setAttribute("clients", clients);
-            req.setAttribute("reservationStatuts", reservationStatuts);
-            req.setAttribute("statsByStatus", statsByStatus);
-            req.setAttribute("totalPlacesPrises", totalPlacesPrises);
-            req.setAttribute("totalPlacesRestantes", totalPlacesRestantes);
-
-            req.getRequestDispatcher("/reservations.jsp").forward(req, resp);
-            return;
-        }
 
         TrajetReservation reservation = new TrajetReservation();
         if (idStr != null && !idStr.isEmpty()) {
@@ -120,26 +74,25 @@ public class ReservationServlet extends HttpServlet {
         client.setId(idClient);
         reservation.setClient(client);
 
+        reservation.setNomPassager(nomPassager);
+        reservation.setNumeroSiege(numeroSiege);
+
         ReservationStatut statut = new ReservationStatut();
         statut.setId(idReservationStatut);
         reservation.setReservationStatut(statut);
 
-        reservation.setNomPassager(nomPassager);
-        reservation.setNumeroSiege(numeroSiege);
         reservation.setNombrePlaceReservation(nombrePlaceReservation);
-        reservation.setDateReservation(LocalDateTime.now()); // Or parse from input if needed
 
-        if (reservation.getId() == null) {
-            reservationService.createReservation(reservation);
-        } else {
-            reservationService.updateReservation(reservation);
-        }
-
-        // Redirect back to trajet detail if parameter is present
-        if (returnToTrajet != null && !returnToTrajet.isEmpty()) {
-            resp.sendRedirect(req.getContextPath() + "/trajets/detail?id=" + returnToTrajet);
-        } else {
+        try {
+            if (reservation.getId() == null) {
+                reservationService.createReservation(reservation);
+            } else {
+                reservationService.updateReservation(reservation);
+            }
             resp.sendRedirect(req.getContextPath() + "/reservations");
+        } catch (Exception e) {
+            req.setAttribute("error", "Erreur lors de l'enregistrement: " + e.getMessage());
+            doGet(req, resp);  // Re-forward to show error
         }
     }
 }

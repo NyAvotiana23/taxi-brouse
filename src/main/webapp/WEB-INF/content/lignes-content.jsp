@@ -17,9 +17,9 @@
                 <div class="card-header py-3">
                     <h6 class="m-0 font-weight-bold text-primary">
                         <% if (ligne != null) { %>
-                            Modifier Ligne
+                        Modifier Ligne
                         <% } else { %>
-                            Nouvelle Ligne
+                        Nouvelle Ligne
                         <% } %>
                     </h6>
                 </div>
@@ -33,11 +33,11 @@
                                 <option value="">Choisir...</option>
                                 <% if (villes != null) {
                                     for (Ville v : villes) { %>
-                                        <option value="<%= v.getId() %>" 
-                                            <%= (ligne != null && ligne.getVilleDepart() != null && ligne.getVilleDepart().getId().equals(v.getId())) ? "selected" : "" %>>
-                                            <%= v.getNom() %>
-                                        </option>
-                                    <% }
+                                <option value="<%= v.getId() %>"
+                                        <%= (ligne != null && ligne.getVilleDepart() != null && ligne.getVilleDepart().getId().equals(v.getId())) ? "selected" : "" %>>
+                                    <%= v.getNom() %>
+                                </option>
+                                <% }
                                 } %>
                             </select>
                         </div>
@@ -47,18 +47,18 @@
                                 <option value="">Choisir...</option>
                                 <% if (villes != null) {
                                     for (Ville v : villes) { %>
-                                        <option value="<%= v.getId() %>" 
-                                            <%= (ligne != null && ligne.getVilleArrivee() != null && ligne.getVilleArrivee().getId().equals(v.getId())) ? "selected" : "" %>>
-                                            <%= v.getNom() %>
-                                        </option>
-                                    <% }
+                                <option value="<%= v.getId() %>"
+                                        <%= (ligne != null && ligne.getVilleArrivee() != null && ligne.getVilleArrivee().getId().equals(v.getId())) ? "selected" : "" %>>
+                                    <%= v.getNom() %>
+                                </option>
+                                <% }
                                 } %>
                             </select>
                         </div>
                         <div class="mb-3">
                             <label for="distanceKm" class="form-label">Distance (km)</label>
-                            <input type="number" step="0.01" class="form-control" id="distanceKm" name="distanceKm" 
-                                value="<%= ligne != null ? ligne.getDistanceKm() : "" %>" required>
+                            <input type="number" step="0.01" class="form-control" id="distanceKm" name="distanceKm"
+                                   value="<%= ligne != null ? ligne.getDistanceKm() : "" %>" required>
                         </div>
 
                         <button type="submit" class="btn btn-primary">Enregistrer</button>
@@ -77,27 +77,27 @@
                     <div class="table-responsive">
                         <table class="table table-bordered" width="100%" cellspacing="0">
                             <thead>
-                                <tr>
-                                    <th>Départ</th>
-                                    <th>Arrivée</th>
-                                    <th>Distance</th>
-                                    <th>Actions</th>
-                                </tr>
+                            <tr>
+                                <th>Départ</th>
+                                <th>Arrivée</th>
+                                <th>Distance</th>
+                                <th>Actions</th>
+                            </tr>
                             </thead>
                             <tbody>
-                                <% if (lignes != null) {
-                                    for (Ligne l : lignes) { %>
-                                        <tr>
-                                            <td><%= l.getVilleDepart().getNom() %></td>
-                                            <td><%= l.getVilleArrivee().getNom() %></td>
-                                            <td><%= l.getDistanceKm() %> km</td>
-                                            <td>
-                                                <a href="<%= request.getContextPath() %>/lignes/detail?id=<%= l.getId() %>" class="btn btn-sm btn-success">Détails</a>
-                                                <a href="<%= request.getContextPath() %>/lignes?action=edit&id=<%= l.getId() %>" class="btn btn-sm btn-info">Modifier</a>
-                                            </td>
-                                        </tr>
-                                    <% }
-                                } %>
+                            <% if (lignes != null) {
+                                for (Ligne l : lignes) { %>
+                            <tr>
+                                <td><%= l.getVilleDepart().getNom() %></td>
+                                <td><%= l.getVilleArrivee().getNom() %></td>
+                                <td><%= l.getDistanceKm() %> km</td>
+                                <td>
+                                    <a href="<%= request.getContextPath() %>/lignes/detail?id=<%= l.getId() %>" class="btn btn-sm btn-success">Détails</a>
+                                    <a href="<%= request.getContextPath() %>/lignes?action=edit&id=<%= l.getId() %>" class="btn btn-sm btn-info">Modifier</a>
+                                </td>
+                            </tr>
+                            <% }
+                            } %>
                             </tbody>
                         </table>
                     </div>

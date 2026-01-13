@@ -2,12 +2,8 @@ package com.mdgtaxi.service;
 
 import com.mdgtaxi.entity.Chauffeur;
 import com.mdgtaxi.entity.ChauffeurMouvementStatut;
-import com.mdgtaxi.entity.ChauffeurStatut;
 import com.mdgtaxi.util.HibernateUtil;
-import com.mdgtaxi.view.VmChauffeurActivite;
-import com.mdgtaxi.view.VmChauffeurDetail;
-import com.mdgtaxi.view.VmChauffeurHistoriqueStatut;
-import com.mdgtaxi.view.VmChauffeurStatutActuel;
+
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -96,57 +92,7 @@ public class ChauffeurService {
         }
     }
 
-    // Operations using Views
 
-    public VmChauffeurDetail getChauffeurDetail(Long idChauffeur) {
-        EntityManager em = emf.createEntityManager();
-        try {
-            return em.find(VmChauffeurDetail.class, idChauffeur);
-        } finally {
-            em.close();
-        }
-    }
-
-    public List<VmChauffeurDetail> getAllChauffeurDetails() {
-        EntityManager em = emf.createEntityManager();
-        try {
-            TypedQuery<VmChauffeurDetail> query = em.createQuery("SELECT cd FROM VmChauffeurDetail cd", VmChauffeurDetail.class);
-            return query.getResultList();
-        } finally {
-            em.close();
-        }
-    }
-
-    public VmChauffeurStatutActuel getCurrentStatut(Long idChauffeur) {
-        EntityManager em = emf.createEntityManager();
-        try {
-            return em.find(VmChauffeurStatutActuel.class, idChauffeur);
-        } finally {
-            em.close();
-        }
-    }
-
-    public List<VmChauffeurHistoriqueStatut> getHistoriqueStatut(Long idChauffeur) {
-        EntityManager em = emf.createEntityManager();
-        try {
-            TypedQuery<VmChauffeurHistoriqueStatut> query = em.createQuery(
-                    "SELECT hs FROM VmChauffeurHistoriqueStatut hs WHERE hs.idChauffeur = :idChauffeur ORDER BY hs.dateMouvement DESC",
-                    VmChauffeurHistoriqueStatut.class);
-            query.setParameter("idChauffeur", idChauffeur);
-            return query.getResultList();
-        } finally {
-            em.close();
-        }
-    }
-
-    public VmChauffeurActivite getActivite(Long idChauffeur) {
-        EntityManager em = emf.createEntityManager();
-        try {
-            return em.find(VmChauffeurActivite.class, idChauffeur);
-        } finally {
-            em.close();
-        }
-    }
 
     // Operations for Related Entities
 
@@ -179,8 +125,6 @@ public class ChauffeurService {
         }
     }
 
-    // Multi-filter criteria function for Chauffeur (using Criteria API)
-    // Filters are provided as a Map<String, Object> where keys are field names like "nom", "prenom", "numeroPermis", etc.
 
     public List<Chauffeur> searchChauffeursWithFilters(Map<String, Object> filters) {
         EntityManager em = emf.createEntityManager();
@@ -228,59 +172,5 @@ public class ChauffeurService {
         }
     }
 
-    // Similar multi-filter for VmChauffeurDetail (since it's a view, we can filter on its fields)
 
-    public List<VmChauffeurDetail> searchChauffeurDetailsWithFilters(Map<String, Object> filters) {
-        EntityManager em = emf.createEntityManager();
-        try {
-            CriteriaBuilder cb = em.getCriteriaBuilder();
-            CriteriaQuery<VmChauffeurDetail> cq = cb.createQuery(VmChauffeurDetail.class);
-            Root<VmChauffeurDetail> root = cq.from(VmChauffeurDetail.class);
-
-            List<Predicate> predicates = new ArrayList<>();
-
-            for (Map.Entry<String, Object> entry : filters.entrySet()) {
-                String key = entry.getKey();
-                Object value = entry.getValue();
-
-                if (value == null) continue;
-
-                switch (key) {
-                    case "nom":
-                        predicates.add(cb.equal(root.get("nom"), value));
-                        break;
-                    case "prenom":
-                        predicates.add(cb.equal(root.get("prenom"), value));
-                        break;
-                    case "nomComplet":
-                        predicates.add(cb.equal(root.get("nomComplet"), value));
-                        break;
-                    case "dateNaissance":
-                        predicates.add(cb.equal(root.get("dateNaissance"), value));
-                        break;
-                    case "age":
-                        predicates.add(cb.equal(root.get("age"), value));
-                        break;
-                    case "numeroPermis":
-                        predicates.add(cb.equal(root.get("numeroPermis"), value));
-                        break;
-                    case "libelleStatut":
-                        predicates.add(cb.equal(root.get("libelleStatut"), value));
-                        break;
-                    // Add more as needed
-                    default:
-                        break;
-                }
-            }
-
-            if (!predicates.isEmpty()) {
-                cq.where(cb.and(predicates.toArray(new Predicate[0])));
-            }
-
-            TypedQuery<VmChauffeurDetail> query = em.createQuery(cq);
-            return query.getResultList();
-        } finally {
-            em.close();
-        }
-    }
 }

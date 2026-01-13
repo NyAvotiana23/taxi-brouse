@@ -22,10 +22,6 @@ public class ChauffeurMouvementStatut implements Serializable {
     private LocalDateTime dateMouvement;
 
     @ManyToOne
-    @JoinColumn(name = "id_ancien_statut")
-    private ChauffeurStatut ancienStatut;
-
-    @ManyToOne
     @JoinColumn(name = "id_nouveau_statut", nullable = false)
     private ChauffeurStatut nouveauStatut;
 

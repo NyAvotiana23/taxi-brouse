@@ -187,10 +187,6 @@ public class ChauffeurMouvementStatut implements Serializable {
     private LocalDateTime dateMouvement;
 
     @ManyToOne
-    @JoinColumn(name = "id_ancien_statut")
-    private ChauffeurStatut ancienStatut;
-
-    @ManyToOne
     @JoinColumn(name = "id_nouveau_statut", nullable = false)
     private ChauffeurStatut nouveauStatut;
 
@@ -394,6 +390,10 @@ public class ModePaiement implements Serializable {
 
     @Column(name = "libelle", nullable = false, unique = true)
     private String libelle;
+}
+package com.mdgtaxi.entity;
+
+public class Place {
 }
 package com.mdgtaxi.entity;
 
@@ -746,10 +746,6 @@ public class TrajetMouvementStatut implements Serializable {
     private LocalDateTime dateMouvement;
 
     @ManyToOne
-    @JoinColumn(name = "id_ancien_statut")
-    private TrajetStatut ancienStatut;
-
-    @ManyToOne
     @JoinColumn(name = "id_nouveau_statut", nullable = false)
     private TrajetStatut nouveauStatut;
 
@@ -822,10 +818,6 @@ public class TrajetReservationMouvementStatut implements Serializable {
     private LocalDateTime dateMouvement;
 
     @ManyToOne
-    @JoinColumn(name = "id_ancien_statut")
-    private ReservationStatut ancienStatut;
-
-    @ManyToOne
     @JoinColumn(name = "id_nouveau_statut", nullable = false)
     private ReservationStatut nouveauStatut;
 
@@ -895,6 +887,10 @@ public class TrajetStatut implements Serializable {
     @Column(name = "span_html", nullable= false)
     private String spanHtml;
 
+}
+package com.mdgtaxi.entity;
+
+public class TrajetTarif {
 }
 package com.mdgtaxi.entity;
 
@@ -1029,10 +1025,6 @@ public class VehiculeMouvementStatut implements Serializable {
 
     @Column(name = "date_mouvement", nullable = false)
     private LocalDateTime dateMouvement;
-
-    @ManyToOne
-    @JoinColumn(name = "id_ancien_statut")
-    private VehiculeStatut ancienStatut;
 
     @ManyToOne
     @JoinColumn(name = "id_nouveau_statut", nullable = false)

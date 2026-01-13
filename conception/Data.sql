@@ -42,10 +42,10 @@ VALUES (1, 1, 'Toyota', 'Corolla', 5, 'ABC123', 50.0, 5.0),
        (3, 2, 'Volvo', 'FH12', 2, 'GHI789', 200.0, 20.0);
 
 -- Vehicule_Mouvement_Statut
-INSERT INTO Vehicule_Mouvement_Statut (id_vehicule, date_mouvement, id_ancien_statut, id_nouveau_statut, observation)
-VALUES (1, '2026-01-01 00:00:00', NULL, 1, 'Initial status'),
-       (2, '2026-01-01 00:00:00', NULL, 1, 'Initial status'),
-       (3, '2026-01-01 00:00:00', NULL, 1, 'Initial status');
+INSERT INTO Vehicule_Mouvement_Statut (id_vehicule, date_mouvement, id_nouveau_statut, observation)
+VALUES (1, '2026-01-01 00:00:00', 1, 'Initial status'),
+       (2, '2026-01-01 00:00:00', 1, 'Initial status'),
+       (3, '2026-01-01 00:00:00', 1, 'Initial status');
 
 -- Vehicule_Entretien
 INSERT INTO Vehicule_Entretien (id_vehicule, motif, date_debut_entretien, date_fin_entretien, montant_depense)
@@ -66,10 +66,10 @@ VALUES ('Rakoto', 'Jean', '1980-01-01', 'PERMIS1'),
        ('Ranaivo', 'Paul', '1990-01-01', 'PERMIS3');
 
 -- Chauffeur_Mouvement_Statut
-INSERT INTO Chauffeur_Mouvement_Statut (id_chauffeur, date_mouvement, id_ancien_statut, id_nouveau_statut, observation)
-VALUES (1, '2026-01-01 00:00:00', NULL, 1, 'Initial status'),
-       (2, '2026-01-01 00:00:00', NULL, 1, 'Initial status'),
-       (3, '2026-01-01 00:00:00', NULL, 1, 'Initial status');
+INSERT INTO Chauffeur_Mouvement_Statut (id_chauffeur, date_mouvement, id_nouveau_statut, observation)
+VALUES (1, '2026-01-01 00:00:00', 1, 'Initial status'),
+       (2, '2026-01-01 00:00:00', 1, 'Initial status'),
+       (3, '2026-01-01 00:00:00', 1, 'Initial status');
 
 -- Province
 INSERT INTO Province (nom)
@@ -124,10 +124,10 @@ VALUES (1, 1, 1, 5, 1, '2026-01-01 00:00:00', '2026-01-01 10:00:00', 10.0),
        (3, 3, 3, 2, 1, '2026-01-01 00:00:00', '2026-01-01 14:00:00', 30.0);
 
 -- Trajet_Mouvement_Statut
-INSERT INTO Trajet_Mouvement_Statut (id_trajet, date_mouvement, id_ancien_statut, id_nouveau_statut, observation)
-VALUES (1, '2026-01-01 00:00:00', NULL, 1, 'Initial status'),
-       (2, '2026-01-01 00:00:00', NULL, 1, 'Initial status'),
-       (3, '2026-01-01 00:00:00', NULL, 1, 'Initial status');
+INSERT INTO Trajet_Mouvement_Statut (id_trajet, date_mouvement, id_nouveau_statut, observation)
+VALUES (1, '2026-01-01 00:00:00', 1, 'Initial status'),
+       (2, '2026-01-01 00:00:00', 1, 'Initial status'),
+       (3, '2026-01-01 00:00:00', 1, 'Initial status');
 
 -- Trajet_Motif_Arret
 INSERT INTO Trajet_Motif_Arret (libelle)
@@ -185,12 +185,11 @@ VALUES (1, 1, 1, 'A1', 'Passager1', '2026-01-01 00:00:00', 1),
        (3, 3, 1, 'A3', 'Passager3', '2026-01-01 00:00:00', 1)
 ;
 
--- Trajet_Reservation_Mouvement_Status
-INSERT INTO Trajet_Reservation_Mouvement_Status (id_trajet_reservation, date_mouvement, id_ancien_statut,
-                                                 id_nouveau_statut, observation)
-VALUES (1, '2026-01-01 00:00:00', NULL, 1, 'Initial status'),
-       (2, '2026-01-01 00:00:00', NULL, 1, 'Initial status'),
-       (3, '2026-01-01 00:00:00', NULL, 1, 'Initial status');
+-- Trajet_Reservation_Mouvement_Statut
+INSERT INTO Trajet_Reservation_Mouvement_Statut (id_trajet_reservation, date_mouvement, id_nouveau_statut, observation)
+VALUES (1, '2026-01-01 00:00:00', 1, 'Initial status'),
+       (2, '2026-01-01 00:00:00', 1, 'Initial status'),
+       (3, '2026-01-01 00:00:00', 1, 'Initial status');
 
 -- Trajet_Reservation_Paiement
 INSERT INTO Trajet_Reservation_Paiement (id_client, id_trajet_reservation, id_caisse, montant, id_mode_paiement,

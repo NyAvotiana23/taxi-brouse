@@ -7,7 +7,13 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class TrajetService {
 
@@ -56,6 +62,63 @@ public class TrajetService {
                     "SELECT t FROM Trajet t WHERE t.ligne.id = :ligneId ORDER BY t.datetimeDepart DESC",
                     Trajet.class);
             query.setParameter("ligneId", ligneId);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+    public List<Trajet> searchTrajetsWithFilters(Map<String, Object> filters) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<Trajet> cq = cb.createQuery(Trajet.class);
+            Root<Trajet> root = cq.from(Trajet.class);
+
+            List<Predicate> predicates = new ArrayList<>();
+
+            for (Map.Entry<String, Object> entry : filters.entrySet()) {
+                String key = entry.getKey();
+                Object value = entry.getValue();
+
+                if (value == null) continue;
+
+                switch (key) {
+                    case "nombrePassager":
+                        predicates.add(cb.equal(root.get("nombrePassager"), value));
+                        break;
+                    case "datetimeDepart":
+                        predicates.add(cb.equal(root.get("datetimeDepart"), value));
+                        break;
+                    case "datetimeArrivee":
+                        predicates.add(cb.equal(root.get("datetimeArrivee"), value));
+                        break;
+                    case "fraisUnitaire":
+                        predicates.add(cb.equal(root.get("fraisUnitaire"), value));
+                        break;
+                    case "ligne.id":
+                        predicates.add(cb.equal(root.get("ligne").get("id"), value));
+                        break;
+                    case "chauffeur.id":
+                        predicates.add(cb.equal(root.get("chauffeur").get("id"), value));
+                        break;
+                    case "vehicule.id":
+                        predicates.add(cb.equal(root.get("vehicule").get("id"), value));
+                        break;
+                    case "trajetStatut.id":
+                        predicates.add(cb.equal(root.get("trajetStatut").get("id"), value));
+                        break;
+                    // Add more fields as needed
+                    default:
+                        // Ignore unknown filters
+                        break;
+                }
+            }
+
+            if (!predicates.isEmpty()) {
+                cq.where(cb.and(predicates.toArray(new Predicate[0])));
+            }
+
+            TypedQuery<Trajet> query = em.createQuery(cq);
             return query.getResultList();
         } finally {
             em.close();

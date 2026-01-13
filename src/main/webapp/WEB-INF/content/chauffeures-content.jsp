@@ -15,9 +15,9 @@
                 <div class="card-header py-3">
                     <h6 class="m-0 font-weight-bold text-primary">
                         <% if (chauffeur != null) { %>
-                            Modifier Chauffeur
+                        Modifier Chauffeur
                         <% } else { %>
-                            Nouveau Chauffeur
+                        Nouveau Chauffeur
                         <% } %>
                     </h6>
                 </div>
@@ -27,23 +27,23 @@
 
                         <div class="mb-3">
                             <label for="nom" class="form-label">Nom</label>
-                            <input type="text" class="form-control" id="nom" name="nom" 
-                                value="<%= chauffeur != null ? chauffeur.getNom() : "" %>" required>
+                            <input type="text" class="form-control" id="nom" name="nom"
+                                   value="<%= chauffeur != null ? chauffeur.getNom() : "" %>" required>
                         </div>
                         <div class="mb-3">
                             <label for="prenom" class="form-label">Prénom</label>
-                            <input type="text" class="form-control" id="prenom" name="prenom" 
-                                value="<%= chauffeur != null ? chauffeur.getPrenom() : "" %>" required>
+                            <input type="text" class="form-control" id="prenom" name="prenom"
+                                   value="<%= chauffeur != null ? chauffeur.getPrenom() : "" %>" required>
                         </div>
                         <div class="mb-3">
                             <label for="dateNaissance" class="form-label">Date de Naissance</label>
-                            <input type="date" class="form-control" id="dateNaissance" name="dateNaissance" 
-                                value="<%= chauffeur != null ? chauffeur.getDateNaissance() : "" %>" required>
+                            <input type="date" class="form-control" id="dateNaissance" name="dateNaissance"
+                                   value="<%= chauffeur != null ? chauffeur.getDateNaissance() : "" %>" required>
                         </div>
                         <div class="mb-3">
                             <label for="numeroPermis" class="form-label">Numéro Permis</label>
-                            <input type="text" class="form-control" id="numeroPermis" name="numeroPermis" 
-                                value="<%= chauffeur != null ? chauffeur.getNumeroPermis() : "" %>" required>
+                            <input type="text" class="form-control" id="numeroPermis" name="numeroPermis"
+                                   value="<%= chauffeur != null ? chauffeur.getNumeroPermis() : "" %>" required>
                         </div>
 
                         <button type="submit" class="btn btn-primary">Enregistrer</button>
@@ -62,28 +62,28 @@
                     <div class="table-responsive">
                         <table class="table table-bordered" width="100%" cellspacing="0">
                             <thead>
-                                <tr>
-                                    <th>Nom</th>
-                                    <th>Prénom</th>
-                                    <th>Date Naissance</th>
-                                    <th>Permis</th>
-                                    <th>Actions</th>
-                                </tr>
+                            <tr>
+                                <th>Nom</th>
+                                <th>Prénom</th>
+                                <th>Date Naissance</th>
+                                <th>Permis</th>
+                                <th>Actions</th>
+                            </tr>
                             </thead>
                             <tbody>
-                                <% if (chauffeurs != null) {
-                                    for (Chauffeur c : chauffeurs) { %>
-                                        <tr>
-                                            <td><%= c.getNom() %></td>
-                                            <td><%= c.getPrenom() %></td>
-                                            <td><%= c.getDateNaissance() %></td>
-                                            <td><%= c.getNumeroPermis() %></td>
-                                            <td>
-                                                <a href="<%= request.getContextPath() %>/chauffeures?action=edit&id=<%= c.getId() %>" class="btn btn-sm btn-info">Modifier</a>
-                                            </td>
-                                        </tr>
-                                    <% }
-                                } %>
+                            <% if (chauffeurs != null) {
+                                for (Chauffeur c : chauffeurs) { %>
+                            <tr>
+                                <td><%= c.getNom() %></td>
+                                <td><%= c.getPrenom() %></td>
+                                <td><%= c.getDateNaissance() %></td>
+                                <td><%= c.getNumeroPermis() %></td>
+                                <td>
+                                    <a href="<%= request.getContextPath() %>/chauffeures?action=edit&id=<%= c.getId() %>" class="btn btn-sm btn-info">Modifier</a>
+                                </td>
+                            </tr>
+                            <% }
+                            } %>
                             </tbody>
                         </table>
                     </div>

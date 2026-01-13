@@ -16,11 +16,7 @@ import java.time.LocalDateTime;
 @Builder
 public class MouvementStatusCriteria {
     private Long idEntite;
-    private String libelleAncienStatut;
     private String libelleNouveauStatut;
-    private Integer minScoreAncien;
-    private Integer maxScoreAncien;
-    private Integer exactScoreAncien;
     private Integer minScoreNouveau;
     private Integer maxScoreNouveau;
     private Integer exactScoreNouveau;

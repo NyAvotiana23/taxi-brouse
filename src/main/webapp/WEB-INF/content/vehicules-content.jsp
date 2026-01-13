@@ -1,6 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.mdgtaxi.entity.*" %>
 <%@ page import="java.util.List" %>
+<%@ page import="com.mdgtaxi.dto.TypeObjectDTO" %>
 <%
     Vehicule vehicule = (Vehicule) request.getAttribute("vehicule");
     List<Vehicule> vehicules = (List<Vehicule>) request.getAttribute("vehicules");

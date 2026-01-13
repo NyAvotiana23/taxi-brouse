@@ -20,8 +20,10 @@ public class MouvementStatusService {
 
     /**
      * Récupère le statut actuel d'une entité
-     * @param tableName Nom de la table (Chauffeur, Vehicule, Trajet, Trajet_Reservation)
-     * @param idEntite ID de l'entité
+     * 
+     * @param tableName Nom de la table (Chauffeur, Vehicule, Trajet,
+     *                  Trajet_Reservation)
+     * @param idEntite  ID de l'entité
      * @return Le statut actuel ou null
      */
     public MouvementStatusDto getCurrentStatus(String tableName, Long idEntite) {
@@ -30,9 +32,10 @@ public class MouvementStatusService {
 
     /**
      * Récupère le statut d'une entité à une date donnée
+     * 
      * @param tableName Nom de la table
-     * @param idEntite ID de l'entité
-     * @param date Date à laquelle on veut connaître le statut
+     * @param idEntite  ID de l'entité
+     * @param date      Date à laquelle on veut connaître le statut
      * @return Le statut à cette date ou null
      */
     public MouvementStatusDto getStatusAtDate(String tableName, Long idEntite, LocalDateTime date) {
@@ -46,10 +49,6 @@ public class MouvementStatusService {
                     "m.id, " +
                     "m." + idField + ", " +
                     "'" + tableName + "', " +
-                    "CASE WHEN m.ancienStatut IS NOT NULL THEN m.ancienStatut.id ELSE NULL END, " +
-                    "CASE WHEN m.ancienStatut IS NOT NULL THEN m.ancienStatut.libelle ELSE NULL END, " +
-                    "CASE WHEN m.ancienStatut IS NOT NULL THEN m.ancienStatut.score ELSE NULL END, " +
-                    "CASE WHEN m.ancienStatut IS NOT NULL THEN m.ancienStatut.spanHtml ELSE NULL END, " +
                     "s.id, " +
                     "s.libelle, " +
                     "s.score, " +
@@ -76,8 +75,9 @@ public class MouvementStatusService {
 
     /**
      * Récupère l'historique complet des mouvements de statut
+     * 
      * @param tableName Nom de la table
-     * @param idEntite ID de l'entité
+     * @param idEntite  ID de l'entité
      * @return Liste des mouvements ordonnés par date décroissante
      */
     public List<MouvementStatusDto> getStatusHistory(String tableName, Long idEntite) {
@@ -91,10 +91,6 @@ public class MouvementStatusService {
                     "m.id, " +
                     "m." + idField + ", " +
                     "'" + tableName + "', " +
-                    "CASE WHEN m.ancienStatut IS NOT NULL THEN m.ancienStatut.id ELSE NULL END, " +
-                    "CASE WHEN m.ancienStatut IS NOT NULL THEN m.ancienStatut.libelle ELSE NULL END, " +
-                    "CASE WHEN m.ancienStatut IS NOT NULL THEN m.ancienStatut.score ELSE NULL END, " +
-                    "CASE WHEN m.ancienStatut IS NOT NULL THEN m.ancienStatut.spanHtml ELSE NULL END, " +
                     "s.id, " +
                     "s.libelle, " +
                     "s.score, " +
@@ -116,8 +112,9 @@ public class MouvementStatusService {
 
     /**
      * Récupère les mouvements de statut selon des critères multiples
+     * 
      * @param tableName Nom de la table
-     * @param criteria Critères de recherche
+     * @param criteria  Critères de recherche
      * @return Liste des mouvements filtrés ordonnés par date décroissante
      */
     public List<MouvementStatusDto> getMouvementsByCriteria(String tableName, MouvementStatusCriteria criteria) {
@@ -132,10 +129,6 @@ public class MouvementStatusService {
                     .append("m.id, ")
                     .append("m.").append(idField).append(", ")
                     .append("'").append(tableName).append("', ")
-                    .append("CASE WHEN m.ancienStatut IS NOT NULL THEN m.ancienStatut.id ELSE NULL END, ")
-                    .append("CASE WHEN m.ancienStatut IS NOT NULL THEN m.ancienStatut.libelle ELSE NULL END, ")
-                    .append("CASE WHEN m.ancienStatut IS NOT NULL THEN m.ancienStatut.score ELSE NULL END, ")
-                    .append("CASE WHEN m.ancienStatut IS NOT NULL THEN m.ancienStatut.spanHtml ELSE NULL END, ")
                     .append("s.id, ")
                     .append("s.libelle, ")
                     .append("s.score, ")
@@ -144,7 +137,6 @@ public class MouvementStatusService {
                     .append("m.observation) ")
                     .append("FROM ").append(mouvementEntity).append(" m ")
                     .append("INNER JOIN ").append(statusEntity).append(" s ON m.nouveauStatut.id = s.id ")
-                    .append("LEFT JOIN ").append(statusEntity).append(" sa ON m.ancienStatut.id = sa.id ")
                     .append("WHERE 1=1 ");
 
             // Filtre par ID d'entité
@@ -152,26 +144,9 @@ public class MouvementStatusService {
                 jpql.append("AND m.").append(idField).append(" = :idEntite ");
             }
 
-            // Filtre par libellé ancien statut
-            if (criteria.getLibelleAncienStatut() != null && !criteria.getLibelleAncienStatut().isEmpty()) {
-                jpql.append("AND sa.libelle = :libelleAncien ");
-            }
-
             // Filtre par libellé nouveau statut
             if (criteria.getLibelleNouveauStatut() != null && !criteria.getLibelleNouveauStatut().isEmpty()) {
                 jpql.append("AND s.libelle = :libelleNouveau ");
-            }
-
-            // Filtres par score ancien statut
-            if (criteria.getExactScoreAncien() != null) {
-                jpql.append("AND sa.score = :exactScoreAncien ");
-            } else {
-                if (criteria.getMinScoreAncien() != null) {
-                    jpql.append("AND sa.score >= :minScoreAncien ");
-                }
-                if (criteria.getMaxScoreAncien() != null) {
-                    jpql.append("AND sa.score <= :maxScoreAncien ");
-                }
             }
 
             // Filtres par score nouveau statut
@@ -207,21 +182,8 @@ public class MouvementStatusService {
             if (criteria.getIdEntite() != null) {
                 query.setParameter("idEntite", criteria.getIdEntite());
             }
-            if (criteria.getLibelleAncienStatut() != null && !criteria.getLibelleAncienStatut().isEmpty()) {
-                query.setParameter("libelleAncien", criteria.getLibelleAncienStatut());
-            }
             if (criteria.getLibelleNouveauStatut() != null && !criteria.getLibelleNouveauStatut().isEmpty()) {
                 query.setParameter("libelleNouveau", criteria.getLibelleNouveauStatut());
-            }
-            if (criteria.getExactScoreAncien() != null) {
-                query.setParameter("exactScoreAncien", criteria.getExactScoreAncien());
-            } else {
-                if (criteria.getMinScoreAncien() != null) {
-                    query.setParameter("minScoreAncien", criteria.getMinScoreAncien());
-                }
-                if (criteria.getMaxScoreAncien() != null) {
-                    query.setParameter("maxScoreAncien", criteria.getMaxScoreAncien());
-                }
             }
             if (criteria.getExactScoreNouveau() != null) {
                 query.setParameter("exactScoreNouveau", criteria.getExactScoreNouveau());
@@ -251,6 +213,7 @@ public class MouvementStatusService {
 
     /**
      * Récupère tous les mouvements pour une table (sans filtre d'entité spécifique)
+     * 
      * @param tableName Nom de la table
      * @return Liste de tous les mouvements
      */
@@ -261,12 +224,14 @@ public class MouvementStatusService {
 
     /**
      * Récupère les mouvements dans une période donnée
+     * 
      * @param tableName Nom de la table
      * @param dateDebut Date de début
-     * @param dateFin Date de fin
+     * @param dateFin   Date de fin
      * @return Liste des mouvements dans la période
      */
-    public List<MouvementStatusDto> getMouvementsByPeriod(String tableName, LocalDateTime dateDebut, LocalDateTime dateFin) {
+    public List<MouvementStatusDto> getMouvementsByPeriod(String tableName, LocalDateTime dateDebut,
+            LocalDateTime dateFin) {
         MouvementStatusCriteria criteria = MouvementStatusCriteria.builder()
                 .dateDebut(dateDebut)
                 .dateFin(dateFin)
@@ -276,7 +241,8 @@ public class MouvementStatusService {
 
     /**
      * Récupère les mouvements vers un statut spécifique
-     * @param tableName Nom de la table
+     * 
+     * @param tableName            Nom de la table
      * @param libelleNouveauStatut Libellé du nouveau statut
      * @return Liste des mouvements vers ce statut
      */
@@ -285,97 +251,6 @@ public class MouvementStatusService {
                 .libelleNouveauStatut(libelleNouveauStatut)
                 .build();
         return getMouvementsByCriteria(tableName, criteria);
-    }
-
-    /**
-     * Récupère les mouvements depuis un statut spécifique
-     * @param tableName Nom de la table
-     * @param libelleAncienStatut Libellé de l'ancien statut
-     * @return Liste des mouvements depuis ce statut
-     */
-    public List<MouvementStatusDto> getMouvementsFromStatus(String tableName, String libelleAncienStatut) {
-        MouvementStatusCriteria criteria = MouvementStatusCriteria.builder()
-                .libelleAncienStatut(libelleAncienStatut)
-                .build();
-        return getMouvementsByCriteria(tableName, criteria);
-    }
-
-    /**
-     * Récupère les mouvements avec amélioration de score (nouveau > ancien)
-     * @param tableName Nom de la table
-     * @return Liste des mouvements avec amélioration
-     */
-    public List<MouvementStatusDto> getMouvementsWithScoreImprovement(String tableName) {
-        String mouvementEntity = getMouvementEntityName(tableName);
-        String statusEntity = getStatusEntityName(tableName);
-        String idField = getIdFieldName(tableName);
-
-        EntityManager em = emf.createEntityManager();
-        try {
-            String jpql = "SELECT new com.mdgtaxi.dto.MouvementStatusDto(" +
-                    "m.id, " +
-                    "m." + idField + ", " +
-                    "'" + tableName + "', " +
-                    "sa.id, " +
-                    "sa.libelle, " +
-                    "sa.score, " +
-                    "sa.spanHtml, " +
-                    "s.id, " +
-                    "s.libelle, " +
-                    "s.score, " +
-                    "s.spanHtml, " +
-                    "m.dateMouvement, " +
-                    "m.observation) " +
-                    "FROM " + mouvementEntity + " m " +
-                    "INNER JOIN " + statusEntity + " s ON m.nouveauStatut.id = s.id " +
-                    "INNER JOIN " + statusEntity + " sa ON m.ancienStatut.id = sa.id " +
-                    "WHERE s.score > sa.score " +
-                    "ORDER BY m.dateMouvement DESC";
-
-            TypedQuery<MouvementStatusDto> query = em.createQuery(jpql, MouvementStatusDto.class);
-            return query.getResultList();
-        } finally {
-            em.close();
-        }
-    }
-
-    /**
-     * Récupère les mouvements avec dégradation de score (nouveau < ancien)
-     * @param tableName Nom de la table
-     * @return Liste des mouvements avec dégradation
-     */
-    public List<MouvementStatusDto> getMouvementsWithScoreDegradation(String tableName) {
-        String mouvementEntity = getMouvementEntityName(tableName);
-        String statusEntity = getStatusEntityName(tableName);
-        String idField = getIdFieldName(tableName);
-
-        EntityManager em = emf.createEntityManager();
-        try {
-            String jpql = "SELECT new com.mdgtaxi.dto.MouvementStatusDto(" +
-                    "m.id, " +
-                    "m." + idField + ", " +
-                    "'" + tableName + "', " +
-                    "sa.id, " +
-                    "sa.libelle, " +
-                    "sa.score, " +
-                    "sa.spanHtml, " +
-                    "s.id, " +
-                    "s.libelle, " +
-                    "s.score, " +
-                    "s.spanHtml, " +
-                    "m.dateMouvement, " +
-                    "m.observation) " +
-                    "FROM " + mouvementEntity + " m " +
-                    "INNER JOIN " + statusEntity + " s ON m.nouveauStatut.id = s.id " +
-                    "INNER JOIN " + statusEntity + " sa ON m.ancienStatut.id = sa.id " +
-                    "WHERE s.score < sa.score " +
-                    "ORDER BY m.dateMouvement DESC";
-
-            TypedQuery<MouvementStatusDto> query = em.createQuery(jpql, MouvementStatusDto.class);
-            return query.getResultList();
-        } finally {
-            em.close();
-        }
     }
 
     // Méthodes de mapping

@@ -21,27 +21,13 @@ public class LigneDetailServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String idStr = req.getParameter("id");
-
-        if (idStr == null || idStr.isEmpty()) {
-            resp.sendRedirect(req.getContextPath() + "/lignes");
-            return;
-        }
-
-        Long ligneId = Long.valueOf(idStr);
-        Ligne ligne = ligneService.getLigneById(ligneId);
-
-        if (ligne == null) {
-            resp.sendRedirect(req.getContextPath() + "/lignes");
-            return;
-        }
-
-        // Get all trajets for this ligne
-        List<Trajet> trajets = trajetService.getTrajetsByLigneId(ligneId);
+        Long id = Long.valueOf(req.getParameter("id"));
+        Ligne ligne = ligneService.getLigneById(id);
+        List<Trajet> trajets = trajetService.getTrajetsByLigneId(id);
 
         req.setAttribute("ligne", ligne);
         req.setAttribute("trajets", trajets);
 
-        req.getRequestDispatcher("/WEB-INF/ligne/ligne-detail.jsp").forward(req, resp);
+        req.getRequestDispatcher("/ligne-detail.jsp").forward(req, resp);
     }
 }

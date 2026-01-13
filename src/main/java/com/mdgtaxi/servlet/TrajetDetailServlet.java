@@ -1,8 +1,13 @@
 package com.mdgtaxi.servlet;
 
 import com.mdgtaxi.dto.TypeObjectDTO;
-import com.mdgtaxi.entity.*;
-import com.mdgtaxi.service.*;
+import com.mdgtaxi.entity.Client;
+import com.mdgtaxi.entity.Trajet;
+import com.mdgtaxi.entity.TrajetReservation;
+import com.mdgtaxi.service.ClientService;
+import com.mdgtaxi.service.ReservationService;
+import com.mdgtaxi.service.TrajetService;
+import com.mdgtaxi.service.TypeObjectService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -22,35 +27,21 @@ public class TrajetDetailServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String idStr = req.getParameter("id");
-
-        if (idStr == null || idStr.isEmpty()) {
-            resp.sendRedirect(req.getContextPath() + "/trajets");
-            return;
-        }
-
-        Long trajetId = Long.valueOf(idStr);
-        Trajet trajet = trajetService.getTrajetById(trajetId);
-
-        if (trajet == null) {
-            resp.sendRedirect(req.getContextPath() + "/trajets");
-            return;
-        }
-
-        int placesRestantes = reservationService.getPlacesRestantesForTrajet(trajetId);
-        int placesPrises = reservationService.getPlacesPrisesForTrajet(trajetId);
-
-        List<TrajetReservation> reservations = reservationService.getReservationsByTrajetId(trajetId);
-        List<Client> clients = clientService.getAllClients();
+        Long id = Long.valueOf(req.getParameter("id"));
+        Trajet trajet = trajetService.getTrajetById(id);
+        List<TrajetReservation> reservations = reservationService.getReservationsByTrajetId(id);
+        int placesPrises = reservationService.getPlacesPrisesForTrajet(id);
+        int placesRestantes = trajet.getVehicule().getMaximumPassager() - placesPrises;
+        List<Client> clients = clientService.getAllClients();  // If needed for form, etc.
         List<TypeObjectDTO> reservationStatuts = typeObjectService.findAllTypeObject("Reservation_Statut");
 
         req.setAttribute("trajet", trajet);
+        req.setAttribute("placesPrises", placesPrises);
+        req.setAttribute("placesRestantes", placesRestantes);
         req.setAttribute("reservations", reservations);
         req.setAttribute("clients", clients);
         req.setAttribute("reservationStatuts", reservationStatuts);
-        req.setAttribute("placesRestantes", placesRestantes);
-        req.setAttribute("placesPrises", placesPrises);
 
-        req.getRequestDispatcher("/WEB-INF/trajet/trajet-detail.jsp").forward(req, resp);
+        req.getRequestDispatcher("/trajet-detail.jsp").forward(req, resp);
     }
 }

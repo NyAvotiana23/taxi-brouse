@@ -22,10 +22,6 @@ public class TrajetReservationMouvementStatut implements Serializable {
     private LocalDateTime dateMouvement;
 
     @ManyToOne
-    @JoinColumn(name = "id_ancien_statut")
-    private ReservationStatut ancienStatut;
-
-    @ManyToOne
     @JoinColumn(name = "id_nouveau_statut", nullable = false)
     private ReservationStatut nouveauStatut;
 

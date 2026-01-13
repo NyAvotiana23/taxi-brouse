@@ -33,37 +33,7 @@ public class TrajetServlet extends HttpServlet {
             req.setAttribute("trajet", trajet);
         }
 
-        // Récupérer les paramètres de filtre
-        String idLigneStr = req.getParameter("filterLigne");
-        String idChauffeurStr = req.getParameter("filterChauffeur");
-        String idVehiculeStr = req.getParameter("filterVehicule");
-        String idTrajetStatutStr = req.getParameter("filterStatut");
-        String dateDebut = req.getParameter("filterDateDebut");
-        String dateFin = req.getParameter("filterDateFin");
-        String minScoreStr = req.getParameter("filterScore");
-
-        // Convertir les paramètres en Long si présents
-        Long idLigne = (idLigneStr != null && !idLigneStr.isEmpty()) ? Long.valueOf(idLigneStr) : null;
-        Long idChauffeur = (idChauffeurStr != null && !idChauffeurStr.isEmpty()) ? Long.valueOf(idChauffeurStr) : null;
-        Long idVehicule = (idVehiculeStr != null && !idVehiculeStr.isEmpty()) ? Long.valueOf(idVehiculeStr) : null;
-        Long idTrajetStatut = (idTrajetStatutStr != null && !idTrajetStatutStr.isEmpty())
-                ? Long.valueOf(idTrajetStatutStr)
-                : null;
-        Integer minScore = (minScoreStr != null && !minScoreStr.isEmpty()) ? Integer.valueOf(minScoreStr) : null;
-
-        // Utiliser le filtre si au moins un critère est présent
-        List<Trajet> trajets;
-        boolean hasFilters = idLigne != null || idChauffeur != null || idVehicule != null ||
-                idTrajetStatut != null || (dateDebut != null && !dateDebut.isEmpty()) ||
-                (dateFin != null && !dateFin.isEmpty()) || minScore != null;
-
-        if (hasFilters) {
-            trajets = trajetService.getFilteredTrajets(idLigne, idChauffeur, idVehicule, idTrajetStatut, dateDebut,
-                    dateFin, minScore);
-        } else {
-            trajets = trajetService.getAllTrajets();
-        }
-
+        List<Trajet> trajets = trajetService.getAllTrajets();
         List<Ligne> lignes = ligneService.getAllLignes();
         List<Chauffeur> chauffeurs = chauffeurService.getAllChauffeurs();
         List<Vehicule> vehicules = vehiculeService.getAllVehicules();
@@ -75,15 +45,6 @@ public class TrajetServlet extends HttpServlet {
         req.setAttribute("vehicules", vehicules);
         req.setAttribute("trajetStatuts", trajetStatuts);
 
-        // Passer les paramètres de filtre à la JSP pour maintenir l'état
-        req.setAttribute("filterLigne", idLigneStr);
-        req.setAttribute("filterChauffeur", idChauffeurStr);
-        req.setAttribute("filterVehicule", idVehiculeStr);
-        req.setAttribute("filterStatut", idTrajetStatutStr);
-        req.setAttribute("filterDateDebut", dateDebut);
-        req.setAttribute("filterDateFin", dateFin);
-        req.setAttribute("filterScore", minScoreStr);
-
         req.getRequestDispatcher("/trajets.jsp").forward(req, resp);
     }
 
@@ -93,13 +54,10 @@ public class TrajetServlet extends HttpServlet {
         Long idLigne = Long.valueOf(req.getParameter("idLigne"));
         Long idChauffeur = Long.valueOf(req.getParameter("idChauffeur"));
         Long idVehicule = Long.valueOf(req.getParameter("idVehicule"));
-        Long idTrajetStatut = Long.valueOf(req.getParameter("idTrajetStatut"));
         LocalDateTime datetimeDepart = LocalDateTime.parse(req.getParameter("datetimeDepart"));
-        String datetimeArriveeStr = req.getParameter("datetimeArrivee");
-        LocalDateTime datetimeArrivee = (datetimeArriveeStr != null && !datetimeArriveeStr.isEmpty())
-                ? LocalDateTime.parse(datetimeArriveeStr)
-                : null;
-        Integer nombrePassager = Integer.valueOf(req.getParameter("nombrePassager"));
+        LocalDateTime datetimeArrivee = req.getParameter("datetimeArrivee") != null && !req.getParameter("datetimeArrivee").isEmpty()
+                ? LocalDateTime.parse(req.getParameter("datetimeArrivee")) : null;
+        Long idTrajetStatut = Long.valueOf(req.getParameter("idTrajetStatut"));
         BigDecimal fraisUnitaire = new BigDecimal(req.getParameter("fraisUnitaire"));
 
         Trajet trajet = new Trajet();
@@ -119,13 +77,13 @@ public class TrajetServlet extends HttpServlet {
         vehicule.setId(idVehicule);
         trajet.setVehicule(vehicule);
 
+        trajet.setDatetimeDepart(datetimeDepart);
+        trajet.setDatetimeArrivee(datetimeArrivee);
+
         TrajetStatut statut = new TrajetStatut();
         statut.setId(idTrajetStatut);
         trajet.setTrajetStatut(statut);
 
-        trajet.setDatetimeDepart(datetimeDepart);
-        trajet.setDatetimeArrivee(datetimeArrivee);
-        trajet.setNombrePassager(nombrePassager);
         trajet.setFraisUnitaire(fraisUnitaire);
 
         if (trajet.getId() == null) {
