@@ -5,28 +5,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c1c861f5-aebe-49fb-9999-4ef53b312464" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/form/chauffeur-form.jsp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/webapp/chauffeur-detail.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources/d12ee72a-d147-4f0c-a37c-a78f7dbf0842.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources/3dbff2e4-095c-49e3-a880-0d698c489a28.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/3dbff2e4-095c-49e3-a880-0d698c489a28.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources/3dbff2e4-095c-49e3-a880-0d698c489a28/storage_v2/_src_/database/mdgtaxi.zoONNg.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources/3dbff2e4-095c-49e3-a880-0d698c489a28/storage_v2/_src_/database/mdgtaxi.zoONNg/schema/information_schema.FNRwLQ.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources/3dbff2e4-095c-49e3-a880-0d698c489a28/storage_v2/_src_/database/mdgtaxi.zoONNg/schema/pg_catalog.0S1ZNQ.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources/3dbff2e4-095c-49e3-a880-0d698c489a28/storage_v2/_src_/database/mdgtaxi.zoONNg/schema/public.abK9xQ.meta" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/Place.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/Place.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/entities.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/entities.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/service/ChauffeurService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/service/ChauffeurService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/service/services.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/service/services.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/servlet/ChauffeurDetailServlet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/servlet/ChauffeurDetailServlet.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/servlet/ChauffeurServlet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/servlet/ChauffeurServlet.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/servlet/VehiculeDetailServlet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/servlet/VehiculeDetailServlet.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/servlet/VehiculeServlet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/servlet/VehiculeServlet.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/servlet/servlets.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/servlet/servlets.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/view/VmTrajetDetail.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/view/VmTrajetDetail.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/view/VmVehiculeDetail.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/view/VmVehiculeDetail.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/view/views.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/view/views.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/chauffeures-content.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/chauffeures-content.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/vehicule-detail-content.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/vehicule-detail-content.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/vehicules-content.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/vehicules-content.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/form/chaffeure-add-form.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/form/vehicule-form.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/form/vehicule-add-form.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/chauffeur-detail-content.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/jsps.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/jsps.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/dashboard-content.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/dashboard-content.jsp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/trajets-content.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/trajets-content.jsp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/web.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/web.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

@@ -10,8 +10,8 @@
                     <i class="bi bi-person-fill text-primary" style="font-size: 3rem;"></i>
                     <h3 class="mt-3">Drivers Management</h3>
                     <p class="text-muted">Manage all your taxi drivers</p>
-                    <a href="${pageContext.request.contextPath}/driver" class="btn btn-primary">
-                        <i class="bi bi-arrow-right-circle"></i> Go to Drivers
+                    <a href="${pageContext.request.contextPath}/chauffeures" class="btn btn-primary">
+                        <i class="bi bi-arrow-right-circle"></i>Voir les chauffeures
                     </a>
                 </div>
             </div>
@@ -23,8 +23,8 @@
                     <i class="bi bi-car-front-fill text-success" style="font-size: 3rem;"></i>
                     <h3 class="mt-3">Vehicles Management</h3>
                     <p class="text-muted">Manage all your taxi vehicles</p>
-                    <a href="${pageContext.request.contextPath}/vehicle" class="btn btn-success">
-                        <i class="bi bi-arrow-right-circle"></i> Go to Vehicles
+                    <a href="${pageContext.request.contextPath}/vehicules" class="btn btn-success">
+                        <i class="bi bi-arrow-right-circle"></i> Voir les vehicules
                     </a>
                 </div>
             </div>
