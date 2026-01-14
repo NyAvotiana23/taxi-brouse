@@ -5,82 +5,28 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c1c861f5-aebe-49fb-9999-4ef53b312464" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/Place.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/TrajetTarif.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/service/MouvementStatusCreateService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/servlet/ChauffeurDetailServlet.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/servlet/VehiculeDetailServlet.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/ligne-detail-content.jsp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/trajet-detail-content.jsp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/vehicule-detail-content.jsp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/form/chaffeure-add-form.jsp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/form/ligne-add-form.jsp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/form/reservation-add-form.jsp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/form/trajet-add-form.jsp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/form/vehicule-add-form.jsp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/webapp/ligne-detail.jsp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/webapp/reservation-detail.jsp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/webapp/trajet-detail.jsp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/webapp/vehicule-detail.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources/d12ee72a-d147-4f0c-a37c-a78f7dbf0842.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/d12ee72a-d147-4f0c-a37c-a78f7dbf0842.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources/d12ee72a-d147-4f0c-a37c-a78f7dbf0842/storage_v2/_src_/database/mdgtaxi.zoONNg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources/d12ee72a-d147-4f0c-a37c-a78f7dbf0842/storage_v2/_src_/database/mdgtaxi.zoONNg/schema/information_schema.FNRwLQ.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources/d12ee72a-d147-4f0c-a37c-a78f7dbf0842/storage_v2/_src_/database/mdgtaxi.zoONNg/schema/pg_catalog.0S1ZNQ.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources/d12ee72a-d147-4f0c-a37c-a78f7dbf0842/storage_v2/_src_/database/mdgtaxi.zoONNg/schema/public.abK9xQ.meta" beforeDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/form/chauffeur-form.jsp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/webapp/chauffeur-detail.jsp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources/d12ee72a-d147-4f0c-a37c-a78f7dbf0842.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/conception/Data.sql" beforeDir="false" afterPath="$PROJECT_DIR$/conception/Data.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/dto/MouvementStatusCriteria.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/dto/MouvementStatusCriteria.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/dto/MouvementStatusDto.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/dto/MouvementStatusDto.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/dto/dtos.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/dto/dtos.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/ChauffeurMouvementStatut.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/ChauffeurMouvementStatut.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/TrajetMouvementStatut.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/TrajetMouvementStatut.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/TrajetReservationMouvementStatut.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/TrajetReservationMouvementStatut.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/VehiculeMouvementStatut.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/VehiculeMouvementStatut.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/Place.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/Place.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/entities.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/entities.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/service/ChauffeurService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/service/ChauffeurService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/service/LigneService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/service/LigneService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/service/MouvementStatusService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/service/MouvementStatusService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/service/ReservationService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/service/ReservationService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/service/TrajetService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/service/TrajetService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/service/VehiculeService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/service/VehiculeService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/service/VilleService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/service/VilleService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/service/services.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/service/services.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/servlet/ChauffeurDetailServlet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/servlet/ChauffeurDetailServlet.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/servlet/ChauffeurServlet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/servlet/ChauffeurServlet.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/servlet/LigneDetailServlet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/servlet/LigneDetailServlet.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/servlet/LigneServlet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/servlet/LigneServlet.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/servlet/ReservationServlet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/servlet/ReservationServlet.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/servlet/TrajetDetailServlet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/servlet/TrajetDetailServlet.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/servlet/TrajetServlet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/servlet/TrajetServlet.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/servlet/VehiculeDetailServlet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/servlet/VehiculeDetailServlet.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/servlet/VehiculeServlet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/servlet/VehiculeServlet.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/view/VmChauffeurHistoriqueStatut.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/view/VmChauffeurHistoriqueStatut.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/view/VmVehiculeHistoriqueStatut.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/view/VmVehiculeHistoriqueStatut.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/servlet/servlets.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/servlet/servlets.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/view/VmTrajetDetail.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/view/VmTrajetDetail.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/view/VmVehiculeDetail.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/view/VmVehiculeDetail.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/view/views.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/view/views.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/chauffeur/chauffeur-detail.jsp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/chauffeur/chauffeur-form.jsp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/chauffeur/chauffeur-liste.jsp" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/chauffeures-content.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/chauffeures-content.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/lignes-content.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/lignes-content.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/reservations-content.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/reservations-content.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/trajets-content.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/trajets-content.jsp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/vehicule-detail-content.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/vehicule-detail-content.jsp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/vehicules-content.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/vehicules-content.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/includes/footer.jsp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/includes/header.jsp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/includes/navbar.jsp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/includes/sidebar.jsp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/ligne/ligne-detail.jsp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/trajet/trajet-detail.jsp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/vehicule/vehicule-detail.jsp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/vehicule/vehicule-form.jsp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/vehicule/vehicule-liste.jsp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/chauffeures.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/chauffeures.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/index.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/index.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/lignes.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/lignes.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/reservations.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/reservations.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/trajets.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/trajets.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/vehicules.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/vehicules.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/win_combine_java.ps1" beforeDir="false" afterPath="$PROJECT_DIR$/win_combine_java.ps1" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/form/chaffeure-add-form.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/form/vehicule-form.jsp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/form/vehicule-add-form.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/chauffeur-detail-content.jsp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/webapp/jsps.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/jsps.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -218,7 +164,9 @@
       <workItem from="1768045689582" duration="1240000" />
       <workItem from="1768051715678" duration="685000" />
       <workItem from="1768304976300" duration="1807000" />
-      <workItem from="1768318583329" duration="7862000" />
+      <workItem from="1768318583329" duration="8743000" />
+      <workItem from="1768331276183" duration="5000" />
+      <workItem from="1768366909512" duration="2447000" />
     </task>
     <servers />
   </component>

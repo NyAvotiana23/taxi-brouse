@@ -22,8 +22,8 @@ import java.time.LocalDateTime;
         v.maximum_passager,
         v.capacite_carburant,
         v.depense_carburant_100km,
-        vt.libelle AS libelle_type,
-        ct.libelle AS type_carburant,
+        vt.libelle AS vehicule_type_libelle,
+        ct.libelle AS carburant_type_libelle,
         vsa.libelle_statut,
         vsa.date_mouvement AS date_dernier_statut
     FROM Vehicule v
@@ -55,11 +55,11 @@ public class VmVehiculeDetail implements Serializable {
     @Column(name = "depense_carburant_100km")
     private BigDecimal depenseCarburant100km;
 
-    @Column(name = "libelle_type")
-    private String libelleType;
+    @Column(name = "vehicule_type_libelle")
+    private String vehiculeTypeLibelle;
 
-    @Column(name = "type_carburant")
-    private String typeCarburant;
+    @Column(name = "carburant_type_libelle")
+    private String carburantTypeLibelle;
 
     @Column(name = "libelle_statut")
     private String libelleStatut;

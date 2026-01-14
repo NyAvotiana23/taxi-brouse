@@ -16,6 +16,6 @@ public class Place {
     @Column(name = "libelle", nullable = false, unique = true)
     private String nom;
 
-    @Column(name = "libelle", nullable = false, unique = true)
+    @Column(name = "description", nullable = false, unique = true)
     private String description;
 }

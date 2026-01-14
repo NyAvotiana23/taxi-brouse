@@ -1,4 +1,7 @@
 ﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<% request.setAttribute("contentPage", "/WEB-INF/content/chauffeur-detail-content.jsp"); %>
+<jsp:include page="/WEB-INF/layouts/main-layout.jsp" />
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <% request.setAttribute("contentPage", "/WEB-INF/content/chauffeures-content.jsp"); %>
 <jsp:include page="/WEB-INF/layouts/main-layout.jsp" />
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>

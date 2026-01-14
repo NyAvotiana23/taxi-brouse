@@ -3,6 +3,9 @@
 import com.mdgtaxi.entity.Chauffeur;
 import com.mdgtaxi.entity.ChauffeurMouvementStatut;
 import com.mdgtaxi.util.HibernateUtil;
+import com.mdgtaxi.view.VmChauffeurActivite;
+import com.mdgtaxi.view.VmChauffeurDetail;
+
 
 
 import javax.persistence.EntityManager;
@@ -22,6 +25,46 @@ public class ChauffeurService {
     private final EntityManagerFactory emf = HibernateUtil.getEntityManagerFactory();
 
     // CRUD Operations for Chauffeur
+
+    /**
+     * Get chauffeur detail view by ID
+     */
+    public VmChauffeurDetail getChauffeurDetailById(Long id) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            return em.find(VmChauffeurDetail.class, id);
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * Get all chauffeur details
+     */
+    public List<VmChauffeurDetail> getAllChauffeurDetails() {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<VmChauffeurDetail> query = em.createQuery(
+                    "SELECT cd FROM VmChauffeurDetail cd",
+                    VmChauffeurDetail.class
+            );
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * Get chauffeur activity by ID
+     */
+    public VmChauffeurActivite getChauffeurActivite(Long id) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            return em.find(VmChauffeurActivite.class, id);
+        } finally {
+            em.close();
+        }
+    }
 
     public Chauffeur createChauffeur(Chauffeur chauffeur) {
         EntityManager em = emf.createEntityManager();

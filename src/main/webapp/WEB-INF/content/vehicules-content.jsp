@@ -1,137 +1,118 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="com.mdgtaxi.entity.*" %>
+<%@ page import="com.mdgtaxi.entity.Vehicule" %>
 <%@ page import="java.util.List" %>
-<%@ page import="com.mdgtaxi.dto.TypeObjectDTO" %>
 <%
     Vehicule vehicule = (Vehicule) request.getAttribute("vehicule");
     List<Vehicule> vehicules = (List<Vehicule>) request.getAttribute("vehicules");
-    List<TypeObjectDTO> vehiculeTypes = (List<TypeObjectDTO>) request.getAttribute("vehiculeTypes");
-    List<TypeObjectDTO> carburantTypes = (List<TypeObjectDTO>) request.getAttribute("carburantTypes");
 %>
 
 <div class="container-fluid">
-    <h1 class="h3 mb-4 text-gray-800">Gestion des Véhicules</h1>
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Gestion des Véhicules</h1>
+        <% if (vehicule == null) { %>
+        <a href="<%= request.getContextPath() %>/vehicules?action=edit" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Nouveau Véhicule
+        </a>
+        <% } %>
+    </div>
 
     <div class="row">
-        <div class="col-md-4">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">
-                        <% if (vehicule != null) { %>
-                            Modifier Véhicule
-                        <% } else { %>
-                            Nouveau Véhicule
-                        <% } %>
-                    </h6>
-                </div>
-                <div class="card-body">
-                    <form action="<%= request.getContextPath() %>/vehicules" method="post">
-                        <input type="hidden" name="id" value="<%= vehicule != null ? vehicule.getId() : "" %>">
-
-                        <div class="mb-3">
-                            <label for="marque" class="form-label">Marque</label>
-                            <input type="text" class="form-control" id="marque" name="marque" 
-                                value="<%= vehicule != null ? vehicule.getMarque() : "" %>" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="modele" class="form-label">Modèle</label>
-                            <input type="text" class="form-control" id="modele" name="modele" 
-                                value="<%= vehicule != null ? vehicule.getModele() : "" %>" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="immatriculation" class="form-label">Immatriculation</label>
-                            <input type="text" class="form-control" id="immatriculation" name="immatriculation" 
-                                value="<%= vehicule != null ? vehicule.getImmatriculation() : "" %>" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="maximumPassager" class="form-label">Max Passagers</label>
-                            <input type="number" class="form-control" id="maximumPassager" name="maximumPassager" 
-                                value="<%= vehicule != null ? vehicule.getMaximumPassager() : "" %>" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="capaciteCarburant" class="form-label">Capacité Carburant</label>
-                            <input type="number" step="0.01" class="form-control" id="capaciteCarburant" name="capaciteCarburant" 
-                                value="<%= vehicule != null && vehicule.getCapaciteCarburant() != null ? vehicule.getCapaciteCarburant() : "" %>">
-                        </div>
-                        <div class="mb-3">
-                            <label for="depenseCarburant100km" class="form-label">Dépense / 100km</label>
-                            <input type="number" step="0.01" class="form-control" id="depenseCarburant100km" name="depenseCarburant100km" 
-                                value="<%= vehicule != null && vehicule.getDepenseCarburant100km() != null ? vehicule.getDepenseCarburant100km() : "" %>">
-                        </div>
-                        <div class="mb-3">
-                            <label for="idType" class="form-label">Type Véhicule</label>
-                            <select class="form-control" id="idType" name="idType" required>
-                                <option value="">Choisir...</option>
-                                <% if (vehiculeTypes != null) {
-                                    for (TypeObjectDTO type : vehiculeTypes) { %>
-                                        <option value="<%= type.getId() %>" 
-                                            <%= (vehicule != null && vehicule.getVehiculeType() != null && vehicule.getVehiculeType().getId().equals(type.getId())) ? "selected" : "" %>>
-                                            <%= type.getLibelle() %>
-                                        </option>
-                                    <% }
-                                } %>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="idTypeCarburant" class="form-label">Type Carburant</label>
-                            <select class="form-control" id="idTypeCarburant" name="idTypeCarburant" required>
-                                <option value="">Choisir...</option>
-                                <% if (carburantTypes != null) {
-                                    for (TypeObjectDTO type : carburantTypes) { %>
-                                        <option value="<%= type.getId() %>" 
-                                            <%= (vehicule != null && vehicule.getCarburantType() != null && vehicule.getCarburantType().getId().equals(type.getId())) ? "selected" : "" %>>
-                                            <%= type.getLibelle() %>
-                                        </option>
-                                    <% }
-                                } %>
-                            </select>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary">Enregistrer</button>
-                        <a href="<%= request.getContextPath() %>/vehicules" class="btn btn-secondary">Annuler</a>
-                    </form>
-                </div>
-            </div>
+        <% if (vehicule != null || request.getParameter("action") != null && "edit".equals(request.getParameter("action"))) { %>
+        <div class="col-lg-5">
+            <jsp:include page="/WEB-INF/form/vehicule-form.jsp" />
         </div>
+        <div class="col-lg-7">
+            <% } else { %>
+            <div class="col-lg-12">
+                <% } %>
 
-        <div class="col-md-8">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Liste des Véhicules</h6>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-bordered" width="100%" cellspacing="0">
-                            <thead>
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                        <h6 class="m-0 font-weight-bold text-primary">Liste des Véhicules</h6>
+                        <span class="badge badge-info">
+                            <%= vehicules != null ? vehicules.size() : 0 %> véhicule(s)
+                        </span>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
+                                <thead class="thead-light">
                                 <tr>
-                                    <th>Immat.</th>
+                                    <th>Immatriculation</th>
                                     <th>Marque</th>
                                     <th>Modèle</th>
                                     <th>Type</th>
                                     <th>Carburant</th>
-                                    <th>Actions</th>
+                                    <th>Capacité</th>
+                                    <th class="text-center">Actions</th>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                <% if (vehicules != null) {
+                                </thead>
+                                <tbody>
+                                <% if (vehicules != null && !vehicules.isEmpty()) {
                                     for (Vehicule v : vehicules) { %>
-                                        <tr>
-                                            <td><%= v.getImmatriculation() %></td>
-                                            <td><%= v.getMarque() %></td>
-                                            <td><%= v.getModele() %></td>
-                                            <td><%= v.getVehiculeType().getLibelle() %></td>
-                                            <td><%= v.getCarburantType().getLibelle() %></td>
-                                            <td>
-                                                <a href="<%= request.getContextPath() %>/vehicules?action=edit&id=<%= v.getId() %>" class="btn btn-sm btn-info">Modifier</a>
-                                            </td>
-                                        </tr>
-                                    <% }
-                                } %>
-                            </tbody>
-                        </table>
+                                <tr>
+                                    <td>
+                                        <strong><%= v.getImmatriculation() %></strong>
+                                    </td>
+                                    <td><%= v.getMarque() %></td>
+                                    <td><%= v.getModele() %></td>
+                                    <td>
+                                                    <span class="badge badge-secondary">
+                                                        <%= v.getVehiculeType().getLibelle() %>
+                                                    </span>
+                                    </td>
+                                    <td>
+                                                    <span class="badge badge-info">
+                                                        <%= v.getCarburantType().getLibelle() %>
+                                                    </span>
+                                    </td>
+                                    <td class="text-center">
+                                        <i class="fas fa-users"></i> <%= v.getMaximumPassager() %>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-group" role="group">
+                                            <a href="<%= request.getContextPath() %>/vehicules/detail?id=<%= v.getId() %>"
+                                               class="btn btn-sm btn-info"
+                                               title="Voir détails">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="<%= request.getContextPath() %>/vehicules?action=edit&id=<%= v.getId() %>"
+                                               class="btn btn-sm btn-warning"
+                                               title="Modifier">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <% }
+                                } else { %>
+                                <tr>
+                                    <td colspan="7" class="text-center text-muted">
+                                        <i class="fas fa-info-circle"></i> Aucun véhicule enregistré
+                                    </td>
+                                </tr>
+                                <% } %>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+
+    <style>
+        .table thead th {
+            border-bottom: 2px solid #dee2e6;
+            font-weight: 600;
+        }
+
+        .btn-group .btn {
+            margin: 0 2px;
+        }
+
+        .badge {
+            padding: 0.35em 0.65em;
+            font-size: 0.875rem;
+        }
+    </style>

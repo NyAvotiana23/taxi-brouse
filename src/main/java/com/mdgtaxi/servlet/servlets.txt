@@ -1,7 +1,12 @@
 ﻿package com.mdgtaxi.servlet;
 
-import com.mdgtaxi.entity.Chauffeur;
+import com.mdgtaxi.dto.MouvementStatusDto;
+import com.mdgtaxi.dto.StatusObjectDto;
+import com.mdgtaxi.entity.ChauffeurMouvementStatut;
 import com.mdgtaxi.service.ChauffeurService;
+import com.mdgtaxi.service.MouvementStatusCreateService;
+import com.mdgtaxi.service.MouvementStatusService;
+import com.mdgtaxi.service.StatusService;
 import com.mdgtaxi.view.VmChauffeurActivite;
 import com.mdgtaxi.view.VmChauffeurDetail;
 import jakarta.servlet.ServletException;
@@ -11,26 +16,106 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @WebServlet("/chauffeures/detail")
 public class ChauffeurDetailServlet extends HttpServlet {
 
     private final ChauffeurService chauffeurService = new ChauffeurService();
+    private final MouvementStatusService mouvementStatusService = new MouvementStatusService();
+    private final MouvementStatusCreateService mouvementStatusCreateService = new MouvementStatusCreateService();
+    private final StatusService statusService = new StatusService();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        Long id = Long.parseLong(req.getParameter("id"));
-        Chauffeur chauffeur = chauffeurService.getChauffeurById(id);
+        String idParam = req.getParameter("id");
 
-        req.setAttribute("chauffeur", chauffeur);
+        if (idParam == null || idParam.isEmpty()) {
+            resp.sendRedirect(req.getContextPath() + "/chauffeures");
+            return;
+        }
+
+        Long id = Long.parseLong(idParam);
+        loadChauffeurDetails(req, id);
 
         req.getRequestDispatcher("/chauffeur-detail.jsp").forward(req, resp);
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String action = req.getParameter("action");
+        String idParam = req.getParameter("id");
+
+        if (idParam == null || idParam.isEmpty()) {
+            resp.sendRedirect(req.getContextPath() + "/chauffeures");
+            return;
+        }
+
+        Long id = Long.parseLong(idParam);
+
+        try {
+            if ("changeStatut".equals(action)) {
+                handleChangeStatut(req, id);
+            }
+
+            resp.sendRedirect(req.getContextPath() + "/chauffeures/detail?id=" + id);
+        } catch (Exception e) {
+            req.setAttribute("error", "Erreur: " + e.getMessage());
+            loadChauffeurDetails(req, id);
+            req.getRequestDispatcher("/chauffeur-detail.jsp").forward(req, resp);
+        }
+    }
+
+    private void loadChauffeurDetails(HttpServletRequest req, Long id) {
+        // Load chauffeur detail view
+        VmChauffeurDetail detail = chauffeurService.getChauffeurDetailById(id);
+        req.setAttribute("detail", detail);
+
+        // Load chauffeur activity
+        VmChauffeurActivite activite = chauffeurService.getChauffeurActivite(id);
+        req.setAttribute("activite", activite);
+
+        // Load current status
+        MouvementStatusDto currentStatus = mouvementStatusService.getCurrentStatus("Chauffeur", id);
+        req.setAttribute("currentStatus", currentStatus);
+
+        // Load status history
+        List<MouvementStatusDto> statusHistory = mouvementStatusService.getStatusHistory("Chauffeur", id);
+        req.setAttribute("statusHistory", statusHistory);
+
+        // Load available statuses
+        List<StatusObjectDto> availableStatuts = statusService.findAllStatuses("Chauffeur");
+        req.setAttribute("availableStatuts", availableStatuts);
+    }
+
+    private void handleChangeStatut(HttpServletRequest req, Long chauffeurId) {
+        Long idStatut = Long.valueOf(req.getParameter("idStatut"));
+        String observation = req.getParameter("observation");
+        String dateChangementStr = req.getParameter("dateChangement");
+
+        LocalDateTime dateChangement;
+        if (dateChangementStr != null && !dateChangementStr.isEmpty()) {
+            dateChangement = LocalDateTime.parse(dateChangementStr);
+        } else {
+            dateChangement = LocalDateTime.now();
+        }
+
+        mouvementStatusCreateService.createMouvementStatut(
+                "Chauffeur",
+                chauffeurId,
+                idStatut,
+                dateChangement,
+                observation
+        );
     }
 }
 package com.mdgtaxi.servlet;
 
+import com.mdgtaxi.dto.StatusObjectDto;
 import com.mdgtaxi.entity.Chauffeur;
 import com.mdgtaxi.service.ChauffeurService;
+import com.mdgtaxi.service.StatusService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -45,17 +130,23 @@ import java.util.List;
 public class ChauffeurServlet extends HttpServlet {
 
     private final ChauffeurService chauffeurService = new ChauffeurService();
+    private final StatusService statusService = new StatusService();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String action = req.getParameter("action");
 
+        // Load reference data
+        loadReferenceData(req);
+
         if ("edit".equals(action)) {
-            Long id = Long.valueOf(req.getParameter("id"));
-            Chauffeur chauffeur = chauffeurService.getChauffeurById(id);
-            req.setAttribute("chauffeur", chauffeur);
+            handleEdit(req);
+        } else if ("view".equals(action)) {
+            handleView(req, resp);
+            return;
         }
 
+        // Load all chauffeurs
         List<Chauffeur> chauffeurs = chauffeurService.getAllChauffeurs();
         req.setAttribute("chauffeurs", chauffeurs);
 
@@ -64,29 +155,64 @@ public class ChauffeurServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String idStr = req.getParameter("id");
-        String nom = req.getParameter("nom");
-        String prenom = req.getParameter("prenom");
-        LocalDate dateNaissance = LocalDate.parse(req.getParameter("dateNaissance"));
-        String numeroPermis = req.getParameter("numeroPermis");
+        try {
+            Chauffeur chauffeur = buildChauffeurFromRequest(req);
 
-        Chauffeur chauffeur = new Chauffeur();
+            if (chauffeur.getId() == null) {
+                chauffeurService.createChauffeur(chauffeur);
+            } else {
+                chauffeurService.updateChauffeur(chauffeur);
+            }
+
+            resp.sendRedirect(req.getContextPath() + "/chauffeures");
+        } catch (Exception e) {
+            req.setAttribute("error", "Erreur lors de l'enregistrement: " + e.getMessage());
+            loadReferenceData(req);
+            req.getRequestDispatcher("/chauffeures.jsp").forward(req, resp);
+        }
+    }
+
+    private void handleEdit(HttpServletRequest req) {
+        String idParam = req.getParameter("id");
+        if (idParam != null && !idParam.isEmpty()) {
+            Long id = Long.valueOf(idParam);
+            Chauffeur chauffeur = chauffeurService.getChauffeurById(id);
+            req.setAttribute("chauffeur", chauffeur);
+        }
+    }
+
+    private void handleView(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String idParam = req.getParameter("id");
+        if (idParam != null && !idParam.isEmpty()) {
+            req.setAttribute("id", idParam);
+            req.getRequestDispatcher("/chauffeur-detail.jsp").forward(req, resp);
+        } else {
+            resp.sendRedirect(req.getContextPath() + "/chauffeures");
+        }
+    }
+
+    private void loadReferenceData(HttpServletRequest req) {
+        List<StatusObjectDto> chauffeurStatuts = statusService.findAllStatuses("Chauffeur");
+        req.setAttribute("chauffeurStatuts", chauffeurStatuts);
+    }
+
+    private Chauffeur buildChauffeurFromRequest(HttpServletRequest req) {
+        String idStr = req.getParameter("id");
+        Chauffeur chauffeur;
+
         if (idStr != null && !idStr.isEmpty()) {
             chauffeur = chauffeurService.getChauffeurById(Long.valueOf(idStr));
-        }
-
-        chauffeur.setNom(nom);
-        chauffeur.setPrenom(prenom);
-        chauffeur.setDateNaissance(dateNaissance);
-        chauffeur.setNumeroPermis(numeroPermis);
-
-        if (chauffeur.getId() == null) {
-            chauffeurService.createChauffeur(chauffeur);
         } else {
-            chauffeurService.updateChauffeur(chauffeur);
+            chauffeur = new Chauffeur();
         }
 
-        resp.sendRedirect(req.getContextPath() + "/chauffeures");
+        // Set fields
+        chauffeur.setNom(req.getParameter("nom"));
+        chauffeur.setPrenom(req.getParameter("prenom"));
+        chauffeur.setDateNaissance(LocalDate.parse(req.getParameter("dateNaissance")));
+        chauffeur.setNumeroPermis(req.getParameter("numeroPermis"));
+
+        return chauffeur;
     }
 }
 package com.mdgtaxi.servlet;
@@ -438,7 +564,13 @@ public class TrajetServlet extends HttpServlet {
 }
 package com.mdgtaxi.servlet;
 
+import com.mdgtaxi.dto.MouvementStatusDto;
+import com.mdgtaxi.dto.StatusObjectDto;
 import com.mdgtaxi.entity.VehiculeEntretien;
+import com.mdgtaxi.entity.VehiculeStatut;
+import com.mdgtaxi.service.MouvementStatusCreateService;
+import com.mdgtaxi.service.MouvementStatusService;
+import com.mdgtaxi.service.StatusService;
 import com.mdgtaxi.service.VehiculeService;
 import com.mdgtaxi.view.VmVehiculeCoutEntretien;
 import com.mdgtaxi.view.VmVehiculeDetail;
@@ -449,33 +581,141 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @WebServlet("/vehicules/detail")
 public class VehiculeDetailServlet extends HttpServlet {
 
     private final VehiculeService vehiculeService = new VehiculeService();
+    private final MouvementStatusService mouvementStatusService = new MouvementStatusService();
+    private final MouvementStatusCreateService mouvementStatusCreateService = new MouvementStatusCreateService();
+    private final StatusService statusService = new StatusService();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        Long id = Long.parseLong(req.getParameter("id"));
-        VmVehiculeDetail detail = vehiculeService.getVehiculeDetail(id);
-        VmVehiculeCoutEntretien cout = vehiculeService.getCoutEntretien(id);
-        List<VehiculeEntretien> entretiens = vehiculeService.getEntretiensByVehicule(id);
+        String idParam = req.getParameter("id");
 
-        req.setAttribute("detail", detail);
-        req.setAttribute("cout", cout);
-        req.setAttribute("entretiens", entretiens);
+        if (idParam == null || idParam.isEmpty()) {
+            resp.sendRedirect(req.getContextPath() + "/vehicules");
+            return;
+        }
+
+        Long id = Long.parseLong(idParam);
+        loadVehiculeDetails(req, id);
 
         req.getRequestDispatcher("/vehicule-detail.jsp").forward(req, resp);
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String action = req.getParameter("action");
+        String idParam = req.getParameter("id");
+
+        if (idParam == null || idParam.isEmpty()) {
+            resp.sendRedirect(req.getContextPath() + "/vehicules");
+            return;
+        }
+
+        Long id = Long.parseLong(idParam);
+
+        try {
+            if ("changeStatut".equals(action)) {
+                handleChangeStatut(req, id);
+            } else if ("addEntretien".equals(action)) {
+                handleAddEntretien(req, id);
+            }
+
+            resp.sendRedirect(req.getContextPath() + "/vehicules/detail?id=" + id);
+        } catch (Exception e) {
+            req.setAttribute("error", "Erreur: " + e.getMessage());
+            loadVehiculeDetails(req, id);
+            req.getRequestDispatcher("/vehicule-detail.jsp").forward(req, resp);
+        }
+    }
+
+    private void loadVehiculeDetails(HttpServletRequest req, Long id) {
+        // Load vehicle detail
+        VmVehiculeDetail detail = vehiculeService.getVehiculeDetail(id);
+        req.setAttribute("detail", detail);
+
+        // Load maintenance cost
+        VmVehiculeCoutEntretien cout = vehiculeService.getCoutEntretien(id);
+        req.setAttribute("cout", cout);
+
+        // Load maintenance history
+        List<VehiculeEntretien> entretiens = vehiculeService.getEntretiensByVehicule(id);
+        req.setAttribute("entretiens", entretiens);
+
+        // Load current status
+        MouvementStatusDto currentStatus = mouvementStatusService.getCurrentStatus("Vehicule", id);
+        req.setAttribute("currentStatus", currentStatus);
+
+        // Load status history
+        List<MouvementStatusDto> statusHistory = mouvementStatusService.getStatusHistory("Vehicule", id);
+        req.setAttribute("statusHistory", statusHistory);
+
+        // Load available statuses
+        List<StatusObjectDto> availableStatuts = statusService.findAllStatuses("Vehicule");
+        req.setAttribute("availableStatuts", availableStatuts);
+    }
+
+    private void handleChangeStatut(HttpServletRequest req, Long vehiculeId) {
+        Long idStatut = Long.valueOf(req.getParameter("idStatut"));
+        String observation = req.getParameter("observation");
+        String dateChangementStr = req.getParameter("dateChangement");
+
+        LocalDateTime dateChangement;
+        if (dateChangementStr != null && !dateChangementStr.isEmpty()) {
+            dateChangement = LocalDateTime.parse(dateChangementStr);
+        } else {
+            dateChangement = LocalDateTime.now();
+        }
+
+        mouvementStatusCreateService.createMouvementStatut(
+                "Vehicule",
+                vehiculeId,
+                idStatut,
+                dateChangement,
+                observation
+        );
+    }
+
+    private void handleAddEntretien(HttpServletRequest req, Long vehiculeId) {
+        VehiculeEntretien entretien = new VehiculeEntretien();
+
+        com.mdgtaxi.entity.Vehicule vehicule = new com.mdgtaxi.entity.Vehicule();
+        vehicule.setId(vehiculeId);
+        entretien.setVehicule(vehicule);
+
+        entretien.setMotif(req.getParameter("motif"));
+        entretien.setMontantDepense(new BigDecimal(req.getParameter("montantDepense")));
+
+        String dateDebutStr = req.getParameter("dateDebutEntretien");
+        if (dateDebutStr != null && !dateDebutStr.isEmpty()) {
+            entretien.setDateDebutEntretien(LocalDateTime.parse(dateDebutStr));
+        } else {
+            entretien.setDateDebutEntretien(LocalDateTime.now());
+        }
+
+        String dateFinStr = req.getParameter("dateFinEntretien");
+        if (dateFinStr != null && !dateFinStr.isEmpty()) {
+            entretien.setDateFinEntretien(LocalDateTime.parse(dateFinStr));
+        }
+
+        vehiculeService.addEntretien(entretien);
     }
 }
 package com.mdgtaxi.servlet;
 
+import com.mdgtaxi.dto.StatusObjectDto;
 import com.mdgtaxi.dto.TypeObjectDTO;
 import com.mdgtaxi.entity.CarburantType;
 import com.mdgtaxi.entity.Vehicule;
 import com.mdgtaxi.entity.VehiculeType;
+import com.mdgtaxi.service.StatusService;
 import com.mdgtaxi.service.TypeObjectService;
 import com.mdgtaxi.service.VehiculeService;
 import jakarta.servlet.ServletException;
@@ -493,66 +733,113 @@ public class VehiculeServlet extends HttpServlet {
 
     private final VehiculeService vehiculeService = new VehiculeService();
     private final TypeObjectService typeObjectService = new TypeObjectService();
+    private final StatusService statusService = new StatusService();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String action = req.getParameter("action");
 
+        // Load reference data for dropdowns
+        loadReferenceData(req);
+
         if ("edit".equals(action)) {
-            Long id = Long.valueOf(req.getParameter("id"));
-            Vehicule vehicule = vehiculeService.getVehiculeById(id);
-            req.setAttribute("vehicule", vehicule);
+            handleEdit(req);
+        } else if ("view".equals(action)) {
+            handleView(req, resp);
+            return;
         }
 
+        // Load all vehicles for the list
         List<Vehicule> vehicules = vehiculeService.getAllVehicules();
-        List<TypeObjectDTO> vehiculeTypes = typeObjectService.findAllTypeObject("Vehicule_Type");
-        List<TypeObjectDTO> carburantTypes = typeObjectService.findAllTypeObject("Carburant_Type");
-
         req.setAttribute("vehicules", vehicules);
-        req.setAttribute("vehiculeTypes", vehiculeTypes);
-        req.setAttribute("carburantTypes", carburantTypes);
 
         req.getRequestDispatcher("/vehicules.jsp").forward(req, resp);
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String idStr = req.getParameter("id");
-        String marque = req.getParameter("marque");
-        String modele = req.getParameter("modele");
-        String immatriculation = req.getParameter("immatriculation");
-        Integer maximumPassager = Integer.valueOf(req.getParameter("maximumPassager"));
-        BigDecimal capaciteCarburant = new BigDecimal(req.getParameter("capaciteCarburant"));
-        BigDecimal depenseCarburant100km = new BigDecimal(req.getParameter("depenseCarburant100km"));
-        Long idType = Long.valueOf(req.getParameter("idType"));
-        Long idTypeCarburant = Long.valueOf(req.getParameter("idTypeCarburant"));
+        try {
+            Vehicule vehicule = buildVehiculeFromRequest(req);
 
-        Vehicule vehicule = new Vehicule();
+            if (vehicule.getId() == null) {
+                vehiculeService.createVehicule(vehicule);
+            } else {
+                vehiculeService.updateVehicule(vehicule);
+            }
+
+            resp.sendRedirect(req.getContextPath() + "/vehicules");
+        } catch (Exception e) {
+            req.setAttribute("error", "Erreur lors de l'enregistrement: " + e.getMessage());
+            loadReferenceData(req);
+            req.getRequestDispatcher("/vehicules.jsp").forward(req, resp);
+        }
+    }
+
+    private void handleEdit(HttpServletRequest req) {
+        String idParam = req.getParameter("id");
+        if (idParam != null && !idParam.isEmpty()) {
+            Long id = Long.valueOf(idParam);
+            Vehicule vehicule = vehiculeService.getVehiculeById(id);
+            req.setAttribute("vehicule", vehicule);
+        }
+    }
+
+    private void handleView(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String idParam = req.getParameter("id");
+        if (idParam != null && !idParam.isEmpty()) {
+            req.setAttribute("id", idParam);
+            req.getRequestDispatcher("/vehicule-detail.jsp").forward(req, resp);
+        } else {
+            resp.sendRedirect(req.getContextPath() + "/vehicules");
+        }
+    }
+
+    private void loadReferenceData(HttpServletRequest req) {
+        List<TypeObjectDTO> vehiculeTypes = typeObjectService.findAllTypeObject("Vehicule_Type");
+        List<TypeObjectDTO> carburantTypes = typeObjectService.findAllTypeObject("Carburant_Type");
+        List<StatusObjectDto> vehiculeStatuts = statusService.findAllStatuses("Vehicule");
+
+        req.setAttribute("vehiculeTypes", vehiculeTypes);
+        req.setAttribute("carburantTypes", carburantTypes);
+        req.setAttribute("vehiculeStatuts", vehiculeStatuts);
+    }
+
+    private Vehicule buildVehiculeFromRequest(HttpServletRequest req) {
+        String idStr = req.getParameter("id");
+        Vehicule vehicule;
+
         if (idStr != null && !idStr.isEmpty()) {
             vehicule = vehiculeService.getVehiculeById(Long.valueOf(idStr));
+        } else {
+            vehicule = new Vehicule();
         }
 
-        vehicule.setMarque(marque);
-        vehicule.setModele(modele);
-        vehicule.setImmatriculation(immatriculation);
-        vehicule.setMaximumPassager(maximumPassager);
-        vehicule.setCapaciteCarburant(capaciteCarburant);
-        vehicule.setDepenseCarburant100km(depenseCarburant100km);
+        // Set basic fields
+        vehicule.setMarque(req.getParameter("marque"));
+        vehicule.setModele(req.getParameter("modele"));
+        vehicule.setImmatriculation(req.getParameter("immatriculation"));
+        vehicule.setMaximumPassager(Integer.valueOf(req.getParameter("maximumPassager")));
 
-        VehiculeType type = new VehiculeType();
-        type.setId(idType);
-        vehicule.setVehiculeType(type);
+        // Set optional numeric fields
+        String capaciteCarburant = req.getParameter("capaciteCarburant");
+        if (capaciteCarburant != null && !capaciteCarburant.isEmpty()) {
+            vehicule.setCapaciteCarburant(new BigDecimal(capaciteCarburant));
+        }
+
+        String depenseCarburant100km = req.getParameter("depenseCarburant100km");
+        if (depenseCarburant100km != null && !depenseCarburant100km.isEmpty()) {
+            vehicule.setDepenseCarburant100km(new BigDecimal(depenseCarburant100km));
+        }
+
+        // Set relationships
+        VehiculeType vehiculeType = new VehiculeType();
+        vehiculeType.setId(Long.valueOf(req.getParameter("idType")));
+        vehicule.setVehiculeType(vehiculeType);
 
         CarburantType carburantType = new CarburantType();
-        carburantType.setId(idTypeCarburant);
+        carburantType.setId(Long.valueOf(req.getParameter("idTypeCarburant")));
         vehicule.setCarburantType(carburantType);
 
-        if (vehicule.getId() == null) {
-            vehiculeService.createVehicule(vehicule);
-        } else {
-            vehiculeService.updateVehicule(vehicule);
-        }
-
-        resp.sendRedirect(req.getContextPath() + "/vehicules");
+        return vehicule;
     }
 }
