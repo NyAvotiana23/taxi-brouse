@@ -285,7 +285,7 @@ public class ReservationService {
         }
     }
 
-    public double getTotalPaiementRecu (Long ) {
+    public double getTotalPaiementRecu (Long idReservation ) {
 
     }
 

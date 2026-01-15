@@ -71,19 +71,24 @@ public class TrajetService {
         }
     }
 
-    public double getPlaceRestante () {
+    public double getPlaceRestante (Long idTrajet) {
 
     }
 
-    public double getPlacePrise () {
+
+    public double getPlaceRestante (Long idTrajet, Long idTypePlace) {
 
     }
 
-    public double getPrevisionChiffreAffaire () {
+    public double getPlacePrise (Long idTrajet, Long idTypePlace) {
 
     }
 
-    public double getTotalPaiementRecu () {
+    public double getPrevisionChiffreAffaire (Long idTrajet) {
+
+    }
+
+    public double getTotalPaiementRecu (Long idTrajet) {
 
     }
 

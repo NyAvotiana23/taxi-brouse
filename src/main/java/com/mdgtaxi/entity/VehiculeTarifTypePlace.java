@@ -7,15 +7,15 @@ import javax.persistence.*;
 
 @Data
 @Entity
-@Table(name = "Trajet_Tarif_Type_Place")
-public class TrajetTarifTypePlace {
+@Table(name = "Vehicule_Tarif_Type_Place")
+public class VehiculeTarifTypePlace {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "id_trajet", nullable = false)
-    private Trajet trajet;
+    @JoinColumn(name = "id_voiture", nullable = false)
+    private Vehicule vehicule;
 
     @ManyToOne
     @JoinColumn(name = "id_type_place", nullable = false)
@@ -24,5 +24,6 @@ public class TrajetTarifTypePlace {
     @Column(name = "tarif_unitaire", nullable = false, unique = true)
     private double tarifUnitaire;
 
+    @Column(name = "nombre_place", nullable = false, unique = true)
     private double nombrePlace;
 }

@@ -174,6 +174,14 @@ public class VehiculeService {
         }
     }
 
+    public double getTotalMaxChiffreAffairePossible (Long idVoiture) {
+
+    }
+
+    public double getTotalMaxChiffreAffairePossible (Long idVoiture, Long idTypePlace) {
+
+    }
+
     public VehiculeMouvementStatut changeStatut(VehiculeMouvementStatut mouvement) {
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
