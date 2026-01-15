@@ -432,7 +432,7 @@ public class ReservationDetailServlet extends HttpServlet {
         Long id = Long.parseLong(idParam);
         loadReservationDetails(req, id);
 
-        req.getRequestDispatcher("/reservation-detail-content.jsp").forward(req, resp);
+        req.getRequestDispatcher("/reservation-detail.jsp").forward(req, resp);
     }
 
     @Override
@@ -478,7 +478,7 @@ public class ReservationDetailServlet extends HttpServlet {
         List<Trajet> trajets = trajetService.getAllTrajets(); // For form if needed
         req.setAttribute("trajets", trajets);
 
-        List<StatusObjectDto> reservationStatuts = statusService.findAllStatuses("Reservation");
+        List<StatusObjectDto> reservationStatuts = statusService.findAllStatuses("Trajet_Reservation");
         req.setAttribute("reservationStatuts", reservationStatuts);
 
         // Assuming ModePaiement is a TypeObject, or adjust service accordingly

@@ -14,7 +14,7 @@ public class VehiculeTarifTypePlace {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "id_voiture", nullable = false)
+    @JoinColumn(name = "id_vehicule", nullable = false)
     private Vehicule vehicule;
 
     @ManyToOne

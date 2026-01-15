@@ -393,27 +393,6 @@ public class ModePaiement implements Serializable {
 }
 package com.mdgtaxi.entity;
 
-
-import lombok.Data;
-
-import javax.persistence.*;
-
-@Data
-@Entity
-@Table(name = "Place")
-public class Place {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(name = "libelle", nullable = false, unique = true)
-    private String nom;
-
-    @Column(name = "description", nullable = false, unique = true)
-    private String description;
-}
-package com.mdgtaxi.entity;
-
 import lombok.Data;
 
 import javax.persistence.*;
@@ -603,8 +582,7 @@ public class Trajet implements Serializable {
     @Column(name = "datetime_arrivee")
     private LocalDateTime datetimeArrivee;
 
-    @Column(name = "frais_unitaire", nullable = false, precision = 15, scale = 2)
-    private BigDecimal fraisUnitaire;
+
 }
 package com.mdgtaxi.entity;
 
@@ -798,8 +776,6 @@ public class TrajetReservation implements Serializable {
     @JoinColumn(name = "id_reservation_statut", nullable = false)
     private ReservationStatut reservationStatut;
 
-    @Column(name = "numero_siege")
-    private String numeroSiege;
 
     @Column(name = "nom_passager", nullable = false)
     private String nomPassager;
@@ -808,8 +784,32 @@ public class TrajetReservation implements Serializable {
     @Column(name = "date_reservation", nullable = false)
     private LocalDateTime dateReservation;
 
-    @Column(name = "nombre_place_reservation", nullable = false)
-    private Integer nombrePlaceReservation;
+}
+package com.mdgtaxi.entity;
+
+import lombok.Data;
+
+import javax.persistence.*;
+
+@Data
+@Entity
+@Table(name = "Trajet_Reservation_Details")
+public class TrajetReservationDetails {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "id_trajet_reservation", nullable = false)
+    private TrajetReservation trajetReservation;
+
+    @ManyToOne
+    @JoinColumn(name = "id_type_place", nullable = false)
+    private TypePlace typePlace;
+
+    @Column(name = "nombre_places", nullable = false)
+    private double nombrePlaces;
+
 }
 package com.mdgtaxi.entity;
 
@@ -907,10 +907,6 @@ public class TrajetStatut implements Serializable {
 }
 package com.mdgtaxi.entity;
 
-public class TrajetTarif {
-}
-package com.mdgtaxi.entity;
-
 import lombok.Data;
 
 import javax.persistence.*;
@@ -944,6 +940,27 @@ public class TypeMouvement implements Serializable {
 
     @Column(name = "libelle", nullable = false, unique = true)
     private String libelle;
+}
+package com.mdgtaxi.entity;
+
+
+import lombok.Data;
+
+import javax.persistence.*;
+
+@Data
+@Entity
+@Table(name = "Type_Place")
+public class TypePlace {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "nom_type_place", nullable = false, unique = true)
+    private String nomTypePlace;
+
+    @Column(name = "description", nullable = false, unique = true)
+    private String description;
 }
 package com.mdgtaxi.entity;
 
@@ -1075,6 +1092,35 @@ public class VehiculeStatut implements Serializable {
     private String spanHtml;
 
 
+}
+package com.mdgtaxi.entity;
+
+
+import lombok.Data;
+
+import javax.persistence.*;
+
+@Data
+@Entity
+@Table(name = "Vehicule_Tarif_Type_Place")
+public class VehiculeTarifTypePlace {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "id_vehicule", nullable = false)
+    private Vehicule vehicule;
+
+    @ManyToOne
+    @JoinColumn(name = "id_type_place", nullable = false)
+    private TypePlace typePlace;
+
+    @Column(name = "tarif_unitaire", nullable = false, unique = true)
+    private double tarifUnitaire;
+
+    @Column(name = "nombre_place", nullable = false, unique = true)
+    private double nombrePlace;
 }
 package com.mdgtaxi.entity;
 

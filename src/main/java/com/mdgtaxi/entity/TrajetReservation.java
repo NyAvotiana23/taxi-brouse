@@ -27,8 +27,6 @@ public class TrajetReservation implements Serializable {
     @JoinColumn(name = "id_reservation_statut", nullable = false)
     private ReservationStatut reservationStatut;
 
-    @Column(name = "numero_siege")
-    private String numeroSiege;
 
     @Column(name = "nom_passager", nullable = false)
     private String nomPassager;
@@ -37,6 +35,4 @@ public class TrajetReservation implements Serializable {
     @Column(name = "date_reservation", nullable = false)
     private LocalDateTime dateReservation;
 
-    @Column(name = "nombre_place_reservation", nullable = false)
-    private Integer nombrePlaceReservation;
 }

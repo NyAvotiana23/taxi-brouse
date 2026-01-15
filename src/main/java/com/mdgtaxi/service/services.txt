@@ -1415,6 +1415,10 @@ public class ReservationService {
         }
     }
 
+    public double getTotalPaiementRecu (Long idReservation ) {
+
+    }
+
     public TrajetReservationPaiement createPayment(TrajetReservationPaiement paiement) {
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
@@ -1710,6 +1714,27 @@ public class TrajetService {
         } finally {
             em.close();
         }
+    }
+
+    public double getPlaceRestante (Long idTrajet) {
+
+    }
+
+
+    public double getPlaceRestante (Long idTrajet, Long idTypePlace) {
+
+    }
+
+    public double getPlacePrise (Long idTrajet, Long idTypePlace) {
+
+    }
+
+    public double getPrevisionChiffreAffaire (Long idTrajet) {
+
+    }
+
+    public double getTotalPaiementRecu (Long idTrajet) {
+
     }
 
     public List<Trajet> searchTrajetsWithFilters(Map<String, Object> filters) {
@@ -2107,6 +2132,14 @@ public class VehiculeService {
         } finally {
             em.close();
         }
+    }
+
+    public double getTotalMaxChiffreAffairePossible (Long idVoiture) {
+
+    }
+
+    public double getTotalMaxChiffreAffairePossible (Long idVoiture, Long idTypePlace) {
+
     }
 
     public VehiculeMouvementStatut changeStatut(VehiculeMouvementStatut mouvement) {
