@@ -21,9 +21,9 @@ VALUES (1, 1.4, 1.5, '2026-01-01 00:00:00'),
 
 -- Additional Carburant_Type
 INSERT INTO Carburant_Type (libelle, dernier_taux)
-VALUES ('Éthanol', 1.1),
+VALUES ('Ethanol', 1.1),
        ('Hybride', 1.3),
-       ('Électrique', 0.0);
+       ('Electrique', 0.0);
 
 -- Additional Carburant_Mouvement_Taux
 INSERT INTO Carburant_Mouvement_Taux (id_carburant_type, ancien_taux, nouveau_taux, date_mouvement)
@@ -90,9 +90,9 @@ VALUES (1, '2026-01-01 00:00:00', 1, 'Initial status'),
 
 -- Vehicule_Entretien
 INSERT INTO Vehicule_Entretien (id_vehicule, motif, date_debut_entretien, date_fin_entretien, montant_depense)
-VALUES (1, 'Maintenance régulière', '2026-01-01 00:00:00', '2026-01-02 00:00:00', 100.0),
-       (2, 'Maintenance régulière', '2026-01-01 00:00:00', '2026-01-02 00:00:00', 200.0),
-       (3, 'Maintenance régulière', '2026-01-01 00:00:00', '2026-01-02 00:00:00', 300.0);
+VALUES (1, 'Maintenance reguliere', '2026-01-01 00:00:00', '2026-01-02 00:00:00', 100.0),
+       (2, 'Maintenance reguliere', '2026-01-01 00:00:00', '2026-01-02 00:00:00', 200.0),
+       (3, 'Maintenance reguliere', '2026-01-01 00:00:00', '2026-01-02 00:00:00', 300.0);
 
 -- Additional Vehicule_Type
 INSERT INTO Vehicule_Type (libelle)
@@ -103,7 +103,7 @@ VALUES ('Moto'),
 -- Additional Vehicule_Statut
 INSERT INTO Vehicule_Statut (libelle, score, span_html)
 VALUES ('En transit', 8, '<span class="badge bg-primary">En transit</span>'),
-       ('Réservé', 7, '<span class="badge bg-info">Réservé</span>'),
+       ('Reserve', 7, '<span class="badge bg-info">Reserve</span>'),
        ('En test', 6, '<span class="badge bg-secondary">En test</span>');
 
 -- Additional Vehicule
@@ -122,8 +122,8 @@ VALUES (4, '2026-02-01 00:00:00', 4, 'Changed to transit'),
 -- Additional Vehicule_Entretien
 INSERT INTO Vehicule_Entretien (id_vehicule, motif, date_debut_entretien, date_fin_entretien, montant_depense)
 VALUES (4, 'Changement d''huile', '2026-02-01 00:00:00', '2026-02-02 00:00:00', 50.0),
-       (5, 'Réparation freins', '2026-02-01 00:00:00', '2026-02-03 00:00:00', 150.0),
-       (6, 'Vérification batterie', '2026-02-01 00:00:00', '2026-02-02 00:00:00', 80.0);
+       (5, 'Reparation freins', '2026-02-01 00:00:00', '2026-02-03 00:00:00', 150.0),
+       (6, 'Verification batterie', '2026-02-01 00:00:00', '2026-02-02 00:00:00', 80.0);
 
 -- ============================================
 -- CHAUFFEUR (Drivers)
@@ -132,7 +132,7 @@ VALUES (4, 'Changement d''huile', '2026-02-01 00:00:00', '2026-02-02 00:00:00', 
 -- Chauffeur_Statut
 INSERT INTO Chauffeur_Statut (libelle, score, span_html)
 VALUES ('Actif', 10, '<span class="badge bg-success">Actif</span>'),
-       ('En congé', 5, '<span class="badge bg-warning">En congé</span>'),
+       ('En conge', 5, '<span class="badge bg-warning">En conge</span>'),
        ('Suspendu', 0, '<span class="badge bg-danger">Suspendu</span>');
 
 -- Chauffeur
@@ -151,7 +151,7 @@ VALUES (1, '2026-01-01 00:00:00', 1, 'Initial status'),
 INSERT INTO Chauffeur_Statut (libelle, score, span_html)
 VALUES ('En formation', 8, '<span class="badge bg-primary">En formation</span>'),
        ('Disponible', 9, '<span class="badge bg-success">Disponible</span>'),
-       ('Retraité', 1, '<span class="badge bg-secondary">Retraité</span>');
+       ('Retraite', 1, '<span class="badge bg-secondary">Retraite</span>');
 
 -- Additional Chauffeur
 INSERT INTO Chauffeur (nom, prenom, date_naissance, numero_permis)
@@ -258,8 +258,8 @@ VALUES (4, 1, 4),
 -- Trajet_Statut
 INSERT INTO Trajet_Statut (libelle, score, span_html)
 VALUES ('En cours', 10, '<span class="badge bg-info">En cours</span>'),
-       ('Terminé', 20, '<span class="badge bg-success">Terminé</span>'),
-       ('Annulé', 0, '<span class="badge bg-danger">Annulé</span>');
+       ('Termine', 20, '<span class="badge bg-success">Termine</span>'),
+       ('Annule', 0, '<span class="badge bg-danger">Annule</span>');
 
 -- Trajet (Adapted: Removed frais_unitaire as per entity definition)
 INSERT INTO Trajet (id_ligne, id_chauffeur, id_vehicule, nombre_passager, id_trajet_statut, datetime_depart,
@@ -296,9 +296,9 @@ VALUES (1, NULL, 1, 1, '2026-01-01 05:00:00', 10.0, 1.5),
 
 -- Additional Trajet_Statut
 INSERT INTO Trajet_Statut (libelle, score, span_html)
-VALUES ('Prévu', 5, '<span class="badge bg-warning">Prévu</span>'),
+VALUES ('Prevu', 5, '<span class="badge bg-warning">Prevu</span>'),
        ('En retard', 15, '<span class="badge bg-danger">En retard</span>'),
-       ('Avancé', 25, '<span class="badge bg-primary">Avancé</span>');
+       ('Avance', 25, '<span class="badge bg-primary">Avance</span>');
 
 -- Additional Trajet (Adapted: Removed frais_unitaire)
 INSERT INTO Trajet (id_ligne, id_chauffeur, id_vehicule, nombre_passager, id_trajet_statut, datetime_depart,
@@ -315,7 +315,7 @@ VALUES (4, '2026-02-01 00:00:00', 4, 'Scheduled'),
 
 -- Additional Trajet_Motif_Arret
 INSERT INTO Trajet_Motif_Arret (libelle)
-VALUES ('Contrôle police'),
+VALUES ('Controle police'),
        ('Pause repas'),
        ('Changement pneu');
 
@@ -352,7 +352,7 @@ VALUES (1, 'ClientDefault', '0341234567', 'default@example.com'),
 INSERT INTO Type_Client (libelle)
 VALUES ('Groupe'),
        ('VIP'),
-       ('Étudiant');
+       ('Etudiant');
 
 -- Additional Client
 INSERT INTO Client (id_type_client, nom_client, telephone, email)
@@ -366,7 +366,7 @@ VALUES (3, 'Client4', '0344567890', 'client4@example.com'),
 
 -- Type_Mouvement
 INSERT INTO Type_Mouvement (libelle)
-VALUES ('Entrée'),
+VALUES ('Entree'),
        ('Sortie');
 
 -- Mode_Paiement
@@ -384,7 +384,7 @@ VALUES ('Ajustement'),
 -- Additional Mode_Paiement
 INSERT INTO Mode_Paiement (libelle)
 VALUES ('Mobile Money'),
-       ('Chèque'),
+       ('Cheque'),
        ('Crypto');
 
 -- ============================================
@@ -393,8 +393,8 @@ VALUES ('Mobile Money'),
 
 -- Reservation_Statut
 INSERT INTO Reservation_Statut (libelle, score, span_html)
-VALUES ('Confirmée', 10, '<span class="badge bg-success">Confirmée</span>'),
-       ('Annulée', 0, '<span class="badge bg-danger">Annulée</span>'),
+VALUES ('Confirmee', 10, '<span class="badge bg-success">Confirmee</span>'),
+       ('Annulee', 0, '<span class="badge bg-danger">Annulee</span>'),
        ('En attente', 5, '<span class="badge bg-warning">En attente</span>');
 
 -- Trajet_Reservation (Adapted: Removed numero_siege and nombre_place_reservation as per entity definition)
@@ -419,9 +419,9 @@ VALUES (1, 1, NULL, 10.0, 1, '2026-01-01 00:00:00'),
 
 -- Additional Reservation_Statut
 INSERT INTO Reservation_Statut (libelle, score, span_html)
-VALUES ('Payée', 15, '<span class="badge bg-primary">Payée</span>'),
-       ('Remboursée', 2, '<span class="badge bg-info">Remboursée</span>'),
-       ('Expirée', 0, '<span class="badge bg-secondary">Expirée</span>');
+VALUES ('Payee', 15, '<span class="badge bg-primary">Payee</span>'),
+       ('Remboursee', 2, '<span class="badge bg-info">Remboursee</span>'),
+       ('Expiree', 0, '<span class="badge bg-secondary">Expiree</span>');
 
 -- Additional Trajet_Reservation (Adapted: Removed numero_siege and nombre_place_reservation)
 INSERT INTO Trajet_Reservation (id_client, id_trajet, id_reservation_statut, nom_passager,
@@ -456,9 +456,9 @@ VALUES (1, 10.0, 1, '2026-01-01 00:00:00'),
 -- Prevision_Finance
 INSERT INTO Prevision_Finance (id_trajet, id_entite_origine, table_origine, montant, id_type_mouvement, date,
                                description)
-VALUES (1, NULL, 'Trajet', 10.0, 1, '2026-01-01 00:00:00', 'Prévision pour trajet 1'),
-       (2, NULL, 'Trajet', 20.0, 1, '2026-01-01 00:00:00', 'Prévision pour trajet 2'),
-       (3, NULL, 'Trajet', 30.0, 1, '2026-01-01 00:00:00', 'Prévision pour trajet 3');
+VALUES (1, NULL, 'Trajet', 10.0, 1, '2026-01-01 00:00:00', 'Prevision pour trajet 1'),
+       (2, NULL, 'Trajet', 20.0, 1, '2026-01-01 00:00:00', 'Prevision pour trajet 2'),
+       (3, NULL, 'Trajet', 30.0, 1, '2026-01-01 00:00:00', 'Prevision pour trajet 3');
 
 -- Prevision_Trajet (Adapted: Kept frais_unitaire as per entity definition)
 INSERT INTO Prevision_Trajet (id_ligne, id_chauffeur, id_vehicule, nombre_passager, id_trajet_statut, datetime_depart,
@@ -476,9 +476,9 @@ VALUES (4, 40.0, 3, '2026-02-01 00:00:00'),
 -- Additional Prevision_Finance
 INSERT INTO Prevision_Finance (id_trajet, id_entite_origine, table_origine, montant, id_type_mouvement, date,
                                description)
-VALUES (4, NULL, 'Trajet', 40.0, 3, '2026-02-01 00:00:00', 'Prévision pour trajet 4'),
-       (5, NULL, 'Trajet', 50.0, 4, '2026-02-01 00:00:00', 'Prévision pour trajet 5'),
-       (6, NULL, 'Trajet', 60.0, 5, '2026-02-01 00:00:00', 'Prévision pour trajet 6');
+VALUES (4, NULL, 'Trajet', 40.0, 3, '2026-02-01 00:00:00', 'Prevision pour trajet 4'),
+       (5, NULL, 'Trajet', 50.0, 4, '2026-02-01 00:00:00', 'Prevision pour trajet 5'),
+       (6, NULL, 'Trajet', 60.0, 5, '2026-02-01 00:00:00', 'Prevision pour trajet 6');
 
 -- Additional Prevision_Trajet
 INSERT INTO Prevision_Trajet (id_ligne, id_chauffeur, id_vehicule, nombre_passager, id_trajet_statut, datetime_depart,
@@ -493,22 +493,25 @@ VALUES (4, 4, 4, 2, 4, '2026-02-01 00:00:00', '2026-02-01 12:00:00', 40.0),
 
 -- Type_Place
 INSERT INTO Type_Place (nom_type_place, description)
-VALUES ('Premium', 'Siège premium avec confort accru et espace supplémentaire'),
-       ('Standard', 'Siège standard pour un voyage économique');
+VALUES ('Premium', 'Siege premium avec confort accru et espace supplementaire'),
+       ('Standard', 'Siege standard pour un voyage economique');
 
 -- Additional Type_Place (Examples)
 INSERT INTO Type_Place (nom_type_place, description)
-VALUES ('VIP', 'Siège VIP avec services exclusifs'),
-       ('Économique', 'Siège basique pour budgets limités');
+VALUES ('VIP', 'Siege VIP avec services exclusifs'),
+       ('Economique', 'Siege basique pour budgets limites');
 
 -- ============================================
 -- VEHICULE_TARIF_TYPE_PLACE (New: Added as per request, with tariffs 140000 for Premium, 80000 for Standard)
 -- ============================================
 
+-- Note: If there is a unique constraint on tarif_unitaire causing errors, remove it from the schema as it prevents multiple entries with the same tariff.
+-- Assuming the constraint is removed, the following will work.
+
 -- Vehicule_Tarif_Type_Place (Associating to vehicles 1-6, with sample nombre_place)
 INSERT INTO Vehicule_Tarif_Type_Place (id_vehicule, id_type_place, tarif_unitaire, nombre_place)
-VALUES (1, 1, 140000.0, 2.0),  -- Premium for Vehicle 1
-       (1, 2, 80000.0, 3.0),   -- Standard for Vehicle 1
+VALUES (1, 1, 140000.0, 2.0), -- Premium for Vehicle 1
+       (1, 2, 80000.0, 3.0),  -- Standard for Vehicle 1
        (2, 1, 140000.0, 5.0),
        (2, 2, 80000.0, 15.0),
        (3, 1, 140000.0, 1.0),
@@ -526,8 +529,8 @@ VALUES (1, 1, 140000.0, 2.0),  -- Premium for Vehicle 1
 
 -- Trajet_Reservation_Details (Associating to reservations 1-6, with sample nombre_places)
 INSERT INTO Trajet_Reservation_Details (id_trajet_reservation, id_type_place, nombre_places)
-VALUES (1, 1, 1.0),  -- Premium for Reservation 1
-       (1, 2, 0.0),  -- No Standard
+VALUES (1, 1, 1.0), -- Premium for Reservation 1
+       (1, 2, 0.0), -- No Standard
        (2, 1, 2.0),
        (2, 2, 3.0),
        (3, 1, 0.0),

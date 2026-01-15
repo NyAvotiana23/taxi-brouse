@@ -21,9 +21,9 @@ public class VehiculeTarifTypePlace {
     @JoinColumn(name = "id_type_place", nullable = false)
     private TypePlace typePlace;
 
-    @Column(name = "tarif_unitaire", nullable = false, unique = true)
+    @Column(name = "tarif_unitaire", nullable = false)
     private double tarifUnitaire;
 
-    @Column(name = "nombre_place", nullable = false, unique = true)
+    @Column(name = "nombre_place", nullable = false)
     private double nombrePlace;
 }

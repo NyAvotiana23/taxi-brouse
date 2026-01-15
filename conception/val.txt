@@ -1,1564 +1,605 @@
-<DOCUMENT filename="entities.txt">
-﻿package com.mdgtaxi.entity;
-
-import lombok.Data;
-
-import javax.persistence.*;
-import java.io.Serializable;
-import java.math.BigDecimal;
-
-@Data
-@Entity
-@Table(name = "Caisse")
-public class Caisse implements Serializable {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @ManyToOne
-    @JoinColumn(name = "id_caisse_type", nullable = false)
-    private CaisseType caisseType;
-
-    @Column(name = "nom", nullable = false, unique = true)
-    private String nom;
-
-    @Column(name = "solde_initial", nullable = false, precision = 15, scale = 2)
-    private BigDecimal soldeInitial;
-}
-package com.mdgtaxi.entity;
-
-import lombok.Data;
-
-import javax.persistence.*;
-import java.io.Serializable;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-
-@Data
-@Entity
-@Table(name = "Caisse_Mouvement")
-public class CaisseMouvement implements Serializable {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @ManyToOne
-    @JoinColumn(name = "id_caisse", nullable = false)
-    private Caisse caisse;
-
-    @Column(name = "id_entite_origine")
-    private Long idEntiteOrigine;
-
-    @Column(name = "table_origine")
-    private String tableOrigine;
-
-    @ManyToOne
-    @JoinColumn(name = "id_type_mouvement", nullable = false)
-    private TypeMouvement typeMouvement;
-
-    @Column(name = "montant", nullable = false, precision = 15, scale = 2)
-    private BigDecimal montant;
-
-    @Column(name = "motif")
-    private String motif;
-
-    @Column(name = "date_mouvement", nullable = false)
-    private LocalDateTime dateMouvement;
-}
-package com.mdgtaxi.entity;
-
-import lombok.Data;
-
-import javax.persistence.*;
-import java.io.Serializable;
-
-@Data
-@Entity
-@Table(name = "Caisse_Type")
-public class CaisseType implements Serializable {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(name = "libelle", nullable = false, unique = true)
-    private String libelle;
-}
-package com.mdgtaxi.entity;
-
-import lombok.Data;
-
-import javax.persistence.*;
-import java.io.Serializable;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-
-@Data
-@Entity
-@Table(name = "Carburant_Mouvement_Taux")
-public class CarburantMouvementTaux implements Serializable {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @ManyToOne
-    @JoinColumn(name = "id_carburant_type", nullable = false)
-    private CarburantType carburantType;
-
-    @Column(name = "ancien_taux", nullable = false, precision = 15, scale = 2)
-    private BigDecimal ancienTaux;
-
-    @Column(name = "nouveau_taux", nullable = false, precision = 15, scale = 2)
-    private BigDecimal nouveauTaux;
-
-    @Column(name = "date_mouvement", nullable = false)
-    private LocalDateTime dateMouvement;
-}
-package com.mdgtaxi.entity;
-
-import lombok.Data;
-
-import javax.persistence.*;
-import java.io.Serializable;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-
-@Data
-@Entity
-@Table(name = "Carburant_Type")
-public class CarburantType implements Serializable {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(name = "libelle", nullable = false, unique = true)
-    private String libelle;
-
-    @Column(name = "dernier_taux", nullable = false, precision = 15, scale = 2)
-    private BigDecimal dernierTaux;
-}
-package com.mdgtaxi.entity;
-
-import lombok.Data;
-
-import javax.persistence.*;
-import java.io.Serializable;
-import java.time.LocalDate;
-
-@Data
-@Entity
-@Table(name = "Chauffeur")
-public class Chauffeur implements Serializable {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(name = "nom", nullable = false)
-    private String nom;
-
-    @Column(name = "prenom", nullable = false)
-    private String prenom;
-
-    @Column(name = "date_naissance", nullable = false)
-    private LocalDate dateNaissance;
-
-    @Column(name = "numero_permis", nullable = false, unique = true)
-    private String numeroPermis;
-}
-package com.mdgtaxi.entity;
-
-import lombok.Data;
-
-import javax.persistence.*;
-import java.io.Serializable;
-import java.time.LocalDateTime;
-
-@Data
-@Entity
-@Table(name = "Chauffeur_Mouvement_Statut")
-public class ChauffeurMouvementStatut implements Serializable {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @ManyToOne
-    @JoinColumn(name = "id_chauffeur", nullable = false)
-    private Chauffeur chauffeur;
-
-    @Column(name = "date_mouvement", nullable = false)
-    private LocalDateTime dateMouvement;
-
-    @ManyToOne
-    @JoinColumn(name = "id_nouveau_statut", nullable = false)
-    private ChauffeurStatut nouveauStatut;
-
-    @Column(name = "observation")
-    private String observation;
-}
-package com.mdgtaxi.entity;
-
-import lombok.Data;
-
-import javax.persistence.*;
-import java.io.Serializable;
-
-@Data
-@Entity
-@Table(name = "Chauffeur_Statut")
-public class ChauffeurStatut implements Serializable {
-    @Id
-    @GeneratedValue(strategy = GenerationType.I...(truncated 17265 characters)...= false)
-    private int score;
-
-    @Column(name = "span_html", nullable= false)
-    private String spanHtml;
-
-}
-package com.mdgtaxi.entity;
-
-public class TrajetTarif {
-}
-package com.mdgtaxi.entity;
-
-import lombok.Data;
-
-import javax.persistence.*;
-import java.io.Serializable;
-
-@Data
-@Entity
-@Table(name = "Type_Client")
-public class TypeClient implements Serializable {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(name = "libelle", nullable = false, unique = true)
-    private String libelle;
-}
-package com.mdgtaxi.entity;
-
-import lombok.Data;
-
-import javax.persistence.*;
-import java.io.Serializable;
-
-@Data
-@Entity
-@Table(name = "Type_Mouvement")
-public class TypeMouvement implements Serializable {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(name = "libelle", nullable = false, unique = true)
-    private String libelle;
-}
-package com.mdgtaxi.entity;
-
-import lombok.Data;
-
-import javax.persistence.*;
-import java.io.Serializable;
-import java.math.BigDecimal;
-
-@Data
-@Entity
-@Table(name = "Vehicule")
-public class Vehicule implements Serializable {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @ManyToOne
-    @JoinColumn(name = "id_type", nullable = false)
-    private VehiculeType vehiculeType;
-
-    @ManyToOne
-    @JoinColumn(name = "id_type_carburant", nullable = false)
-    private CarburantType carburantType;
-
-    @Column(name = "marque", nullable = false)
-    private String marque;
-
-    @Column(name = "modele", nullable = false)
-    private String modele;
-
-    @Column(name = "maximum_passager", nullable = false)
-    private Integer maximumPassager;
-
-    @Column(name = "immatriculation", nullable = false, unique = true)
-    private String immatriculation;
-
-    @Column(name = "capacite_carburant", precision = 10, scale = 2)
-    private BigDecimal capaciteCarburant;
-
-    @Column(name = "depense_carburant_100km", precision = 10, scale = 2)
-    private BigDecimal depenseCarburant100km;
-}
-package com.mdgtaxi.entity;
-
-import lombok.Data;
-
-import javax.persistence.*;
-import java.io.Serializable;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-
-@Data
-@Entity
-@Table(name = "Vehicule_Entretien")
-public class VehiculeEntretien implements Serializable {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @ManyToOne
-    @JoinColumn(name = "id_vehicule", nullable = false)
-    private Vehicule vehicule;
-
-    @Column(name = "motif", nullable = false)
-    private String motif;
-
-    @Column(name = "date_debut_entretien", nullable = false)
-    private LocalDateTime dateDebutEntretien;
-
-    @Column(name = "date_fin_entretien")
-    private LocalDateTime dateFinEntretien;
-
-    @Column(name = "montant_depense", nullable = false, precision = 15, scale = 2)
-    private BigDecimal montantDepense;
-}
-package com.mdgtaxi.entity;
-
-import lombok.Data;
-
-import javax.persistence.*;
-import java.io.Serializable;
-import java.time.LocalDateTime;
-
-@Data
-@Entity
-@Table(name = "Vehicule_Mouvement_Statut")
-public class VehiculeMouvementStatut implements Serializable {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @ManyToOne
-    @JoinColumn(name = "id_vehicule", nullable = false)
-    private Vehicule vehicule;
-
-    @Column(name = "date_mouvement", nullable = false)
-    private LocalDateTime dateMouvement;
-
-    @ManyToOne
-    @JoinColumn(name = "id_nouveau_statut", nullable = false)
-    private VehiculeStatut nouveauStatut;
-
-    @Column(name = "observation")
-    private String observation;
-}
-package com.mdgtaxi.entity;
-
-import lombok.Data;
-
-import javax.persistence.*;
-import java.io.Serializable;
-
-@Data
-@Entity
-@Table(name = "Vehicule_Statut")
-public class VehiculeStatut implements Serializable {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(name = "libelle", nullable = false, unique = true)
-    private String libelle;
-
-    @Column(name = "score", nullable = false)
-    private int score;
-
-    @Column(name = "span_html", nullable= false)
-    private String spanHtml;
-
-
-}
-package com.mdgtaxi.entity;
-
-import lombok.Data;
-
-import javax.persistence.*;
-import java.io.Serializable;
-
-@Data
-@Entity
-@Table(name = "Vehicule_Type")
-public class VehiculeType implements Serializable {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(name = "libelle", nullable = false, unique = true)
-    private String libelle;
-}
-package com.mdgtaxi.entity;
-
-import lombok.Data;
-
-import javax.persistence.*;
-import java.io.Serializable;
-
-@Data
-@Entity
-@Table(name = "Ville")
-public class Ville implements Serializable {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @ManyToOne
-    @JoinColumn(name = "id_region", nullable = false)
-    private Region region;
-
-    @Column(name = "nom", nullable = false)
-    private String nom;
-}
-package com.mdgtaxi.entity;
-
-import lombok.Data;
-
-import javax.persistence.*;
-
-import java.io.Serializable;
-
-import java.math.BigDecimal;
-
-import java.time.LocalDateTime;
-
-@Data
-
-@Entity
-
-@Table(name = "Reservation_Paiement")
-
-public class ReservationPaiement implements Serializable {
-
-    @Id
-
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-
-    private Long id;
-
-    @ManyToOne
-
-    @JoinColumn(name = "id_reservation", nullable = false)
-
-    private TrajetReservation reservation;
-
-    @Column(name = "montant", nullable = false, precision = 15, scale = 2)
-
-    private BigDecimal montant;
-
-    @Column(name = "date_paiement", nullable = false)
-
-    private LocalDateTime datePaiement;
-
-    @Column(name = "mode_paiement")
-
-    private String modePaiement;
-
-    @Column(name = "reference")
-
-    private String reference;
-
-    @Column(name = "statut")
-
-    private String statut;
-
-}
-</DOCUMENT>
-
-<DOCUMENT filename="servlets.txt">
-﻿package com.mdgtaxi.servlet;
-
-import com.mdgtaxi.dto.MouvementStatusDto;
-import com.mdgtaxi.dto.StatusObjectDto;
-import com.mdgtaxi.entity.ChauffeurMouvementStatut;
-import com.mdgtaxi.service.ChauffeurService;
-import com.mdgtaxi.service.MouvementStatusCreateService;
-import com.mdgtaxi.service.MouvementStatusService;
-import com.mdgtaxi.service.StatusService;
-import com.mdgtaxi.view.VmChauffeurActivite;
-import com.mdgtaxi.view.VmChauffeurDetail;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.List;
-
-@WebServlet("/chauffeures/detail")
-public class ChauffeurDetailServlet extends HttpServlet {
-
-    private final ChauffeurService chauffeurService = new ChauffeurService();
-    private final MouvementStatusService mouvementStatusService = new MouvementStatusService();
-    private final MouvementStatusCreateService mouvementStatusCreateService = new MouvementStatusCreateService();
-    private final StatusService statusService = new StatusService();
-
-    @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String idParam = req.getParameter("id");
-
-        if (idParam == null || idParam.isEmpty()) {
-            resp.sendRedirect(req.getContextPath() + "/chauffeures");
-            return;
-        }
-
-        Long id = Long.parseLong(idParam);
-        loadChauffeurDetails(req, id);
-
-        req.getRequestDispatcher("/chauffeur-detail.jsp").forward(req, resp);
-    }
-
-    @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String action = req.getParameter("action");
-        String idParam = req.getParameter("id");
-
-        if (idParam == null || idParam.isEmpty()) {
-            resp.sendRedirect(req.getContextPath() + "/chauffeures");
-            return;
-        }
-
-        Long id = Long.parseLong(idParam);
-
-        try {
-            if ("changeStatut".equals(action)) {
-                handleChangeStatut(req, id);
-            }
-
-            resp.sendRedirect(req.getContextPath() + "/chauffeures/detail?id=" + id);
-        } catch (Exception e) {
-            req.setAttribute("error", "Erreur: " + e.getMessage());
-            loadChauffeurDetails(req, id);
-            req.getRequestDispatcher("/chauffeur-detail.jsp").forward(req, resp);
-        }
-    }
-
-    private void loadChauffeurDetails(HttpServletRequest req, Long id) {
-        // Load chauffeur detail view
-        VmChauffeurDetail detail = chauffeurService.getChauffeurDetailById(id);
-        req.setAttribute("detail", detail);
-
-        // Load chauffeur activity
-        VmChauffeurActivite activite = chauffeurService.getChauffeurActivite(id);
-        req.setAttribute("activite", activite);
-
-        // Load current status
-        MouvementStatusDto currentStatus = mouvementStatusService.getCurrentStatus("Chauffeur", id);
-        req.setAttribute("currentStatus", currentStatus);
-
-        // Load status history
-        List<MouvementStatusDto> statusHistory = mouvementStatusService.getStatusHistory("Chauffeur", id);
-        req.setAttribute("statusHistory", statusHistory);
-
-        // Load available statuses
-        List<StatusObjectDto> availableStatuts = statusService.findAllStatuses("Chauffeur");
-        req.setAttribute("availableStatuts", availableStatuts);
-    }
-
-    private void handleChangeStatut(HttpServletRequest req, Long chauffeurId) {
-        Long idStatut = Long.valueOf(req.getParameter("idStatut"));
-        String observation = req.getParameter("observation");
-        String dateChangementStr = req.getParameter("dateChangement");
-
-        LocalDateTime dateChangement;
-        if (dateChangementStr != null && !dateChangementStr.isEmpty()) {
-            dateChangement = LocalDateTime.parse(dateChangementStr);
-        } else {
-            dateChangement = LocalDateTime.now();
-        }
-
-        mouvementStatusCreateService.createMouvementStatut(
-                "Chauffeur",
-                chauffeurId,
-                idStatut,
-                dateChangement,
-                observation
-        );
-    }
-}
-package com.mdgtaxi.servlet;
-
-import com.mdgtaxi.dto.StatusObjectDto;
-import com.mdgtaxi.entity.Chauffeur;
-import com.mdgtaxi.service.ChauffeurService;
-import com.mdgtaxi.service.StatusService;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-
-import java.io.IOException;
-import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-@WebServlet("/chauffeures")
-public class ChauffeurServlet extends HttpServlet {
-
-    private final ChauffeurService chauffeurService = new ChauffeurService();
-    private final StatusService statusService = new StatusService();
-
-    @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String action = req.getParameter("action");
-
-        // Load reference data
-        loadReferenceData(req);
-
-        if ("edit".equals(action)) {
-            handleEdit(req);
-        } else if ("view".equals(action)) {
-            handleV...(truncated 32698 characters)...   try {
-                Integer max = Integer.parseInt(maximumPassagerStr);
-                filters.put("maximumPassager", max);
-            } catch (NumberFormatException e) {
-                // Ignore invalid number
-            }
-        }
-
-        String capaciteCarburantStr = req.getParameter("filter_capaciteCarburant");
-        if (capaciteCarburantStr != null && !capaciteCarburantStr.isEmpty()) {
-            try {
-                BigDecimal cap = new BigDecimal(capaciteCarburantStr);
-                filters.put("capaciteCarburant", cap);
-            } catch (NumberFormatException e) {
-                // Ignore invalid number
-            }
-        }
-
-        String depenseCarburant100kmStr = req.getParameter("filter_depenseCarburant100km");
-        if (depenseCarburant100kmStr != null && !depenseCarburant100kmStr.isEmpty()) {
-            try {
-                BigDecimal dep = new BigDecimal(depenseCarburant100kmStr);
-                filters.put("depenseCarburant100km", dep);
-            } catch (NumberFormatException e) {
-                // Ignore invalid number
-            }
-        }
-
-        String vehiculeTypeLibelle = req.getParameter("filter_vehiculeType");
-        if (vehiculeTypeLibelle != null && !vehiculeTypeLibelle.isEmpty()) {
-            filters.put("vehiculeType.libelle", vehiculeTypeLibelle);
-        }
-
-        String carburantTypeLibelle = req.getParameter("filter_carburantType");
-        if (carburantTypeLibelle != null && !carburantTypeLibelle.isEmpty()) {
-            filters.put("carburantType.libelle", carburantTypeLibelle);
-        }
-
-        // Load vehicles with filters
-        List<Vehicule> vehicules = filters.isEmpty() ? vehiculeService.getAllVehicules() : vehiculeService.searchVehiculesWithFilters(filters);
-        req.setAttribute("vehicules", vehicules);
-
-        req.getRequestDispatcher("/vehicules.jsp").forward(req, resp);
-    }
-
-    @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        try {
-            Vehicule vehicule = buildVehiculeFromRequest(req);
-
-            if (vehicule.getId() == null) {
-                vehiculeService.createVehicule(vehicule);
-            } else {
-                vehiculeService.updateVehicule(vehicule);
-            }
-
-            resp.sendRedirect(req.getContextPath() + "/vehicules");
-        } catch (Exception e) {
-            req.setAttribute("error", "Erreur lors de l'enregistrement: " + e.getMessage());
-            loadReferenceData(req);
-            req.getRequestDispatcher("/vehicules.jsp").forward(req, resp);
-        }
-    }
-
-    private void handleEdit(HttpServletRequest req) {
-        String idParam = req.getParameter("id");
-        if (idParam != null && !idParam.isEmpty()) {
-            Long id = Long.valueOf(idParam);
-            Vehicule vehicule = vehiculeService.getVehiculeById(id);
-            req.setAttribute("vehicule", vehicule);
-        }
-    }
-
-    private void handleView(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String idParam = req.getParameter("id");
-        if (idParam != null && !idParam.isEmpty()) {
-            req.setAttribute("id", idParam);
-            req.getRequestDispatcher("/vehicule-detail.jsp").forward(req, resp);
-        } else {
-            resp.sendRedirect(req.getContextPath() + "/vehicules");
-        }
-    }
-
-    private void loadReferenceData(HttpServletRequest req) {
-        List<TypeObjectDTO> vehiculeTypes = typeObjectService.findAllTypeObject("Vehicule_Type");
-        List<TypeObjectDTO> carburantTypes = typeObjectService.findAllTypeObject("Carburant_Type");
-        List<StatusObjectDto> vehiculeStatuts = statusService.findAllStatuses("Vehicule");
-
-        req.setAttribute("vehiculeTypes", vehiculeTypes);
-        req.setAttribute("carburantTypes", carburantTypes);
-        req.setAttribute("vehiculeStatuts", vehiculeStatuts);
-    }
-
-    private Vehicule buildVehiculeFromRequest(HttpServletRequest req) {
-        String idStr = req.getParameter("id");
-        Vehicule vehicule;
-
-        if (idStr != null && !idStr.isEmpty()) {
-            vehicule = vehiculeService.getVehiculeById(Long.valueOf(idStr));
-        } else {
-            vehicule = new Vehicule();
-        }
-
-        // Set basic fields
-        vehicule.setMarque(req.getParameter("marque"));
-        vehicule.setModele(req.getParameter("modele"));
-        vehicule.setImmatriculation(req.getParameter("immatriculation"));
-        vehicule.setMaximumPassager(Integer.valueOf(req.getParameter("maximumPassager")));
-
-        // Set optional numeric fields
-        String capaciteCarburant = req.getParameter("capaciteCarburant");
-        if (capaciteCarburant != null && !capaciteCarburant.isEmpty()) {
-            vehicule.setCapaciteCarburant(new BigDecimal(capaciteCarburant));
-        }
-
-        String depenseCarburant100km = req.getParameter("depenseCarburant100km");
-        if (depenseCarburant100km != null && !depenseCarburant100km.isEmpty()) {
-            vehicule.setDepenseCarburant100km(new BigDecimal(depenseCarburant100km));
-        }
-
-        // Set relationships
-        VehiculeType vehiculeType = new VehiculeType();
-        vehiculeType.setId(Long.valueOf(req.getParameter("idType")));
-        vehicule.setVehiculeType(vehiculeType);
-
-        CarburantType carburantType = new CarburantType();
-        carburantType.setId(Long.valueOf(req.getParameter("idTypeCarburant")));
-        vehicule.setCarburantType(carburantType);
-
-        return vehicule;
-    }
-}
-package com.mdgtaxi.servlet;
-
-import com.mdgtaxi.entity.ReservationPaiement;
-import com.mdgtaxi.entity.TrajetReservation;
-import com.mdgtaxi.service.PaiementService;
-import com.mdgtaxi.service.ReservationService;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.List;
-
-@WebServlet("/reservations/detail")
-public class ReservationDetailServlet extends HttpServlet {
-
-    private final ReservationService reservationService = new ReservationService();
-    private final PaiementService paiementService = new PaiementService();
-
-    @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String idParam = req.getParameter("id");
-
-        if (idParam == null || idParam.isEmpty()) {
-            resp.sendRedirect(req.getContextPath() + "/reservations");
-            return;
-        }
-
-        Long id = Long.parseLong(idParam);
-        loadReservationDetails(req, id);
-
-        req.getRequestDispatcher("/reservation-detail.jsp").forward(req, resp);
-    }
-
-    @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String action = req.getParameter("action");
-        String idParam = req.getParameter("id");
-
-        if (idParam == null || idParam.isEmpty()) {
-            resp.sendRedirect(req.getContextPath() + "/reservations");
-            return;
-        }
-
-        Long id = Long.parseLong(idParam);
-
-        try {
-            if ("addPaiement".equals(action)) {
-                handleAddPaiement(req, id);
-            }
-
-            resp.sendRedirect(req.getContextPath() + "/reservations/detail?id=" + id);
-        } catch (Exception e) {
-            req.setAttribute("error", "Erreur: " + e.getMessage());
-            loadReservationDetails(req, id);
-            req.getRequestDispatcher("/reservation-detail.jsp").forward(req, resp);
-        }
-    }
-
-    private void loadReservationDetails(HttpServletRequest req, Long id) {
-        TrajetReservation reservation = reservationService.getReservationById(id);
-        req.setAttribute("reservation", reservation);
-
-        List<ReservationPaiement> paiements = paiementService.getPaiementsByReservation(id);
-        req.setAttribute("paiements", paiements);
-
-        BigDecimal totalPaid = paiements.stream().map(ReservationPaiement::getMontant).reduce(BigDecimal.ZERO, BigDecimal::add);
-        req.setAttribute("totalPaid", totalPaid);
-    }
-
-    private void handleAddPaiement(HttpServletRequest req, Long reservationId) {
-        BigDecimal montant = new BigDecimal(req.getParameter("montant"));
-        String mode = req.getParameter("modePaiement");
-        String reference = req.getParameter("reference");
-        String statut = req.getParameter("statut");
-        LocalDateTime date = LocalDateTime.now();
-
-        TrajetReservation reservation = new TrajetReservation();
-        reservation.setId(reservationId);
-
-        ReservationPaiement paiement = new ReservationPaiement();
-        paiement.setReservation(reservation);
-        paiement.setMontant(montant);
-        paiement.setDatePaiement(date);
-        paiement.setModePaiement(mode);
-        paiement.setReference(reference);
-        paiement.setStatut(statut);
-
-        paiementService.createPaiement(paiement);
-    }
-}
-</DOCUMENT>
-
-<DOCUMENT filename="services.txt">
-﻿package com.mdgtaxi.service;
-
-import com.mdgtaxi.entity.Chauffeur;
-import com.mdgtaxi.entity.ChauffeurMouvementStatut;
-import com.mdgtaxi.util.HibernateUtil;
-import com.mdgtaxi.view.VmChauffeurActivite;
-import com.mdgtaxi.view.VmChauffeurDetail;
-
-
-
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityTransaction;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-public class ChauffeurService {
-
-    private final EntityManagerFactory emf = HibernateUtil.getEntityManagerFactory();
-
-    // CRUD Operations for Chauffeur
-
-    /**
-     * Get chauffeur detail view by ID
-     */
-    public VmChauffeurDetail getChauffeurDetailById(Long id) {
-        EntityManager em = emf.createEntityManager();
-        try {
-            return em.find(VmChauffeurDetail.class, id);
-        } finally {
-            em.close();
-        }
-    }
-
-    /**
-     * Get all chauffeur details
-     */
-    public List<VmChauffeurDetail> getAllChauffeurDetails() {
-        EntityManager em = emf.createEntityManager();
-        try {
-            TypedQuery<VmChauffeurDetail> query = em.createQuery(
-                    "SELECT cd FROM VmChauffeurDetail cd",
-                    VmChauffeurDetail.class
-            );
-            return query.getResultList();
-        } finally {
-            em.close();
-        }
-    }
-
-    /**
-     * Get chauffeur activity by ID
-     */
-    public VmChauffeurActivite getChauffeurActivite(Long id) {
-        EntityManager em = emf.createEntityManager();
-        try {
-            return em.find(VmChauffeurActivite.class, id);
-        } finally {
-            em.close();
-        }
-    }
-
-    public Chauffeur createChauffeur(Chauffeur chauffeur) {
-        EntityManager em = emf.createEntityManager();
-        EntityTransaction tx = em.getTransaction();
-        try {
-            tx.begin();
-            em.persist(chauffeur);
-            tx.commit();
-            return chauffeur;
-        } catch (Exception e) {
-            if (tx.isActive()) tx.rollback();
-            throw e;
-        } finally {
-            em.close();
-        }
-    }
-
-    public Chauffeur getChauffeurById(Long id) {
-        EntityManager em = emf.createEntityManager();
-        try {
-            return em.find(Chauffeur.class, id);
-        } finally {
-            em.close();
-        }
-    }
-
-    public List<Chauffeur> getAllChauffeurs() {
-        EntityManager em = emf.createEntityManager();
-        try {
-            TypedQuery<Chauffeur> query = em.createQuery("SELECT c FROM Chauffeur c", Chauffeur.class);
-            return query.getResultList();
-        } finally {
-            em.close();
-        }
-    }
-
-    public Chauffeur updateChauffeur(Chauffeur chauffeur) {
-        EntityManager em = emf.createEntityManager();
-        EntityTransaction tx = em.getTransaction();
-        try {
-            tx.begin();
-            Chauffeur updated = em.merge(chauffeur);
-            tx.commit();
-            return updated;
-        } catch (Exception e) {
-            if (tx.isActive()) tx.rollback();
-            throw e;
-        } finally {
-            em.close();
-        }
-    }
-
-    public void deleteChauffeur(Long id) {
-        EntityManager em = emf.createEntityManager();
-        EntityTransaction tx = em.getTransaction();
-        try {
-            tx.begin();
-            Chauffeur chauffeur = em.find(Chauffeur.class, id);
-            if (chauffeur != null) {
-                em.remove(chauffeur);
-            }
-            tx.commit();
-        } catch (Exception e) {
-            if (tx.isActive()) tx.rollback();
-            throw e;
-        } finally {
-            em.close();
-        }
-    }
-
-
-
-    // Operations for Related Entities
-
-    public ChauffeurMouvementStatut changeStatut(ChauffeurMouvementStatut mouvement) {
-        EntityManager em = emf.createEntityManager();
-        EntityTransaction tx = em.getTransaction();
-        try {
-            tx.begin();
-            em.persist(mouvement);
-            tx.commit();
-            return mouvement;
-        } catch (Exception e) {
-            if (tx.isActive()) tx.rollback();
-            throw e;
-        } finally {
-            em.close();
-        }
-    }
-
-    public List<ChauffeurMouvementStatut> getMouvementsByChauffeur(Long idChauffeur) {
-        EntityManager em = emf.createEntityManager();
-        try {
-            TypedQuery<ChauffeurMouvementStatut> query = em.createQuery(
-                    "SELECT cms FROM ChauffeurMouvementStatut cms WHERE cms.chauffeur.id = :idChauffeur ORDER BY cms.dateMouvement DESC",
-                    ChauffeurMouvementStatut.class);
-            query.setParameter("idChauffeur", idChauffeur);
-            return query.getResultList();
-        } finally {
-            em.close();
-        }
-    }
-
-
-    public List<Chauffeur> searchChauffeursWithFilters(Map<String, Object> filters) {
-        EntityManager em = emf.createEntityManager();
-        try {
-            CriteriaBuilder cb = em.getCriteriaBuilder();
-            CriteriaQuery<Chauffeur> cq = cb.createQuery(Chauffeur.class);
-            Root<Chauffeur> root = cq.from(Chauffeur.class);
-
-            List<Predicate> predicates = new ArrayList<>();
-
-            for (Map.Entry<String, Object> entry : filters.entrySet()) {
-          ...(truncated 72101 characters)...ngeStatut(VehiculeMouvementStatut mouvement) {
-        EntityManager em = emf.createEntityManager();
-        EntityTransaction tx = em.getTransaction();
-        try {
-            tx.begin();
-            em.persist(mouvement);
-            tx.commit();
-            return mouvement;
-        } catch (Exception e) {
-            if (tx.isActive()) tx.rollback();
-            throw e;
-        } finally {
-            em.close();
-        }
-    }
-
-    // Multi-filter criteria function for Vehicule (using Criteria API)
-    // Filters are provided as a Map<String, Object> where keys are field names like "marque", "modele", "immatriculation", etc.
-    // For relationships, use "vehiculeType.libelle", "carburantType.libelle"
-    // Supports exact match for strings, equality for numbers, etc.
-
-    public List<Vehicule> searchVehiculesWithFilters(Map<String, Object> filters) {
-        EntityManager em = emf.createEntityManager();
-        try {
-            CriteriaBuilder cb = em.getCriteriaBuilder();
-            CriteriaQuery<Vehicule> cq = cb.createQuery(Vehicule.class);
-            Root<Vehicule> root = cq.from(Vehicule.class);
-
-            List<Predicate> predicates = new ArrayList<>();
-
-            for (Map.Entry<String, Object> entry : filters.entrySet()) {
-                String key = entry.getKey();
-                Object value = entry.getValue();
-
-                if (value == null) continue;
-
-                switch (key) {
-                    case "marque":
-                        predicates.add(cb.equal(root.get("marque"), value));
-                        break;
-                    case "modele":
-                        predicates.add(cb.equal(root.get("modele"), value));
-                        break;
-                    case "immatriculation":
-                        predicates.add(cb.equal(root.get("immatriculation"), value));
-                        break;
-                    case "maximumPassager":
-                        predicates.add(cb.equal(root.get("maximumPassager"), value));
-                        break;
-                    case "capaciteCarburant":
-                        predicates.add(cb.equal(root.get("capaciteCarburant"), value));
-                        break;
-                    case "depenseCarburant100km":
-                        predicates.add(cb.equal(root.get("depenseCarburant100km"), value));
-                        break;
-                    case "vehiculeType.libelle":
-                        predicates.add(cb.equal(root.get("vehiculeType").get("libelle"), value));
-                        break;
-                    case "carburantType.libelle":
-                        predicates.add(cb.equal(root.get("carburantType").get("libelle"), value));
-                        break;
-                    // Add more fields as needed
-                    default:
-                        // Ignore unknown filters
-                        break;
-                }
-            }
-
-            if (!predicates.isEmpty()) {
-                cq.where(cb.and(predicates.toArray(new Predicate[0])));
-            }
-
-            TypedQuery<Vehicule> query = em.createQuery(cq);
-            return query.getResultList();
-        } finally {
-            em.close();
-        }
-    }
-}
-package com.mdgtaxi.service;
-
-import com.mdgtaxi.entity.Ville;
-import com.mdgtaxi.util.HibernateUtil;
-
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-public class VilleService {
-
-    private final EntityManagerFactory emf = HibernateUtil.getEntityManagerFactory();
-
-    public List<Ville> getAllVilles() {
-        EntityManager em = emf.createEntityManager();
-        try {
-            TypedQuery<Ville> query = em.createQuery("SELECT v FROM Ville v", Ville.class);
-            return query.getResultList();
-        } finally {
-            em.close();
-        }
-    }
-
-    public List<Ville> searchVillesWithFilters(Map<String, Object> filters) {
-        EntityManager em = emf.createEntityManager();
-        try {
-            CriteriaBuilder cb = em.getCriteriaBuilder();
-            CriteriaQuery<Ville> cq = cb.createQuery(Ville.class);
-            Root<Ville> root = cq.from(Ville.class);
-
-            List<Predicate> predicates = new ArrayList<>();
-
-            for (Map.Entry<String, Object> entry : filters.entrySet()) {
-                String key = entry.getKey();
-                Object value = entry.getValue();
-
-                if (value == null) continue;
-
-                switch (key) {
-                    case "nom":
-                        predicates.add(cb.equal(root.get("nom"), value));
-                        break;
-                    case "region.id":
-                        predicates.add(cb.equal(root.get("region").get("id"), value));
-                        break;
-                    // Add more fields as needed
-                    default:
-                        // Ignore unknown filters
-                        break;
-                }
-            }
-
-            if (!predicates.isEmpty()) {
-                cq.where(cb.and(predicates.toArray(new Predicate[0])));
-            }
-
-            TypedQuery<Ville> query = em.createQuery(cq);
-            return query.getResultList();
-        } finally {
-            em.close();
-        }
-    }
-}
-package com.mdgtaxi.service;
-
-import com.mdgtaxi.entity.ReservationPaiement;
-import com.mdgtaxi.util.HibernateUtil;
-
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityTransaction;
-import javax.persistence.TypedQuery;
-import java.util.List;
-
-public class PaiementService {
-
-    private final EntityManagerFactory emf = HibernateUtil.getEntityManagerFactory();
-
-    public List<ReservationPaiement> getPaiementsByReservation(Long reservationId) {
-        EntityManager em = emf.createEntityManager();
-        try {
-            TypedQuery<ReservationPaiement> query = em.createQuery(
-                    "SELECT p FROM ReservationPaiement p WHERE p.reservation.id = :id ORDER BY p.datePaiement DESC",
-                    ReservationPaiement.class);
-            query.setParameter("id", reservationId);
-            return query.getResultList();
-        } finally {
-            em.close();
-        }
-    }
-
-    public ReservationPaiement createPaiement(ReservationPaiement paiement) {
-        EntityManager em = emf.createEntityManager();
-        EntityTransaction tx = em.getTransaction();
-        try {
-            tx.begin();
-            em.persist(paiement);
-            tx.commit();
-            return paiement;
-        } catch (Exception e) {
-            if (tx.isActive()) tx.rollback();
-            throw e;
-        } finally {
-            em.close();
-        }
-    }
-}
-</DOCUMENT>
-
-<DOCUMENT filename="reservation-detail.jsp">
+<DOCUMENT filename="trajet-detail-content.jsp">
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<% request.setAttribute("contentPage", "/WEB-INF/content/reservation-detail-content.jsp"); %>
-<jsp:include page="/WEB-INF/layouts/main-layout.jsp" />
+<%@ page import="com.mdgtaxi.entity.*" %>
+<%@ page import="java.util.List" %>
+<%@ page import="com.mdgtaxi.dto.TypeObjectDTO" %>
+<%@ page import="java.math.BigDecimal" %>
+<%@ page import="java.util.Map" %>
+<%@ page import="java.util.HashMap" %>
+<%
+    Trajet trajet = (Trajet) request.getAttribute("trajet");
+    List<VehiculeTarifTypePlace> tarifPlaces = (List<VehiculeTarifTypePlace>) request.getAttribute("tarifPlaces");
+    Map<Long, Double> soldPerType = (Map<Long, Double>) request.getAttribute("soldPerType");
+
+    double totalPlacesPrises = 0.0;
+    double totalPlacesRestantes = 0.0;
+    double totalCA = 0.0;
+
+    if (tarifPlaces != null && soldPerType != null) {
+        for (VehiculeTarifTypePlace tp : tarifPlaces) {
+            double sold = soldPerType.getOrDefault(tp.getTypePlace().getId(), 0.0);
+            double remaining = tp.getNombrePlace() - sold;
+            double subtotal = sold * tp.getTarifUnitaire();
+
+            totalPlacesPrises += sold;
+            totalPlacesRestantes += remaining;
+            totalCA += subtotal;
+        }
+    }
+
+    List<TrajetReservation> reservations = (List<TrajetReservation>) request.getAttribute("reservations");
+    List<Client> clients = (List<Client>) request.getAttribute("clients");
+    List<TypeObjectDTO> reservationStatuts = (List<TypeObjectDTO>) request.getAttribute("reservationStatuts");
+%>
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 text-gray-800">Détails du Trajet</h1>
+        <a href="<%= request.getContextPath() %>/trajets" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Retour
+        </a>
+    </div>
+
+    <!-- Trajet Information Card -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header py-3 bg-primary text-white">
+                    <h6 class="m-0 font-weight-bold">Informations du Trajet</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Ligne:</strong>
+                                <%= trajet.getLigne().getVilleDepart().getNom() %> →
+                                <%= trajet.getLigne().getVilleArrivee().getNom() %>
+                            </p>
+                            <p><strong>Distance:</strong> <%= trajet.getLigne().getDistanceKm() %> km</p>
+                            <p><strong>Chauffeur:</strong>
+                                <%= trajet.getChauffeur().getNom() %> <%= trajet.getChauffeur().getPrenom() %>
+                            </p>
+                            <p><strong>Véhicule:</strong> <%= trajet.getVehicule().getImmatriculation() %>
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Date Départ:</strong> <%= trajet.getDatetimeDepart() %>
+                            </p>
+                            <p><strong>Date Arrivée:</strong> <%= trajet.getDatetimeArrivee() %>
+                            </p>
+                            <p><strong>Statut:</strong> <%= trajet.getTrajetStatut().getLibelle() %>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistiques Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Places Prises
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800"><%= String.format("%.1f", totalPlacesPrises) %>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-people-fill fs-2 text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Places Restantes
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800"><%= String.format("%.1f", totalPlacesRestantes) %>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-chair fs-2 text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Chiffre d'Affaires
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800"><%= String.format("%,.2f", totalCA) %> Ar
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-currency-exchange fs-2 text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tarifs par Type de Place -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Tarifs par Type de Place</h6>
+        </div>
+        <div class="card-body">
+            <% if (tarifPlaces != null && !tarifPlaces.isEmpty()) { %>
+            <table class="table table-bordered">
+                <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Tarif Unitaire</th>
+                    <th>Places Disponibles</th>
+                    <th>Places Vendues</th>
+                    <th>Subtotal</th>
+                </tr>
+                </thead>
+                <tbody>
+                <% for (VehiculeTarifTypePlace tp : tarifPlaces) {
+                    double sold = soldPerType.getOrDefault(tp.getTypePlace().getId(), 0.0);
+                    double remaining = tp.getNombrePlace() - sold;
+                    double subtotal = sold * tp.getTarifUnitaire();
+                %>
+                <tr>
+                    <td><%= tp.getTypePlace().getLibelle() %></td>
+                    <td><%= String.format("%,.2f", tp.getTarifUnitaire()) %> Ar</td>
+                    <td><%= String.format("%.1f", remaining) %></td>
+                    <td><%= String.format("%.1f", sold) %></td>
+                    <td><%= String.format("%,.2f", subtotal) %> Ar</td>
+                </tr>
+                <% } %>
+                </tbody>
+            </table>
+            <% } else { %>
+            <div class="alert alert-info">Aucun tarif défini pour ce véhicule.</div>
+            <% } %>
+        </div>
+    </div>
+
+    <!-- Nouvelle Réservation Form (sans places, comme demandé) -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Nouvelle Réservation</h6>
+        </div>
+        <div class="card-body">
+            <form action="<%= request.getContextPath() %>/reservations" method="post">
+                <input type="hidden" name="idTrajet" value="<%= trajet.getId() %>">
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="idClient" class="form-label">Client</label>
+                        <select class="form-control" id="idClient" name="idClient" required>
+                            <option value="">Choisir...</option>
+                            <% if (clients != null) {
+                                for (Client c : clients) { %>
+                            <option value="<%= c.getId() %>"><%= c.getNomClient() %>
+                            </option>
+                            <% }
+                            } %>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="nomPassager" class="form-label">Nom Passager</label>
+                        <input type="text" class="form-control" id="nomPassager" name="nomPassager" required>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="numeroSiege" class="form-label">Numéro Siège</label>
+                        <input type="text" class="form-control" id="numeroSiege" name="numeroSiege">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="idReservationStatut" class="form-label">Statut</label>
+                        <select class="form-control" id="idReservationStatut" name="idReservationStatut" required>
+                            <option value="">Choisir...</option>
+                            <% if (reservationStatuts != null) {
+                                for (TypeObjectDTO s : reservationStatuts) { %>
+                            <option value="<%= s.getId() %>"><%= s.getLibelle() %>
+                            </option>
+                            <% }
+                            } %>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Enregistrer</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Liste des Reservations -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        Réservations pour ce Trajet
+                        <span class="badge bg-primary"><%= reservations != null ? reservations.size() : 0 %></span>
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <% if (reservations != null && !reservations.isEmpty()) { %>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover">
+                            <thead class="table-light">
+                            <tr>
+                                <th>Client</th>
+                                <th>Passager</th>
+                                <th>Siège</th>
+                                <th>Statut</th>
+                                <th>Detail</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <% for (TrajetReservation r : reservations) { %>
+                            <tr>
+                                <td><%= r.getClient().getNomClient() %>
+                                </td>
+                                <td><%= r.getNomPassager() %>
+                                </td>
+                                <td><%= r.getNumeroSiege() != null ? r.getNumeroSiege() : "-" %>
+                                </td>
+                                <td>
+                                                <span class="badge bg-info">
+                                                    <%= r.getReservationStatut().getLibelle() %>
+                                                </span>
+                                </td>
+                                <td>
+                                    <a href="<%= request.getContextPath() %>/reservations/detail?id=<%= r.getId() %>"
+                                       class="btn btn-sm btn-primary">Détail</a>
+                                </td>
+                            </tr>
+                            <% } %>
+                            </tbody>
+                        </table>
+                    </div>
+                    <% } else { %>
+                    <div class="alert alert-info" role="alert">
+                        <i class="bi bi-info-circle"></i> Aucune réservation pour ce trajet.
+                    </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 </DOCUMENT>
 
 <DOCUMENT filename="reservation-detail-content.jsp">
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="com.mdgtaxi.entity.TrajetReservation" %>
-<%@ page import="com.mdgtaxi.entity.ReservationPaiement" %>
+<%@ page import="com.mdgtaxi.entity.*" %>
 <%@ page import="java.util.List" %>
+<%@ page import="com.mdgtaxi.dto.TypeObjectDTO" %>
+<%@ page import="com.mdgtaxi.dto.StatusObjectDto" %>
+<%@ page import="java.math.BigDecimal" %>
+<%@ page import="com.mdgtaxi.util.TableUtil" %>
 
 <%
-    TrajetReservation detail = (TrajetReservation) request.getAttribute("reservation");
-    List<ReservationPaiement> paiements = (List<ReservationPaiement>) request.getAttribute("paiements");
+    TrajetReservation reservation = (TrajetReservation) request.getAttribute("reservation");
+    List<TrajetReservationDetails> reservationDetails = (List<TrajetReservationDetails>) request.getAttribute("reservationDetails");
+    List<TrajetReservationPaiement> payments = (List<TrajetReservationPaiement>) request.getAttribute("payments");
+    List<TrajetReservationMouvementStatut> statusHistory = (List<TrajetReservationMouvementStatut>) request.getAttribute("statusHistory");
+    List<TypeObjectDTO> modePaiements = (List<TypeObjectDTO>) request.getAttribute("modePaiements");
+    List<TypeObjectDTO> typePlaces = (List<TypeObjectDTO>) request.getAttribute("typePlaces"); // Ajouté pour les types de places
+    List<StatusObjectDto> reservationStatuts = (List<StatusObjectDto>) request.getAttribute("reservationStatuts");
+    BigDecimal montantTotal = (BigDecimal) request.getAttribute("montantTotal");
+    BigDecimal montantPaye = (BigDecimal) request.getAttribute("montantPaye");
+    BigDecimal soldeRestant = (BigDecimal) request.getAttribute("soldeRestant");
     String error = (String) request.getAttribute("error");
 %>
 
 <div class="container-fluid">
-    <h1 class="h3 mb-4 text-gray-800">Détail de la Réservation</h1>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 text-gray-800">Détails de la Réservation #<%= reservation.getId() %></h1>
+        <a href="<%= request.getContextPath() %>/reservations" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Retour
+        </a>
+    </div>
 
     <% if (error != null) { %>
     <div class="alert alert-danger"><%= error %></div>
     <% } %>
 
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Informations de la Réservation</h6>
+    <!-- Informations principales -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Informations de la Réservation</h6>
+                </div>
+                <div class="card-body">
+                    <p><strong>Trajet:</strong> <%= reservation.getTrajet().getLigne().getVilleDepart().getNom() %> → <%= reservation.getTrajet().getLigne().getVilleArrivee().getNom() %></p>
+                    <p><strong>Date du trajet:</strong> <%= reservation.getTrajet().getDatetimeDepart() %></p>
+                    <p><strong>Client:</strong> <%= reservation.getClient().getNomClient() %></p>
+                    <p><strong>Passager:</strong> <%= reservation.getNomPassager() %></p>
+                    <p><strong>Date de réservation:</strong> <%= reservation.getDateReservation() %></p>
+                    <p><strong>Statut:</strong> <span class="badge badge-primary"><%= reservation.getReservationStatut().getLibelle() %></span></p>
+                </div>
+            </div>
         </div>
-        <div class="card-body">
-            <p><strong>Trajet:</strong> <%= detail.getTrajet().getLigne().getVilleDepart().getNom() %> -> <%= detail.getTrajet().getLigne().getVilleArrivee().getNom() %> (<%= detail.getTrajet().getDatetimeDepart() %>)</p>
-            <p><strong>Client:</strong> <%= detail.getClient().getNomClient() %></p>
-            <p><strong>Passager:</strong> <%= detail.getNomPassager() %></p>
-            <p><strong>Siège:</strong> <%= detail.getNumeroSiege() != null ? detail.getNumeroSiege() : "-" %></p>
-            <p><strong>Statut:</strong> <%= detail.getReservationStatut().getLibelle() %></p>
-            <p><strong>Nombre de Places:</strong> <%= detail.getNombrePlaceReservation() %></p>
+
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-success">Informations Financières</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <p class="text-muted mb-1">Montant Total</p>
+                            <h4 class="text-dark"><%= String.format("%,.2f", montantTotal) %> Ar</h4>
+                        </div>
+                        <div class="col-6">
+                            <p class="text-muted mb-1">Déjà Payé</p>
+                            <h4 class="text-success"><%= String.format("%,.2f", montantPaye) %> Ar</h4>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-12">
+                            <p class="text-muted mb-1">Solde Restant</p>
+                            <h3 class="<%= soldeRestant.compareTo(BigDecimal.ZERO) > 0 ? "text-danger" : "text-success" %>">
+                                <%= String.format("%,.2f", soldeRestant) %> Ar
+                            </h3>
+                            <% if (soldeRestant.compareTo(BigDecimal.ZERO) == 0) { %>
+                            <span class="badge badge-success">Payé intégralement</span>
+                            <% } else if (montantPaye.compareTo(BigDecimal.ZERO) > 0) { %>
+                            <span class="badge badge-warning">Partiellement payé</span>
+                            <% } else { %>
+                            <span class="badge badge-danger">Non payé</span>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
+    <!-- Détails des places réservées -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Places Réservées</h6>
+        </div>
+        <div class="card-body">
+            <% if (reservationDetails != null && !reservationDetails.isEmpty()) { %>
+            <table class="table table-bordered">
+                <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Nombre</th>
+                    <th>Tarif Unitaire</th>
+                    <th>Subtotal</th>
+                </tr>
+                </thead>
+                <tbody>
+                <% for (TrajetReservationDetails d : reservationDetails) { %>
+                <tr>
+                    <td><%= d.getTypePlace().getLibelle() %></td>
+                    <td><%= d.getNombre() %></td>
+                    <td><%= String.format("%,.2f", d.getTarifUnitaire()) %> Ar</td>
+                    <td><%= String.format("%,.2f", d.getMontant()) %> Ar</td>
+                </tr>
+                <% } %>
+                </tbody>
+            </table>
+            <% } else { %>
+            <div class="alert alert-info">Aucune place réservée pour l'instant.</div>
+            <% } %>
+        </div>
+    </div>
+
+    <!-- Nouvelle section : Ajouter un détail de réservation (type de place un par un) -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Ajouter un Type de Place</h6>
+        </div>
+        <div class="card-body">
+            <form action="<%= request.getContextPath() %>/reservations/detail?id=<%= reservation.getId() %>" method="post">
+                <input type="hidden" name="action" value="addDetail">
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="idTypePlace" class="form-label">Type de Place *</label>
+                        <select class="form-control" id="idTypePlace" name="idTypePlace" required>
+                            <option value="">Choisir...</option>
+                            <% if (typePlaces != null) {
+                                for (TypeObjectDTO tp : typePlaces) { %>
+                            <option value="<%= tp.getId() %>"><%= tp.getLibelle() %></option>
+                            <% }
+                            } %>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="nombre" class="form-label">Nombre de Places *</label>
+                        <input type="number" step="0.5" min="0.5" class="form-control" id="nombre" name="nombre" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> Ajouter
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Formulaire d'ajout de paiement (déjà existant, inchangé) -->
     <div class="card shadow mb-4">
         <div class="card-header py-3">
             <h6 class="m-0 font-weight-bold text-primary">Ajouter un Paiement</h6>
         </div>
         <div class="card-body">
-            <form action="<%= request.getContextPath() %>/reservations/detail" method="post">
+            <form action="<%= request.getContextPath() %>/reservations/detail?id=<%= reservation.getId() %>" method="post">
                 <input type="hidden" name="action" value="addPaiement">
-                <input type="hidden" name="id" value="<%= detail.getId() %>">
 
-                <div class="mb-3">
-                    <label for="montant" class="form-label">Montant</label>
-                    <input type="number" step="0.01" class="form-control" id="montant" name="montant" required>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label for="montant" class="form-label">Montant *</label>
+                            <input type="number" step="0.01" class="form-control" id="montant" name="montant" required>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label for="idModePaiement" class="form-label">Mode de Paiement *</label>
+                            <select class="form-control" id="idModePaiement" name="idModePaiement" required>
+                                <option value="">Choisir...</option>
+                                <% for (TypeObjectDTO m : modePaiements) { %>
+                                <option value="<%= m.getId() %>"><%= m.getLibelle() %></option>
+                                <% } %>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label for="idCaisse" class="form-label">Caisse</label>
+                            <select class="form-control" id="idCaisse" name="idCaisse">
+                                <option value="">Choisir...</option>
+                                <% List<Caisse> caisses = (List<Caisse>) request.getAttribute("caisses");
+                                    if (caisses != null) {
+                                        for (Caisse c : caisses) { %>
+                                <option value="<%= c.getId() %>"><%= c.getNom() %></option>
+                                <% }
+                                } %>
+                            </select>
+                        </div>
+                    </div>
                 </div>
-
-                <div class="mb-3">
-                    <label for="modePaiement" class="form-label">Mode de Paiement</label>
-                    <select class="form-control" id="modePaiement" name="modePaiement" required>
-                        <option value="Cash">Cash</option>
-                        <option value="Carte">Carte</option>
-                        <option value="Mobile Money">Mobile Money</option>
-                    </select>
-                </div>
-
-                <div class="mb-3">
-                    <label for="reference" class="form-label">Référence</label>
-                    <input type="text" class="form-control" id="reference" name="reference">
-                </div>
-
-                <div class="mb-3">
-                    <label for="statut" class="form-label">Statut</label>
-                    <select class="form-control" id="statut" name="statut" required>
-                        <option value="Payé">Payé</option>
-                        <option value="En Attente">En Attente</option>
-                    </select>
-                </div>
-
-                <button type="submit" class="btn btn-primary">Ajouter Paiement</button>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-cash"></i> Enregistrer Paiement
+                </button>
             </form>
         </div>
     </div>
 
+    <!-- Historique des paiements -->
     <div class="card shadow mb-4">
         <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Liste des Paiements</h6>
+            <h6 class="m-0 font-weight-bold text-primary">Historique des Paiements</h6>
         </div>
         <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-bordered" width="100%" cellspacing="0">
-                    <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Montant</th>
-                        <th>Mode</th>
-                        <th>Référence</th>
-                        <th>Statut</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <% if (paiements != null) {
-                        for (ReservationPaiement p : paiements) { %>
-                    <tr>
-                        <td><%= p.getDatePaiement() %></td>
-                        <td><%= p.getMontant() %></td>
-                        <td><%= p.getModePaiement() %></td>
-                        <td><%= p.getReference() != null ? p.getReference() : "-" %></td>
-                        <td><%= p.getStatut() %></td>
-                    </tr>
-                    <% }
-                    } %>
-                    </tbody>
-                </table>
-            </div>
-            <p><strong>Total Payé:</strong> <%= request.getAttribute("totalPaid") %></p>
+            <% if (payments != null && !payments.isEmpty()) { %>
+            <table class="table table-bordered">
+                <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Montant</th>
+                    <th>Mode</th>
+                    <th>Caisse</th>
+                </tr>
+                </thead>
+                <tbody>
+                <% for (TrajetReservationPaiement p : payments) { %>
+                <tr>
+                    <td><%= p.getDatePaiement() %></td>
+                    <td><%= String.format("%,.2f", p.getMontant()) %> Ar</td>
+                    <td><%= p.getModePaiement().getLibelle() %></td>
+                    <td><%= p.getCaisse() != null ? p.getCaisse().getNom() : "-" %></td>
+                </tr>
+                <% } %>
+                </tbody>
+            </table>
+            <% } else { %>
+            <div class="alert alert-info">Aucun paiement enregistré.</div>
+            <% } %>
+        </div>
+    </div>
+
+    <!-- Changement de statut -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Changer le Statut</h6>
+        </div>
+        <div class="card-body">
+            <form action="<%= request.getContextPath() %>/reservations/detail?id=<%= reservation.getId() %>" method="post">
+                <input type="hidden" name="action" value="changeStatut">
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="idStatut" class="form-label">Nouveau Statut *</label>
+                            <select class="form-control" id="idStatut" name="idStatut" required>
+                                <option value="">Choisir...</option>
+                                <% for (StatusObjectDto s : reservationStatuts) { %>
+                                <option value="<%= s.getId() %>"><%= s.getLibelle() %></option>
+                                <% } %>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="observation" class="form-label">Observation</label>
+                            <textarea class="form-control" id="observation" name="observation" rows="2"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-arrow-repeat"></i> Changer Statut
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Historique des statuts -->
+    <div class="card shadow">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Historique des Statuts</h6>
+        </div>
+        <div class="card-body">
+            <% if (statusHistory != null && !statusHistory.isEmpty()) { %>
+            <table class="table table-bordered">
+                <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Statut</th>
+                    <th>Observation</th>
+                </tr>
+                </thead>
+                <tbody>
+                <% for (TrajetReservationMouvementStatut m : statusHistory) { %>
+                <tr>
+                    <td><%= m.getDateMouvement() %></td>
+                    <td><span class="badge badge-info"><%= m.getNouveauStatut().getLibelle() %></span></td>
+                    <td><%= m.getObservation() != null ? m.getObservation() : "-" %></td>
+                </tr>
+                <% } %>
+                </tbody>
+            </table>
+            <% } else { %>
+            <div class="alert alert-info">Aucun changement de statut enregistré.</div>
+            <% } %>
         </div>
     </div>
 </div>
 </DOCUMENT>
 
-<DOCUMENT filename="reservations-content.jsp">
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="com.mdgtaxi.entity.*" %>
-<%@ page import="java.util.List" %>
-<%@ page import="java.util.Map" %>
-<%@ page import="com.mdgtaxi.dto.TypeObjectDTO" %>
-<%
-    TrajetReservation reservation = (TrajetReservation) request.getAttribute("reservation");
-    List<TrajetReservation> reservations = (List<TrajetReservation>) request.getAttribute("reservations");
-    List<Trajet> trajets = (List<Trajet>) request.getAttribute("trajets");
-    List<Client> clients = (List<Client>) request.getAttribute("clients");
-    List<TypeObjectDTO> reservationStatuts = (List<TypeObjectDTO>) request.getAttribute("reservationStatuts");
-    Map<String, Long> statsByStatus = (Map<String, Long>) request.getAttribute("statsByStatus");
-    Integer totalPlacesPrises = (Integer) request.getAttribute("totalPlacesPrises");
-    Integer totalPlacesRestantes = (Integer) request.getAttribute("totalPlacesRestantes");
-    String error = (String) request.getAttribute("error");
+Note: To compute stats like montantTotal and montantPaye in the service layer (e.g., in ReservationService or similar), use TableUtil as follows:
 
-    String preselectedTrajetId = request.getParameter("idTrajet");
-%>
+// Assuming you have lists reservationDetails and payments loaded
+double montantTotalDouble = TableUtil.sum(reservationDetails, "montant"); // 'montant' is the field name in TrajetReservationDetails
+BigDecimal montantTotal = BigDecimal.valueOf(montantTotalDouble);
 
-<div class="container-fluid">
-    <h1 class="h3 mb-4 text-gray-800">Gestion des Réservations</h1>
+double montantPayeDouble = TableUtil.sum(payments, "montant"); // 'montant' in TrajetReservationPaiement
+BigDecimal montantPaye = BigDecimal.valueOf(montantPayeDouble);
 
-    <!-- Statistiques -->
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <div class="card shadow">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Statistiques des Réservations</h6>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <% if (statsByStatus != null) {
-                            for (Map.Entry<String, Long> entry : statsByStatus.entrySet()) { %>
-                        <div class="col-md-3">
-                            <div class="card border-left-primary shadow h-100 py-2">
-                                <div class="card-body">
-                                    <div class="row no-gutters align-items-center">
-                                        <div class="col mr-2">
-                                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                                <%= entry.getKey() %>
-                                            </div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800"><%= entry.getValue() %></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <% }
-                        } %>
-                        <div class="col-md-3">
-                            <div class="card border-left-success shadow h-100 py-2">
-                                <div class="card-body">
-                                    <div class="row no-gutters align-items-center">
-                                        <div class="col mr-2">
-                                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                                Places Prises
-                                            </div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800"><%= totalPlacesPrises != null ? totalPlacesPrises : 0 %></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card border-left-warning shadow h-100 py-2">
-                                <div class="card-body">
-                                    <div class="row no-gutters align-items-center">
-                                        <div class="col mr-2">
-                                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                                Places Restantes
-                                            </div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800"><%= totalPlacesRestantes != null ? totalPlacesRestantes : 0 %></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+BigDecimal soldeRestant = montantTotal.subtract(montantPaye);
 
-    <% if (error != null) { %>
-    <div class="alert alert-danger"><%= error %></div>
-    <% } %>
+// Then set these as request attributes
 
-    <div class="row">
-        <div class="col-md-4">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">
-                        <% if (reservation != null) { %>
-                        Modifier Réservation
-                        <% } else { %>
-                        Nouvelle Réservation
-                        <% } %>
-                    </h6>
-                </div>
-                <div class="card-body">
-                    <form action="<%= request.getContextPath() %>/reservations" method="post">
-                        <input type="hidden" name="id" value="<%= reservation != null ? reservation.getId() : "" %>">
-
-                        <div class="mb-3">
-                            <label for="idTrajet" class="form-label">Trajet</label>
-                            <select class="form-control" id="idTrajet" name="idTrajet" required>
-                                <option value="">Choisir...</option>
-                                <% if (trajets != null) {
-                                    for (Trajet t : trajets) { %>
-                                <option value="<%= t.getId() %>"
-                                        <%= (preselectedTrajetId != null && preselectedTrajetId.equals(t.getId().toString())) || (reservation != null && reservation.getTrajet() != null && reservation.getTrajet().getId().equals(t.getId())) ? "selected" : "" %>>
-                                    <%= t.getLigne().getVilleDepart().getNom() %> -> <%= t.getLigne().getVilleArrivee().getNom() %> (<%= t.getDatetimeDepart() %>)
-                                </option>
-                                <% }
-                                } %>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="idClient" class="form-label">Client</label>
-                            <select class="form-control" id="idClient" name="idClient" required>
-                                <option value="">Choisir...</option>
-                                <% if (clients != null) {
-                                    for (Client c : clients) { %>
-                                <option value="<%= c.getId() %>"
-                                        <%= (reservation != null && reservation.getClient() != null && reservation.getClient().getId().equals(c.getId())) ? "selected" : "" %>>
-                                    <%= c.getNomClient() %>
-                                </option>
-                                <% }
-                                } %>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="nomPassager" class="form-label">Nom Passager</label>
-                            <input type="text" class="form-control" id="nomPassager" name="nomPassager"
-                                   value="<%= reservation != null ? reservation.getNomPassager() : "" %>" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="numeroSiege" class="form-label">Numéro Siège</label>
-                            <input type="text" class="form-control" id="numeroSiege" name="numeroSiege"
-                                   value="<%= reservation != null ? reservation.getNumeroSiege() : "" %>">
-                        </div>
-                        <div class="mb-3">
-                            <label for="idReservationStatut" class="form-label">Statut</label>
-                            <select class="form-control" id="idReservationStatut" name="idReservationStatut" required>
-                                <option value="">Choisir...</option>
-                                <% if (reservationStatuts != null) {
-                                    for (TypeObjectDTO s : reservationStatuts) { %>
-                                <option value="<%= s.getId() %>"
-                                        <%= (reservation != null && reservation.getReservationStatut() != null && reservation.getReservationStatut().getId().equals(s.getId())) ? "selected" : "" %>>
-                                    <%= s.getLibelle() %>
-                                </option>
-                                <% }
-                                } %>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="nombrePlaceReservation" class="form-label">Nombre Places</label>
-                            <input type="number" class="form-control" id="nombrePlaceReservation" name="nombrePlaceReservation"
-                                   value="<%= reservation != null ? reservation.getNombrePlaceReservation() : "" %>" required>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary">Enregistrer</button>
-                        <a href="<%= request.getContextPath() %>/reservations" class="btn btn-secondary">Annuler</a>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-8">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Liste des Réservations</h6>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-bordered" width="100%" cellspacing="0">
-                            <thead>
-                            <tr>
-                                <th>Trajet</th>
-                                <th>Client</th>
-                                <th>Passager</th>
-                                <th>Siège</th>
-                                <th>Statut</th>
-                                <th>Actions</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <% if (reservations != null) {
-                                for (TrajetReservation r : reservations) { %>
-                            <tr>
-                                <td><%= r.getTrajet().getLigne().getVilleDepart().getNom() %> -> <%= r.getTrajet().getLigne().getVilleArrivee().getNom() %></td>
-                                <td><%= r.getClient().getNomClient() %></td>
-                                <td><%= r.getNomPassager() %></td>
-                                <td><%= r.getNumeroSiege() != null ? r.getNumeroSiege() : "-" %></td>
-                                <td><%= r.getReservationStatut().getLibelle() %></td>
-                                <td>
-                                    <a href="<%= request.getContextPath() %>/reservations?action=edit&id=<%= r.getId() %>" class="btn btn-sm btn-info">Modifier</a>
-                                    <a href="<%= request.getContextPath() %>/reservations/detail?id=<%= r.getId() %>" class="btn btn-sm btn-primary">Détail</a>
-                                </td>
-                            </tr>
-                            <% }
-                            } %>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-</DOCUMENT>
+You will need to update the servlet handling POST for "addDetail" action to create and persist a new TrajetReservationDetails entity linked to the reservation, and recalculate stats. Similarly for the creation of reservation in trajet-detail-content.jsp, ensure that no details are required initially (handle empty list).

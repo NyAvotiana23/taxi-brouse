@@ -755,6 +755,7 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Entity
@@ -783,6 +784,9 @@ public class TrajetReservation implements Serializable {
 
     @Column(name = "date_reservation", nullable = false)
     private LocalDateTime dateReservation;
+
+    @OneToMany(mappedBy = "trajetReservation", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TrajetReservationDetails> trajetReservationDetails;
 
 }
 package com.mdgtaxi.entity;
@@ -956,10 +960,10 @@ public class TypePlace {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "nom_type_place", nullable = false, unique = true)
+    @Column(name = "nom_type_place", nullable = false)
     private String nomTypePlace;
 
-    @Column(name = "description", nullable = false, unique = true)
+    @Column(name = "description", nullable = false)
     private String description;
 }
 package com.mdgtaxi.entity;
@@ -1116,10 +1120,10 @@ public class VehiculeTarifTypePlace {
     @JoinColumn(name = "id_type_place", nullable = false)
     private TypePlace typePlace;
 
-    @Column(name = "tarif_unitaire", nullable = false, unique = true)
+    @Column(name = "tarif_unitaire", nullable = false)
     private double tarifUnitaire;
 
-    @Column(name = "nombre_place", nullable = false, unique = true)
+    @Column(name = "nombre_place", nullable = false)
     private double nombrePlace;
 }
 package com.mdgtaxi.entity;

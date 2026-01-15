@@ -392,10 +392,8 @@ public class LigneServlet extends HttpServlet {
         resp.sendRedirect(req.getContextPath() + "/lignes");
     }
 }
-// Update to servlets.txt (ReservationDetailServlet class, using correct entity names)
 package com.mdgtaxi.servlet;
 
-import com.mdgtaxi.dto.MouvementStatusDto;
 import com.mdgtaxi.dto.StatusObjectDto;
 import com.mdgtaxi.dto.TypeObjectDTO;
 import com.mdgtaxi.entity.*;
@@ -415,10 +413,10 @@ import java.util.List;
 public class ReservationDetailServlet extends HttpServlet {
 
     private final ReservationService reservationService = new ReservationService();
-    private final ClientService clientService = new ClientService(); // Assume exists
-    private final TrajetService trajetService = new TrajetService(); // Assume exists
+    private final ClientService clientService = new ClientService();
+    private final TrajetService trajetService = new TrajetService();
     private final StatusService statusService = new StatusService();
-    private final TypeObjectService typeObjectService = new TypeObjectService(); // Assume exists for ModePaiement, but adjust if needed
+    private final TypeObjectService typeObjectService = new TypeObjectService();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -458,7 +456,7 @@ public class ReservationDetailServlet extends HttpServlet {
         } catch (Exception e) {
             req.setAttribute("error", "Erreur: " + e.getMessage());
             loadReservationDetails(req, id);
-            req.getRequestDispatcher("/reservation-detail-content.jsp").forward(req, resp);
+            req.getRequestDispatcher("/reservation-detail.jsp").forward(req, resp);
         }
     }
 
@@ -466,35 +464,54 @@ public class ReservationDetailServlet extends HttpServlet {
         TrajetReservation reservation = reservationService.getReservationById(id);
         req.setAttribute("reservation", reservation);
 
+        // Load reservation details (types de places)
+        List<TrajetReservationDetails> reservationDetails = reservationService.getReservationDetailsByReservationId(id);
+        req.setAttribute("reservationDetails", reservationDetails);
+
+        // Load payments
         List<TrajetReservationPaiement> payments = reservationService.getPaymentsByReservation(id);
         req.setAttribute("payments", payments);
 
+        // Load status history
         List<TrajetReservationMouvementStatut> statusHistory = reservationService.getStatusHistoryByReservation(id);
         req.setAttribute("statusHistory", statusHistory);
 
-        List<Client> clients = clientService.getAllClients(); // For form if needed
+        // Calculate amounts
+        BigDecimal montantTotal = reservationService.getMontantTotalReservation(id);
+        BigDecimal montantPaye = reservationService.getTotalPaiementRecu(id);
+        BigDecimal soldeRestant = reservationService.getSoldeRestant(id);
+
+        req.setAttribute("montantTotal", montantTotal);
+        req.setAttribute("montantPaye", montantPaye);
+        req.setAttribute("soldeRestant", soldeRestant);
+
+        // Load reference data
+        List<Client> clients = clientService.getAllClients();
         req.setAttribute("clients", clients);
 
-        List<Trajet> trajets = trajetService.getAllTrajets(); // For form if needed
+        List<Trajet> trajets = trajetService.getAllTrajets();
         req.setAttribute("trajets", trajets);
 
         List<StatusObjectDto> reservationStatuts = statusService.findAllStatuses("Trajet_Reservation");
         req.setAttribute("reservationStatuts", reservationStatuts);
 
-        // Assuming ModePaiement is a TypeObject, or adjust service accordingly
         List<TypeObjectDTO> modePaiements = typeObjectService.findAllTypeObject("Mode_Paiement");
         req.setAttribute("modePaiements", modePaiements);
+
+        List<TypeObjectDTO> typePlaces = typeObjectService.findAllTypeObject("Type_Place");
+        req.setAttribute("typePlaces", typePlaces);
     }
 
     private void handleChangeStatut(HttpServletRequest req, Long reservationId) {
         Long idStatut = Long.valueOf(req.getParameter("idStatut"));
         String observation = req.getParameter("observation");
-        LocalDateTime dateChangement = LocalDateTime.now(); // Or parse from param
+        LocalDateTime dateChangement = LocalDateTime.now();
 
         TrajetReservationMouvementStatut mouvement = new TrajetReservationMouvementStatut();
         TrajetReservation reservation = new TrajetReservation();
         reservation.setId(reservationId);
         mouvement.setTrajetReservation(reservation);
+
         ReservationStatut statut = new ReservationStatut();
         statut.setId(idStatut);
         mouvement.setNouveauStatut(statut);
@@ -507,22 +524,26 @@ public class ReservationDetailServlet extends HttpServlet {
     private void handleAddPayment(HttpServletRequest req, Long reservationId) {
         BigDecimal montant = new BigDecimal(req.getParameter("montant"));
         Long idModePaiement = Long.valueOf(req.getParameter("idModePaiement"));
-        Long idClient = Long.valueOf(req.getParameter("idClient")); // Assuming from form, or use reservation's client
-        Long idCaisse = req.getParameter("idCaisse") != null ? Long.valueOf(req.getParameter("idCaisse")) : null;
-        LocalDateTime datePaiement = LocalDateTime.now(); // Or parse
+        Long idClient = Long.valueOf(req.getParameter("idClient"));
+        String idCaisseStr = req.getParameter("idCaisse");
+        Long idCaisse = (idCaisseStr != null && !idCaisseStr.isEmpty()) ? Long.valueOf(idCaisseStr) : null;
+        LocalDateTime datePaiement = LocalDateTime.now();
 
         TrajetReservationPaiement paiement = new TrajetReservationPaiement();
         Client client = new Client();
         client.setId(idClient);
         paiement.setClient(client);
+
         TrajetReservation reservation = new TrajetReservation();
         reservation.setId(reservationId);
         paiement.setTrajetReservation(reservation);
+
         if (idCaisse != null) {
             Caisse caisse = new Caisse();
             caisse.setId(idCaisse);
             paiement.setCaisse(caisse);
         }
+
         paiement.setMontant(montant);
         ModePaiement mode = new ModePaiement();
         mode.setId(idModePaiement);
@@ -555,6 +576,7 @@ public class ReservationServlet extends HttpServlet {
     private final TrajetService trajetService = new TrajetService();
     private final ClientService clientService = new ClientService();
     private final TypeObjectService typeObjectService = new TypeObjectService();
+    private final StatusService statusService = new StatusService();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -564,19 +586,26 @@ public class ReservationServlet extends HttpServlet {
             Long id = Long.valueOf(req.getParameter("id"));
             TrajetReservation reservation = reservationService.getReservationById(id);
             req.setAttribute("reservation", reservation);
+
+            // Load reservation details
+            List<TrajetReservationDetails> details = reservationService.getReservationDetailsByReservationId(id);
+            req.setAttribute("reservationDetails", details);
         }
 
         List<TrajetReservation> reservations = reservationService.getAllReservations();
         List<Trajet> trajets = trajetService.getAllTrajets();
         List<Client> clients = clientService.getAllClients();
-        List<TypeObjectDTO> reservationStatuts = typeObjectService.findAllTypeObject("Reservation_Statut");
-        Integer totalPlacesPrises = reservationService.getTotalPlacesPrises();
-        Integer totalPlacesRestantes = reservationService.getTotalPlacesRestantes();
+        List<TypeObjectDTO> typePlaces = typeObjectService.findAllTypeObject("Type_Place");
+
+        Map<String, Long> statsByStatus = reservationService.getReservationStatsByStatus();
+        Double totalPlacesPrises = reservationService.getTotalPlacesPrises();
+        Double totalPlacesRestantes = reservationService.getTotalPlacesRestantes();
 
         req.setAttribute("reservations", reservations);
         req.setAttribute("trajets", trajets);
         req.setAttribute("clients", clients);
-        req.setAttribute("reservationStatuts", reservationStatuts);
+        req.setAttribute("typePlaces", typePlaces);
+        req.setAttribute("statsByStatus", statsByStatus);
         req.setAttribute("totalPlacesPrises", totalPlacesPrises);
         req.setAttribute("totalPlacesRestantes", totalPlacesRestantes);
 
@@ -585,56 +614,71 @@ public class ReservationServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String idStr = req.getParameter("id");
-        Long idTrajet = Long.valueOf(req.getParameter("idTrajet"));
-        Long idClient = Long.valueOf(req.getParameter("idClient"));
-        String nomPassager = req.getParameter("nomPassager");
-
-
-        String dateReservation = req.getParameter("dateReservation");
-        LocalDateTime localDateTimeReservation = LocalDateTime.parse(dateReservation);
-
-        String numeroSiege = req.getParameter("numeroSiege");
-
-
-        Long idReservationStatut = Long.valueOf(req.getParameter("idReservationStatut"));
-        Integer nombrePlaceReservation = Integer.valueOf(req.getParameter("nombrePlaceReservation"));
-
-        TrajetReservation reservation = new TrajetReservation();
-        if (idStr != null && !idStr.isEmpty()) {
-            reservation = reservationService.getReservationById(Long.valueOf(idStr));
-        }
-
-        Trajet trajet = new Trajet();
-        trajet.setId(idTrajet);
-        reservation.setTrajet(trajet);
-
-        Client client = new Client();
-        client.setId(idClient);
-        reservation.setClient(client);
-
-        reservation.setDateReservation(localDateTimeReservation);
-
-        reservation.setNomPassager(nomPassager);
-        reservation.setNumeroSiege(numeroSiege);
-
-        ReservationStatut statut = new ReservationStatut();
-
-        statut.setId(idReservationStatut);
-        reservation.setReservationStatut(statut);
-
-        reservation.setNombrePlaceReservation(nombrePlaceReservation);
-
         try {
-            if (reservation.getId() == null) {
-                reservationService.createReservation(reservation);
-            } else {
-                reservationService.updateReservation(reservation);
+            String idStr = req.getParameter("id");
+            Long idTrajet = Long.valueOf(req.getParameter("idTrajet"));
+            Long idClient = Long.valueOf(req.getParameter("idClient"));
+            String nomPassager = req.getParameter("nomPassager");
+            Long idReservationStatut = Long.valueOf(req.getParameter("idReservationStatut"));
+
+            // Create or update reservation
+            TrajetReservation reservation = new TrajetReservation();
+            if (idStr != null && !idStr.isEmpty()) {
+                reservation = reservationService.getReservationById(Long.valueOf(idStr));
             }
+
+            Trajet trajet = new Trajet();
+            trajet.setId(idTrajet);
+            reservation.setTrajet(trajet);
+
+            Client client = new Client();
+            client.setId(idClient);
+            reservation.setClient(client);
+
+            reservation.setDateReservation(LocalDateTime.now());
+            reservation.setNomPassager(nomPassager);
+
+            ReservationStatut statut = new ReservationStatut();
+            statut.setId(idReservationStatut);
+            reservation.setReservationStatut(statut);
+
+            // Save reservation
+            if (reservation.getId() == null) {
+                reservation = reservationService.createReservation(reservation);
+            } else {
+                reservation = reservationService.updateReservation(reservation);
+            }
+
+            // Process reservation details (types de places)
+            String[] typePlaceIds = req.getParameterValues("typePlaceId[]");
+            String[] nombrePlaces = req.getParameterValues("nombrePlaces[]");
+
+            if (typePlaceIds != null && nombrePlaces != null) {
+                for (int i = 0; i < typePlaceIds.length; i++) {
+                    if (typePlaceIds[i] != null && !typePlaceIds[i].isEmpty()
+                            && nombrePlaces[i] != null && !nombrePlaces[i].isEmpty()) {
+
+                        double nbPlaces = Double.parseDouble(nombrePlaces[i]);
+                        if (nbPlaces > 0) {
+                            TrajetReservationDetails detail = new TrajetReservationDetails();
+                            detail.setTrajetReservation(reservation);
+
+                            TypePlace typePlace = new TypePlace();
+                            typePlace.setId(Long.valueOf(typePlaceIds[i]));
+                            detail.setTypePlace(typePlace);
+
+                            detail.setNombrePlaces(nbPlaces);
+
+                            reservationService.createReservationDetail(detail);
+                        }
+                    }
+                }
+            }
+
             resp.sendRedirect(req.getContextPath() + "/reservations");
         } catch (Exception e) {
             req.setAttribute("error", "Erreur lors de l'enregistrement: " + e.getMessage());
-            doGet(req, resp);  // Re-forward to show error
+            doGet(req, resp);
         }
     }
 }
@@ -744,8 +788,8 @@ public class TrajetDetailServlet extends HttpServlet {
 
 
         List<TrajetReservation> reservations = reservationService.getReservationsByTrajetId(id);
-        int placesPrises = reservationService.getPlacesPrisesForTrajet(id);
-        int placesRestantes = trajet.getVehicule().getMaximumPassager() - placesPrises;
+        double placesPrises = reservationService.getPlacesPrisesForTrajet(id);
+        double placesRestantes = trajet.getVehicule().getMaximumPassager() - placesPrises;
         List<Client> clients = clientService.getAllClients();  // If needed for form, etc.
         List<TypeObjectDTO> reservationStatuts = typeObjectService.findAllTypeObject("Reservation_Statut");
 
@@ -761,11 +805,14 @@ public class TrajetDetailServlet extends HttpServlet {
         req.getRequestDispatcher("/trajet-detail.jsp").forward(req, resp);
     }
 }
+// Add this TrajetServlet to servlets.txt
+
 package com.mdgtaxi.servlet;
 
 import com.mdgtaxi.dto.TypeObjectDTO;
 import com.mdgtaxi.entity.*;
 import com.mdgtaxi.service.*;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -774,141 +821,167 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @WebServlet("/trajets")
 public class TrajetServlet extends HttpServlet {
 
     private final TrajetService trajetService = new TrajetService();
-    private final LigneService ligneService = new LigneService();
+    private final LigneService ligneService = new LigneService(); // Assume exists
     private final ChauffeurService chauffeurService = new ChauffeurService();
     private final VehiculeService vehiculeService = new VehiculeService();
     private final TypeObjectService typeObjectService = new TypeObjectService();
+    private final ClientService clientService = new ClientService(); // Assume exists
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String action = req.getParameter("action");
+        String idStr = req.getParameter("id");
+        Long id = idStr != null && !idStr.isEmpty() ? Long.valueOf(idStr) : null;
+
+        loadReferenceData(req);
 
         if ("edit".equals(action)) {
-            Long id = Long.valueOf(req.getParameter("id"));
-            Trajet trajet = trajetService.getTrajetById(id);
-            req.setAttribute("trajet", trajet);
+            if (id != null) {
+                Trajet trajet = trajetService.getTrajetById(id);
+                req.setAttribute("trajet", trajet);
+            }
+        } else if ("detail".equals(action)) {
+            if (id != null) {
+                handleDetail(req, id);
+                req.getRequestDispatcher("/trajet-detail.jsp").forward(req, resp);
+                return;
+            }
         }
 
-        // Build filters map from request parameters
-        Map<String, Object> filters = new HashMap<>();
+        // Filters
+        Map<String, Object> filters = collectFilters(req);
 
-        String idLigne = req.getParameter("idLigne");
-        if (idLigne != null && !idLigne.isEmpty()) {
-            filters.put("ligne.id", Long.valueOf(idLigne));
-        }
-
-        String idChauffeur = req.getParameter("idChauffeur");
-        if (idChauffeur != null && !idChauffeur.isEmpty()) {
-            filters.put("chauffeur.id", Long.valueOf(idChauffeur));
-        }
-
-        String idVehicule = req.getParameter("idVehicule");
-        if (idVehicule != null && !idVehicule.isEmpty()) {
-            filters.put("vehicule.id", Long.valueOf(idVehicule));
-        }
-
-        String idTrajetStatut = req.getParameter("idTrajetStatut");
-        if (idTrajetStatut != null && !idTrajetStatut.isEmpty()) {
-            filters.put("trajetStatut.id", Long.valueOf(idTrajetStatut));
-        }
-
-        String startDate = req.getParameter("startDate");
-        if (startDate != null && !startDate.isEmpty()) {
-            filters.put("datetimeDepart>=", LocalDateTime.parse(startDate + "T00:00:00"));
-        }
-
-        String endDate = req.getParameter("endDate");
-        if (endDate != null && !endDate.isEmpty()) {
-            filters.put("datetimeDepart<=", LocalDateTime.parse(endDate + "T23:59:59"));
-        }
-
-        // Get filtered or all trajets
-        List<Trajet> trajets;
-        if (!filters.isEmpty()) {
-            trajets = trajetService.searchTrajetsWithFilters(filters);
-        } else {
-            trajets = trajetService.getAllTrajets();
-        }
-
-        List<Ligne> lignes = ligneService.getAllLignes();
-        List<Chauffeur> chauffeurs = chauffeurService.getAllChauffeurs();
-        List<Vehicule> vehicules = vehiculeService.getAllVehicules();
-        List<TypeObjectDTO> trajetStatuts = typeObjectService.findAllTypeObject("Trajet_Statut");
-
+        List<Trajet> trajets = filters.isEmpty() ? trajetService.getAllTrajets() : trajetService.searchTrajetsWithFilters(filters); // Assume method
         req.setAttribute("trajets", trajets);
-        req.setAttribute("lignes", lignes);
-        req.setAttribute("chauffeurs", chauffeurs);
-        req.setAttribute("vehicules", vehicules);
-        req.setAttribute("trajetStatuts", trajetStatuts);
 
         req.getRequestDispatcher("/trajets.jsp").forward(req, resp);
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String action = req.getParameter("action");
         String idStr = req.getParameter("id");
-        Long idLigne = Long.valueOf(req.getParameter("idLigne"));
-        Long idChauffeur = Long.valueOf(req.getParameter("idChauffeur"));
-        Long idVehicule = Long.valueOf(req.getParameter("idVehicule"));
-        LocalDateTime datetimeDepart = LocalDateTime.parse(req.getParameter("datetimeDepart"));
-        LocalDateTime datetimeArrivee = req.getParameter("datetimeArrivee") != null && !req.getParameter("datetimeArrivee").isEmpty()
-                ? LocalDateTime.parse(req.getParameter("datetimeArrivee")) : null;
-        Long idTrajetStatut = Long.valueOf(req.getParameter("idTrajetStatut"));
-        BigDecimal fraisUnitaire = new BigDecimal(req.getParameter("fraisUnitaire"));
-        Integer nombrePassager = req.getParameter("nombrePassager") != null && !req.getParameter("nombrePassager").isEmpty()
-                ? Integer.valueOf(req.getParameter("nombrePassager")) : 0;
+        Long id = idStr != null && !idStr.isEmpty() ? Long.valueOf(idStr) : null;
 
-        Trajet trajet = new Trajet();
-        if (idStr != null && !idStr.isEmpty()) {
-            trajet = trajetService.getTrajetById(Long.valueOf(idStr));
+        try {
+            if (action == null || "save".equals(action)) {
+                Trajet trajet = buildTrajetFromRequest(req);
+                trajet = trajetService.createTrajet(trajet); // Assume method
+                resp.sendRedirect(req.getContextPath() + "/trajets");
+            } else {
+                resp.sendRedirect(req.getContextPath() + "/trajets");
+            }
+        } catch (Exception e) {
+            req.setAttribute("error", "Erreur: " + e.getMessage());
+            if (id != null) {
+                handleDetail(req, id);
+                req.getRequestDispatcher("/trajet-detail.jsp").forward(req, resp);
+            } else {
+                req.getRequestDispatcher("/trajets.jsp").forward(req, resp);
+            }
         }
+    }
+
+    private void loadReferenceData(HttpServletRequest req) {
+        List<Ligne> lignes = ligneService.getAllLignes(); // Assume method
+        List<Chauffeur> chauffeurs = chauffeurService.getAllChauffeurs();
+        List<Vehicule> vehicules = vehiculeService.getAllVehicules();
+        List<TypeObjectDTO> trajetStatuts = typeObjectService.findAllTypeObject("Trajet_Statut");
+        List<Client> clients = clientService.getAllClients(); // For new reservation
+        List<TypeObjectDTO> reservationStatuts = typeObjectService.findAllTypeObject("Reservation_Statut");
+
+        req.setAttribute("lignes", lignes);
+        req.setAttribute("chauffeurs", chauffeurs);
+        req.setAttribute("vehicules", vehicules);
+        req.setAttribute("trajetStatuts", trajetStatuts);
+        req.setAttribute("clients", clients);
+        req.setAttribute("reservationStatuts", reservationStatuts);
+    }
+
+    private Map<String, Object> collectFilters(HttpServletRequest req) {
+        Map<String, Object> filters = new HashMap<>();
+
+        String ligneId = req.getParameter("ligneId");
+        if (ligneId != null && !ligneId.isEmpty()) filters.put("ligne.id", Long.valueOf(ligneId));
+
+        String chauffeurId = req.getParameter("chauffeurId");
+        if (chauffeurId != null && !chauffeurId.isEmpty()) filters.put("chauffeur.id", Long.valueOf(chauffeurId));
+
+        String vehiculeId = req.getParameter("vehiculeId");
+        if (vehiculeId != null && !vehiculeId.isEmpty()) filters.put("vehicule.id", Long.valueOf(vehiculeId));
+
+        String statutId = req.getParameter("statutId");
+        if (statutId != null && !statutId.isEmpty()) filters.put("trajetStatut.id", Long.valueOf(statutId));
+
+        String startDateStr = req.getParameter("startDate");
+        if (startDateStr != null && !startDateStr.isEmpty()) filters.put("datetimeDepart >= ", LocalDate.parse(startDateStr).atStartOfDay());
+
+        String endDateStr = req.getParameter("endDate");
+        if (endDateStr != null && !endDateStr.isEmpty()) filters.put("datetimeDepart <= ", LocalDate.parse(endDateStr).atTime(23, 59, 59));
+
+        return filters;
+    }
+
+    private void handleDetail(HttpServletRequest req, Long id) {
+        Trajet trajet = trajetService.getTrajetById(id);
+        req.setAttribute("trajet", trajet);
+
+        Vehicule vehicule = trajet.getVehicule();
+        List<VehiculeTarifTypePlace> tarifPlaces = vehiculeService.getTarifTypePlacesByVehicule(vehicule.getId());
+        req.setAttribute("tarifPlaces", tarifPlaces);
+
+        Map<Long, Double> soldPerType = trajetService.getSoldPlacesPerType(id);
+        req.setAttribute("soldPerType", soldPerType);
+
+        List<TrajetReservation> reservations = trajetService.getReservationsByTrajet(id);
+        req.setAttribute("reservations", reservations);
+
+        // Other data like clients, reservationStatuts already loaded in loadReferenceData
+    }
+
+    private Trajet buildTrajetFromRequest(HttpServletRequest req) {
+        String idStr = req.getParameter("id");
+        Trajet trajet = (idStr != null && !idStr.isEmpty()) ? trajetService.getTrajetById(Long.valueOf(idStr)) : new Trajet();
 
         Ligne ligne = new Ligne();
-        ligne.setId(idLigne);
+        ligne.setId(Long.valueOf(req.getParameter("idLigne")));
         trajet.setLigne(ligne);
 
         Chauffeur chauffeur = new Chauffeur();
-        chauffeur.setId(idChauffeur);
+        chauffeur.setId(Long.valueOf(req.getParameter("idChauffeur")));
         trajet.setChauffeur(chauffeur);
 
         Vehicule vehicule = new Vehicule();
-        vehicule.setId(idVehicule);
+        vehicule.setId(Long.valueOf(req.getParameter("idVehicule")));
         trajet.setVehicule(vehicule);
 
-        trajet.setDatetimeDepart(datetimeDepart);
-        trajet.setDatetimeArrivee(datetimeArrivee);
+        trajet.setDatetimeDepart(LocalDateTime.parse(req.getParameter("datetimeDepart")));
 
-        TrajetStatut statut = new TrajetStatut();
-        statut.setId(idTrajetStatut);
-        trajet.setTrajetStatut(statut);
-
-        trajet.setFraisUnitaire(fraisUnitaire);
-        trajet.setNombrePassager(nombrePassager);
-
-        if (trajet.getId() == null) {
-            trajetService.createTrajet(trajet);
-        } else {
-            trajetService.updateTrajet(trajet);
+        String datetimeArriveeStr = req.getParameter("datetimeArrivee");
+        if (datetimeArriveeStr != null && !datetimeArriveeStr.isEmpty()) {
+            trajet.setDatetimeArrivee(LocalDateTime.parse(datetimeArriveeStr));
         }
 
-        resp.sendRedirect(req.getContextPath() + "/trajets");
+        TrajetStatut statut = new TrajetStatut();
+        statut.setId(Long.valueOf(req.getParameter("idTrajetStatut")));
+        trajet.setTrajetStatut(statut);
+
+        return trajet;
     }
 }
 package com.mdgtaxi.servlet;
 
 import com.mdgtaxi.dto.MouvementStatusDto;
 import com.mdgtaxi.dto.StatusObjectDto;
-import com.mdgtaxi.entity.VehiculeEntretien;
-import com.mdgtaxi.entity.VehiculeStatut;
+import com.mdgtaxi.entity.*;
 import com.mdgtaxi.service.MouvementStatusCreateService;
 import com.mdgtaxi.service.MouvementStatusService;
 import com.mdgtaxi.service.StatusService;
@@ -967,14 +1040,66 @@ public class VehiculeDetailServlet extends HttpServlet {
                 handleChangeStatut(req, id);
             } else if ("addEntretien".equals(action)) {
                 handleAddEntretien(req, id);
+            } else if ("addTarifPlace".equals(action)) {  // NEW: Handle add
+                handleAddTarifPlace(req, id);
+            } else if ("updateTarifPlace".equals(action)) {  // NEW: Handle update
+                handleUpdateTarifPlace(req, id);
+            } else if ("deleteTarifPlace".equals(action)) {  // NEW: Handle delete
+                handleDeleteTarifPlace(req, id);
             }
 
             resp.sendRedirect(req.getContextPath() + "/vehicules/detail?id=" + id);
         } catch (Exception e) {
+            e.printStackTrace();
             req.setAttribute("error", "Erreur: " + e.getMessage());
             loadVehiculeDetails(req, id);
             req.getRequestDispatcher("/vehicule-detail.jsp").forward(req, resp);
         }
+    }
+
+
+    private void handleAddTarifPlace(HttpServletRequest req, Long vehiculeId) throws Exception {
+        VehiculeTarifTypePlace vttp = new VehiculeTarifTypePlace();
+        Vehicule vehicule = new Vehicule();
+        vehicule.setId(vehiculeId);
+        vttp.setVehicule(vehicule);
+
+        Long typePlaceId = Long.parseLong(req.getParameter("typePlaceId"));
+        TypePlace typePlace = new TypePlace();
+        typePlace.setId(typePlaceId);
+        vttp.setTypePlace(typePlace);
+
+        vttp.setNombrePlace(Double.parseDouble(req.getParameter("nombrePlace")));
+        vttp.setTarifUnitaire(Double.parseDouble(req.getParameter("tarifUnitaire")));
+
+        vehiculeService.createOrUpdateTarifTypePlace(vttp);
+    }
+
+    private void handleUpdateTarifPlace(HttpServletRequest req, Long vehiculeId) throws Exception  {
+        Long vttpId = Long.parseLong(req.getParameter("vttpId"));
+        VehiculeTarifTypePlace vttp = vehiculeService.getTarifTypePlaceById(vttpId);  // Assume you add this method to VehiculeService
+        if (vttp == null || !vttp.getVehicule().getId().equals(vehiculeId)) {
+            throw new IllegalArgumentException("Invalid TarifTypePlace ID");
+        }
+
+        Long typePlaceId = Long.parseLong(req.getParameter("typePlaceId"));
+        TypePlace typePlace = new TypePlace();
+        typePlace.setId(typePlaceId);
+        vttp.setTypePlace(typePlace);
+
+        vttp.setNombrePlace(Double.parseDouble(req.getParameter("nombrePlace")));
+        vttp.setTarifUnitaire(Double.parseDouble(req.getParameter("tarifUnitaire")));
+
+        vehiculeService.createOrUpdateTarifTypePlace(vttp);
+    }
+
+    private void handleDeleteTarifPlace(HttpServletRequest req, Long vehiculeId) {
+        Long vttpId = Long.parseLong(req.getParameter("vttpId"));
+        VehiculeTarifTypePlace vttp = vehiculeService.getTarifTypePlaceById(vttpId);
+        if (vttp == null || !vttp.getVehicule().getId().equals(vehiculeId)) {
+            throw new IllegalArgumentException("Invalid TarifTypePlace ID");
+        }
+        vehiculeService.deleteTarifTypePlace(vttpId);  // Assume you add this method to VehiculeService
     }
 
     private void loadVehiculeDetails(HttpServletRequest req, Long id) {
@@ -1001,6 +1126,15 @@ public class VehiculeDetailServlet extends HttpServlet {
         // Load available statuses
         List<StatusObjectDto> availableStatuts = statusService.findAllStatuses("Vehicule");
         req.setAttribute("availableStatuts", availableStatuts);
+
+        List<VehiculeTarifTypePlace> tarifPlaces = vehiculeService.getTarifTypePlacesByVehicule(id);
+        req.setAttribute("tarifPlaces", tarifPlaces);
+
+        double maxCA = vehiculeService.getTotalMaxChiffreAffairePossible(id);
+        req.setAttribute("maxCA", maxCA);
+
+        List<TypePlace> typePlaces = vehiculeService.getAllTypePlaces();
+        req.setAttribute("typePlaces", typePlaces);
     }
 
     private void handleChangeStatut(HttpServletRequest req, Long vehiculeId) {
@@ -1058,7 +1192,6 @@ import com.mdgtaxi.entity.CarburantType;
 import com.mdgtaxi.entity.TypePlace;
 import com.mdgtaxi.entity.Vehicule;
 import com.mdgtaxi.entity.VehiculeEntretien;
-import com.mdgtaxi.entity.VehiculeMouvementStatut;
 import com.mdgtaxi.entity.VehiculeTarifTypePlace;
 import com.mdgtaxi.entity.VehiculeType;
 import com.mdgtaxi.service.MouvementStatusCreateService;
@@ -1077,6 +1210,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -1086,188 +1220,120 @@ public class VehiculeServlet extends HttpServlet {
 
     private final VehiculeService vehiculeService = new VehiculeService();
     private final TypeObjectService typeObjectService = new TypeObjectService();
-    private final StatusService statusService = new StatusService();
     private final MouvementStatusService mouvementStatusService = new MouvementStatusService();
     private final MouvementStatusCreateService mouvementStatusCreateService = new MouvementStatusCreateService();
+    private final StatusService statusService = new StatusService();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String action = req.getParameter("action");
-        String idParam = req.getParameter("id");
 
         // Load reference data
         loadReferenceData(req);
 
         if ("edit".equals(action)) {
             handleEdit(req);
-            req.getRequestDispatcher("/vehicules-content.jsp").forward(req, resp);
+            // Load tarif map for pre-filling
+            String idStr = req.getParameter("id");
+            if (idStr != null && !idStr.isEmpty()) {
+                Long id = Long.valueOf(idStr);
+                List<VehiculeTarifTypePlace> tarifPlaces = vehiculeService.getTarifTypePlacesByVehicule(id);
+                Map<Long, VehiculeTarifTypePlace> tarifMap = new HashMap<>();
+                for (VehiculeTarifTypePlace vttp : tarifPlaces) {
+                    tarifMap.put(vttp.getTypePlace().getId(), vttp);
+                }
+                req.setAttribute("tarifMap", tarifMap);
+            }
+        } else if ("detail".equals(action)) {
+            handleDetail(req, req.getParameter("id"));
+            req.getRequestDispatcher("/vehicule-detail.jsp").forward(req, resp);
             return;
-        } else if ("detail".equals(action) && idParam != null) {
-            handleDetail(req, Long.parseLong(idParam));
-            req.getRequestDispatcher("/vehicule-detail-content.jsp").forward(req, resp);
-            return;
         }
 
-        // Handle filters
-        Map<String, Object> filters = new HashMap<>();
+        // Collect filters
+        Map<String, Object> filters = collectFilters(req);
 
-        String marque = req.getParameter("filter_marque");
-        if (marque != null && !marque.isEmpty()) {
-            filters.put("marque", marque);
-        }
-
-        String modele = req.getParameter("filter_modele");
-        if (modele != null && !modele.isEmpty()) {
-            filters.put("modele", modele);
-        }
-
-        String immatriculation = req.getParameter("filter_immatriculation");
-        if (immatriculation != null && !immatriculation.isEmpty()) {
-            filters.put("immatriculation", immatriculation);
-        }
-
-        String maximumPassagerStr = req.getParameter("filter_maximumPassager");
-        if (maximumPassagerStr != null && !maximumPassagerStr.isEmpty()) {
-            try {
-                Integer max = Integer.parseInt(maximumPassagerStr);
-                filters.put("maximumPassager", max);
-            } catch (NumberFormatException e) {
-                // Ignore invalid number
-            }
-        }
-
-        String capaciteCarburantStr = req.getParameter("filter_capaciteCarburant");
-        if (capaciteCarburantStr != null && !capaciteCarburantStr.isEmpty()) {
-            try {
-                BigDecimal cap = new BigDecimal(capaciteCarburantStr);
-                filters.put("capaciteCarburant", cap);
-            } catch (NumberFormatException e) {
-                // Ignore invalid number
-            }
-        }
-
-        String depenseCarburant100kmStr = req.getParameter("filter_depenseCarburant100km");
-        if (depenseCarburant100kmStr != null && !depenseCarburant100kmStr.isEmpty()) {
-            try {
-                BigDecimal dep = new BigDecimal(depenseCarburant100kmStr);
-                filters.put("depenseCarburant100km", dep);
-            } catch (NumberFormatException e) {
-                // Ignore invalid number
-            }
-        }
-
-        String vehiculeTypeLibelle = req.getParameter("filter_vehiculeType");
-        if (vehiculeTypeLibelle != null && !vehiculeTypeLibelle.isEmpty()) {
-            filters.put("vehiculeType.libelle", vehiculeTypeLibelle);
-        }
-
-        String carburantTypeLibelle = req.getParameter("filter_carburantType");
-        if (carburantTypeLibelle != null && !carburantTypeLibelle.isEmpty()) {
-            filters.put("carburantType.libelle", carburantTypeLibelle);
-        }
-
-        // Load vehicles with filters
+        // Load vehicules with filters
         List<Vehicule> vehicules = filters.isEmpty() ? vehiculeService.getAllVehicules() : vehiculeService.searchVehiculesWithFilters(filters);
         req.setAttribute("vehicules", vehicules);
 
-        req.getRequestDispatcher("/vehicules-content.jsp").forward(req, resp);
+        req.getRequestDispatcher("/vehicules.jsp").forward(req, resp);
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String action = req.getParameter("action");
-        String idParam = req.getParameter("id");
-
-        if ("changeStatut".equals(action) && idParam != null) {
-            handleChangeStatut(req, Long.parseLong(idParam));
-            resp.sendRedirect(req.getContextPath() + "/vehicules/detail?id=" + idParam);
-            return;
-        } else if ("addEntretien".equals(action) && idParam != null) {
-            handleAddEntretien(req, Long.parseLong(idParam));
-            resp.sendRedirect(req.getContextPath() + "/vehicules/detail?id=" + idParam);
-            return;
-        }
+        String idStr = req.getParameter("id");
+        Long id = idStr != null && !idStr.isEmpty() ? Long.valueOf(idStr) : null;
 
         try {
-            Vehicule vehicule = buildVehiculeFromRequest(req);
-
-            if (vehicule.getId() == null) {
+            if ("save".equals(action)) {
+                Vehicule vehicule = buildVehiculeFromRequest(req);
                 vehicule = vehiculeService.createVehicule(vehicule);
-            } else {
-                vehicule = vehiculeService.updateVehicule(vehicule);
-            }
 
-            // Handle tarif type places
-            handleTarifTypePlaces(req, vehicule);
+                // Handle dynamic tarif type places
+                List<TypeObjectDTO> typePlaces = typeObjectService.findAllTypeObject("Type_Place");
+                for (TypeObjectDTO type : typePlaces) {
+                    Long typeId = type.getId();
+                    String placesStr = req.getParameter("places_" + typeId);
+                    String tarifStr = req.getParameter("tarif_" + typeId);
 
-            resp.sendRedirect(req.getContextPath() + "/vehicules");
-        } catch (Exception e) {
-            req.setAttribute("error", "Erreur lors de l'enregistrement: " + e.getMessage());
-            loadReferenceData(req);
-            req.getRequestDispatcher("/vehicules-content.jsp").forward(req, resp);
-        }
-    }
+                    if (placesStr != null && !placesStr.trim().isEmpty()) {
+                        try {
+                            double nombrePlaces = Double.parseDouble(placesStr);
+                            if (nombrePlaces > 0) {
+                                double tarif = (tarifStr != null && !tarifStr.trim().isEmpty())
+                                        ? Double.parseDouble(tarifStr)
+                                        : 0.0;  // Default to 0 if not provided
 
-    private void handleEdit(HttpServletRequest req) {
-        String idParam = req.getParameter("id");
-        if (idParam != null && !idParam.isEmpty()) {
-            Long id = Long.valueOf(idParam);
-            Vehicule vehicule = vehiculeService.getVehiculeById(id);
-            req.setAttribute("vehicule", vehicule);
-
-            // Load tarif type places
-            List<VehiculeTarifTypePlace> tarifPlaces = vehiculeService.getTarifTypePlacesByVehicule(id);
-            for (VehiculeTarifTypePlace vttp : tarifPlaces) {
-                if (vttp.getTypePlace().getId() == 1L) { // Premium
-                    req.setAttribute("premiumPlaces", vttp.getNombrePlace());
-                    req.setAttribute("premiumTarif", vttp.getTarifUnitaire());
-                } else if (vttp.getTypePlace().getId() == 2L) { // Standard
-                    req.setAttribute("standardPlaces", vttp.getNombrePlace());
-                    req.setAttribute("standardTarif", vttp.getTarifUnitaire());
+                                VehiculeTarifTypePlace vttp = vehiculeService.getTarifTypePlaceByVehiculeAndType(vehicule.getId(), typeId);
+                                if (vttp == null) {
+                                    vttp = new VehiculeTarifTypePlace();
+                                    vttp.setVehicule(vehicule);
+                                    TypePlace typePlace = new TypePlace();
+                                    typePlace.setId(typeId);
+                                    vttp.setTypePlace(typePlace);
+                                }
+                                vttp.setNombrePlace(nombrePlaces);
+                                vttp.setTarifUnitaire(tarif);
+                                vehiculeService.createOrUpdateTarifTypePlace(vttp);
+                            }
+                        } catch (NumberFormatException e) {
+                            // Optional: log or handle invalid input
+                        }
+                    }
                 }
+
+                resp.sendRedirect(req.getContextPath() + "/vehicules");
+            } else if ("changeStatut".equals(action)) {
+                handleChangeStatut(req, id);
+                resp.sendRedirect(req.getContextPath() + "/vehicules/detail?id=" + id);
+            } else if ("addEntretien".equals(action)) {
+                handleAddEntretien(req, id);
+                resp.sendRedirect(req.getContextPath() + "/vehicules/detail?id=" + id);
+            } else {
+                resp.sendRedirect(req.getContextPath() + "/vehicules");
+            }
+        } catch (Exception e) {
+            req.setAttribute("error", "Erreur: " + e.getMessage());
+            if (id != null) {
+                handleDetail(req, idStr);
+                req.getRequestDispatcher("/vehicule-detail.jsp").forward(req, resp);
+            } else {
+                loadReferenceData(req);
+                req.setAttribute("vehicule", buildVehiculeFromRequest(req)); // To repopulate form
+                req.getRequestDispatcher("/vehicules.jsp").forward(req, resp);
             }
         }
-    }
-
-    private void handleDetail(HttpServletRequest req, Long id) {
-        // Load vehicle detail
-        VmVehiculeDetail detail = vehiculeService.getVehiculeDetail(id);
-        req.setAttribute("detail", detail);
-
-        // Load cost
-        VmVehiculeCoutEntretien cout = vehiculeService.getCoutEntretien(id);
-        req.setAttribute("cout", cout);
-
-        // Load maintenances
-        List<VehiculeEntretien> entretiens = vehiculeService.getEntretiensByVehicule(id);
-        req.setAttribute("entretiens", entretiens);
-
-        // Load current status
-        MouvementStatusDto currentStatus = mouvementStatusService.getCurrentStatus("Vehicule", id);
-        req.setAttribute("currentStatus", currentStatus);
-
-        // Load status history
-        List<MouvementStatusDto> statusHistory = mouvementStatusService.getStatusHistory("Vehicule", id);
-        req.setAttribute("statusHistory", statusHistory);
-
-        // Load available statuses
-        List<StatusObjectDto> availableStatuts = statusService.findAllStatuses("Vehicule");
-        req.setAttribute("availableStatuts", availableStatuts);
-
-        // Load tarif type places
-        List<VehiculeTarifTypePlace> tarifPlaces = vehiculeService.getTarifTypePlacesByVehicule(id);
-        req.setAttribute("tarifPlaces", tarifPlaces);
-
-        // Load max CA
-        double maxCA = vehiculeService.getTotalMaxChiffreAffairePossible(id);
-        req.setAttribute("maxCA", maxCA);
     }
 
     private void loadReferenceData(HttpServletRequest req) {
         List<TypeObjectDTO> vehiculeTypes = typeObjectService.findAllTypeObject("Vehicule_Type");
         List<TypeObjectDTO> carburantTypes = typeObjectService.findAllTypeObject("Carburant_Type");
         List<StatusObjectDto> vehiculeStatuts = statusService.findAllStatuses("Vehicule");
-        List<TypeObjectDTO> typePlaces = typeObjectService.findAllTypeObject("Type_Place"); // Assuming this exists
+
+
+        List<TypePlace> typePlaces = vehiculeService.getAllTypePlaces();
 
         req.setAttribute("vehiculeTypes", vehiculeTypes);
         req.setAttribute("carburantTypes", carburantTypes);
@@ -1275,23 +1341,95 @@ public class VehiculeServlet extends HttpServlet {
         req.setAttribute("typePlaces", typePlaces);
     }
 
-    private Vehicule buildVehiculeFromRequest(HttpServletRequest req) {
-        String idStr = req.getParameter("id");
-        Vehicule vehicule;
+    private Map<String, Object> collectFilters(HttpServletRequest req) {
+        Map<String, Object> filters = new HashMap<>();
 
-        if (idStr != null && !idStr.isEmpty()) {
-            vehicule = vehiculeService.getVehiculeById(Long.valueOf(idStr));
-        } else {
-            vehicule = new Vehicule();
+        String marque = req.getParameter("filter_marque");
+        if (marque != null && !marque.isEmpty()) filters.put("marque", marque);
+
+        String modele = req.getParameter("filter_modele");
+        if (modele != null && !modele.isEmpty()) filters.put("modele", modele);
+
+        String immatriculation = req.getParameter("filter_immatriculation");
+        if (immatriculation != null && !immatriculation.isEmpty()) filters.put("immatriculation", immatriculation);
+
+        String maxPassagerStr = req.getParameter("filter_maximumPassager");
+        if (maxPassagerStr != null && !maxPassagerStr.isEmpty()) {
+            try {
+                filters.put("maximumPassager", Integer.parseInt(maxPassagerStr));
+            } catch (NumberFormatException ignored) {}
         }
 
-        // Set basic fields
+        String capaciteStr = req.getParameter("filter_capaciteCarburant");
+        if (capaciteStr != null && !capaciteStr.isEmpty()) {
+            try {
+                filters.put("capaciteCarburant", new BigDecimal(capaciteStr));
+            } catch (NumberFormatException ignored) {}
+        }
+
+        String depenseStr = req.getParameter("filter_depenseCarburant100km");
+        if (depenseStr != null && !depenseStr.isEmpty()) {
+            try {
+                filters.put("depenseCarburant100km", new BigDecimal(depenseStr));
+            } catch (NumberFormatException ignored) {}
+        }
+
+        String vehType = req.getParameter("filter_vehiculeType");
+        if (vehType != null && !vehType.isEmpty()) filters.put("vehiculeType.libelle", vehType);
+
+        String carbType = req.getParameter("filter_carburantType");
+        if (carbType != null && !carbType.isEmpty()) filters.put("carburantType.libelle", carbType);
+
+        return filters;
+    }
+
+    private void handleEdit(HttpServletRequest req) {
+        String idStr = req.getParameter("id");
+        if (idStr != null && !idStr.isEmpty()) {
+            Long id = Long.valueOf(idStr);
+            Vehicule vehicule = vehiculeService.getVehiculeById(id);
+            req.setAttribute("vehicule", vehicule);
+        }
+    }
+
+    private void handleDetail(HttpServletRequest req, String idStr) {
+        if (idStr == null || idStr.isEmpty()) return;
+        Long id = Long.valueOf(idStr);
+
+        VmVehiculeDetail detail = vehiculeService.getVehiculeDetail(id);
+        req.setAttribute("detail", detail);
+
+        VmVehiculeCoutEntretien cout = vehiculeService.getCoutEntretien(id);
+        req.setAttribute("cout", cout);
+
+        List<VehiculeEntretien> entretiens = vehiculeService.getEntretiensByVehicule(id);
+        req.setAttribute("entretiens", entretiens);
+
+        MouvementStatusDto currentStatus = mouvementStatusService.getCurrentStatus("Vehicule", id);
+        req.setAttribute("currentStatus", currentStatus);
+
+        List<MouvementStatusDto> statusHistory = mouvementStatusService.getStatusHistory("Vehicule", id);
+        req.setAttribute("statusHistory", statusHistory);
+
+        List<StatusObjectDto> availableStatuts = statusService.findAllStatuses("Vehicule");
+        req.setAttribute("availableStatuts", availableStatuts);
+
+        List<VehiculeTarifTypePlace> tarifPlaces = vehiculeService.getTarifTypePlacesByVehicule(id);
+        req.setAttribute("tarifPlaces", tarifPlaces);
+
+        double maxCA = vehiculeService.getTotalMaxChiffreAffairePossible(id);
+        req.setAttribute("maxCA", maxCA);
+    }
+
+    private Vehicule buildVehiculeFromRequest(HttpServletRequest req) {
+        String idStr = req.getParameter("id");
+        Vehicule vehicule = (idStr != null && !idStr.isEmpty()) ? vehiculeService.getVehiculeById(Long.valueOf(idStr)) : new Vehicule();
+
         vehicule.setMarque(req.getParameter("marque"));
         vehicule.setModele(req.getParameter("modele"));
         vehicule.setImmatriculation(req.getParameter("immatriculation"));
         vehicule.setMaximumPassager(Integer.valueOf(req.getParameter("maximumPassager")));
 
-        // Set optional numeric fields
         String capaciteCarburant = req.getParameter("capaciteCarburant");
         if (capaciteCarburant != null && !capaciteCarburant.isEmpty()) {
             vehicule.setCapaciteCarburant(new BigDecimal(capaciteCarburant));
@@ -1302,7 +1440,6 @@ public class VehiculeServlet extends HttpServlet {
             vehicule.setDepenseCarburant100km(new BigDecimal(depenseCarburant100km));
         }
 
-        // Set relationships
         VehiculeType vehiculeType = new VehiculeType();
         vehiculeType.setId(Long.valueOf(req.getParameter("idType")));
         vehicule.setVehiculeType(vehiculeType);
@@ -1314,54 +1451,16 @@ public class VehiculeServlet extends HttpServlet {
         return vehicule;
     }
 
-    private void handleTarifTypePlaces(HttpServletRequest req, Vehicule vehicule) {
-        // Assuming fixed types: 1=Premium, 2=Standard
-        handleTarifTypePlace(req, vehicule, 1L, "premiumPlaces", "premiumTarif", 140000.0);
-        handleTarifTypePlace(req, vehicule, 2L, "standardPlaces", "standardTarif", 80000.0);
-    }
-
-    private void handleTarifTypePlace(HttpServletRequest req, Vehicule vehicule, Long typeId, String placesParam, String tarifParam, double defaultTarif) {
-        String placesStr = req.getParameter(placesParam);
-        String tarifStr = req.getParameter(tarifParam);
-
-        if (placesStr != null && !placesStr.isEmpty()) {
-            double nombrePlaces = Double.parseDouble(placesStr);
-            double tarif = tarifStr != null && !tarifStr.isEmpty() ? Double.parseDouble(tarifStr) : defaultTarif;
-
-            VehiculeTarifTypePlace vttp = vehiculeService.getTarifTypePlaceByVehiculeAndType(vehicule.getId(), typeId);
-            if (vttp == null) {
-                vttp = new VehiculeTarifTypePlace();
-                vttp.setVehicule(vehicule);
-                TypePlace typePlace = new TypePlace();
-                typePlace.setId(typeId);
-                vttp.setTypePlace(typePlace);
-            }
-            vttp.setNombrePlace(nombrePlaces);
-            vttp.setTarifUnitaire(tarif);
-
-            vehiculeService.createOrUpdateTarifTypePlace(vttp);
-        }
-    }
-
     private void handleChangeStatut(HttpServletRequest req, Long vehiculeId) {
         Long idStatut = Long.valueOf(req.getParameter("idStatut"));
         String observation = req.getParameter("observation");
         String dateChangementStr = req.getParameter("dateChangement");
 
-        LocalDateTime dateChangement;
-        if (dateChangementStr != null && !dateChangementStr.isEmpty()) {
-            dateChangement = LocalDateTime.parse(dateChangementStr);
-        } else {
-            dateChangement = LocalDateTime.now();
-        }
+        LocalDateTime dateChangement = (dateChangementStr != null && !dateChangementStr.isEmpty())
+                ? LocalDateTime.parse(dateChangementStr)
+                : LocalDateTime.now();
 
-        mouvementStatusCreateService.createMouvementStatut(
-                "Vehicule",
-                vehiculeId,
-                idStatut,
-                dateChangement,
-                observation
-        );
+        mouvementStatusCreateService.createMouvementStatut("Vehicule", vehiculeId, idStatut, dateChangement, observation);
     }
 
     private void handleAddEntretien(HttpServletRequest req, Long vehiculeId) {
@@ -1377,11 +1476,9 @@ public class VehiculeServlet extends HttpServlet {
         entretien.setMotif(motif);
         entretien.setMontantDepense(new BigDecimal(montantStr));
 
-        if (dateDebutStr != null && !dateDebutStr.isEmpty()) {
-            entretien.setDateDebutEntretien(LocalDateTime.parse(dateDebutStr));
-        } else {
-            entretien.setDateDebutEntretien(LocalDateTime.now());
-        }
+        entretien.setDateDebutEntretien((dateDebutStr != null && !dateDebutStr.isEmpty())
+                ? LocalDateTime.parse(dateDebutStr)
+                : LocalDateTime.now());
 
         if (dateFinStr != null && !dateFinStr.isEmpty()) {
             entretien.setDateFinEntretien(LocalDateTime.parse(dateFinStr));

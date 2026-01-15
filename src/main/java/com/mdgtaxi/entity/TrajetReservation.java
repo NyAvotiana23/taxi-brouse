@@ -6,6 +6,7 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Entity
@@ -34,5 +35,8 @@ public class TrajetReservation implements Serializable {
 
     @Column(name = "date_reservation", nullable = false)
     private LocalDateTime dateReservation;
+
+    @OneToMany(mappedBy = "trajetReservation", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TrajetReservationDetails> trajetReservationDetails;
 
 }

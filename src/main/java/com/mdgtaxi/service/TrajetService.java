@@ -18,6 +18,7 @@ import javax.persistence.criteria.Root;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -155,7 +156,7 @@ public class TrajetService {
     public double getTotalPaiementRecu(Long idTrajet) {
         EntityManager em = emf.createEntityManager();
         try {
-            String jpql = "SELECT SUM(p.montant.doubleValue) FROM TrajetReservationPaiement p WHERE p.trajetReservation.trajet.id = :idTrajet";
+            String jpql = "SELECT SUM(p.montant) FROM TrajetReservationPaiement p WHERE p.trajetReservation.trajet.id = :idTrajet";
             TypedQuery<Double> query = em.createQuery(jpql, Double.class);
             query.setParameter("idTrajet", idTrajet);
             Double total = query.getSingleResult();
@@ -230,6 +231,42 @@ public class TrajetService {
             cq.orderBy(cb.desc(root.get("datetimeDepart")));
 
             TypedQuery<Trajet> query = em.createQuery(cq);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+
+
+    public Map<Long, Double> getSoldPlacesPerType(Long trajetId) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<Object[]> query = em.createQuery(
+                    "SELECT tp.id, SUM(trd.nombrePlaces) " +
+                            "FROM TrajetReservationDetails trd " +
+                            "JOIN trd.typePlace tp " +
+                            "JOIN trd.trajetReservation tr " +
+                            "WHERE tr.trajet.id = :trajetId " +
+                            "GROUP BY tp.id", Object[].class);
+            query.setParameter("trajetId", trajetId);
+            List<Object[]> results = query.getResultList();
+            Map<Long, Double> map = new HashMap<>();
+            for (Object[] row : results) {
+                map.put((Long) row[0], ((Number) row[1]).doubleValue());
+            }
+            return map;
+        } finally {
+            em.close();
+        }
+    }
+
+    public List<TrajetReservation> getReservationsByTrajet(Long trajetId) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<TrajetReservation> query = em.createQuery(
+                    "SELECT r FROM TrajetReservation r WHERE r.trajet.id = :id", TrajetReservation.class);
+            query.setParameter("id", trajetId);
             return query.getResultList();
         } finally {
             em.close();

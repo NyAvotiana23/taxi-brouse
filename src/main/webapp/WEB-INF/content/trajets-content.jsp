@@ -94,12 +94,6 @@
                             </select>
                         </div>
 
-                        <div class="mb-3">
-                            <label for="fraisUnitaire" class="form-label">Frais Unitaire (Ar)</label>
-                            <input type="number" step="0.01" class="form-control" id="fraisUnitaire" name="fraisUnitaire"
-                                   value="<%= trajet != null ? trajet.getFraisUnitaire() : "" %>" required>
-                        </div>
-
                         <button type="submit" class="btn btn-primary">Enregistrer</button>
                         <a href="<%= request.getContextPath() %>/trajets" class="btn btn-secondary">Annuler</a>
                     </form>
@@ -200,7 +194,6 @@
                                 <td><%= t.getDatetimeDepart() %></td>
                                 <td><%= t.getDatetimeArrivee() != null ? t.getDatetimeArrivee() : "-" %></td>
                                 <td><%= t.getTrajetStatut().getLibelle() %></td>
-                                <td><%= t.getFraisUnitaire() %> Ar</td>
                                 <td>
                                     <a href="<%= request.getContextPath() %>/trajets?action=edit&id=<%= t.getId() %>" class="btn btn-sm btn-info">Modifier</a>
                                     <a href="<%= request.getContextPath() %>/trajets/detail?id=<%= t.getId() %>" class="btn btn-sm btn-primary">Détails</a>

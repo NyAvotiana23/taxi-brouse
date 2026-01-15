@@ -3,13 +3,28 @@
 <%@ page import="java.util.List" %>
 <%@ page import="com.mdgtaxi.dto.TypeObjectDTO" %>
 <%@ page import="java.math.BigDecimal" %>
+<%@ page import="java.util.Map" %>
+<%@ page import="java.util.HashMap" %>
 <%
     Trajet trajet = (Trajet) request.getAttribute("trajet");
-    int placesRestantes = (Integer) request.getAttribute("placesRestantes");
-    int placesPrises = (Integer) request.getAttribute("placesPrises");
-    BigDecimal chiffredaffaire =
-            BigDecimal.valueOf(placesPrises)
-                    .multiply(trajet.getFraisUnitaire());
+    List<VehiculeTarifTypePlace> tarifPlaces = (List<VehiculeTarifTypePlace>) request.getAttribute("tarifPlaces");
+    Map<Long, Double> soldPerType = (Map<Long, Double>) request.getAttribute("soldPerType");
+
+    double totalPlacesPrises = 0.0;
+    double totalPlacesRestantes = 0.0;
+    double totalCA = 0.0;
+
+    if (tarifPlaces != null && soldPerType != null) {
+        for (VehiculeTarifTypePlace tp : tarifPlaces) {
+            double sold = soldPerType.getOrDefault(tp.getTypePlace().getId(), 0.0);
+            double remaining = tp.getNombrePlace() - sold;
+            double subtotal = sold * tp.getTarifUnitaire();
+
+            totalPlacesPrises += sold;
+            totalPlacesRestantes += remaining;
+            totalCA += subtotal;
+        }
+    }
 
     List<TrajetReservation> reservations = (List<TrajetReservation>) request.getAttribute("reservations");
     List<Client> clients = (List<Client>) request.getAttribute("clients");
@@ -52,7 +67,6 @@
                             </p>
                             <p><strong>Statut:</strong> <%= trajet.getTrajetStatut().getLibelle() %>
                             </p>
-                            <p><strong>Frais Unitaire:</strong> <%= trajet.getFraisUnitaire() %> Ar</p>
                         </div>
                     </div>
                 </div>
@@ -70,7 +84,7 @@
                             <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
                                 Places Prises
                             </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800"><%= placesPrises %>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800"><%= String.format("%.1f", totalPlacesPrises) %>
                             </div>
                         </div>
                         <div class="col-auto">
@@ -88,11 +102,11 @@
                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
                                 Places Restantes
                             </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800"><%= placesRestantes %>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800"><%= String.format("%.1f", totalPlacesRestantes) %>
                             </div>
                         </div>
                         <div class="col-auto">
-                            <i class="bi bi-seat-fill fs-2 text-gray-300"></i>
+                            <i class="bi bi-chair fs-2 text-gray-300"></i>
                         </div>
                     </div>
                 </div>
@@ -106,7 +120,8 @@
                             <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
                                 Chiffre d'Affaires
                             </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800"><%= chiffredaffaire %> Ar</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800"><%= String.format("%.2f", totalCA) %> Ar
+                            </div>
                         </div>
                         <div class="col-auto">
                             <i class="bi bi-currency-exchange fs-2 text-gray-300"></i>
@@ -116,65 +131,114 @@
             </div>
         </div>
     </div>
-    <div class="row mt-4">
-        <div class="col-12">
-            <div class="card shadow">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Ajouter une Réservation</h6>
-                </div>
-                <div class="card-body">
-                    <form action="<%= request.getContextPath() %>/reservations" method="post">
-                        <input type="hidden" name="idTrajet" value="<%= trajet.getId() %>">
 
-                        <div class="mb-3">
-                            <label for="idClient" class="form-label">Client</label>
-                            <select class="form-control" id="idClient" name="idClient" required>
-                                <option value="">Choisir...</option>
-                                <% if (clients != null) {
-                                    for (Client c : clients) { %>
-                                <option value="<%= c.getId() %>"><%= c.getNomClient() %>
-                                </option>
-                                <% }
-                                } %>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="nomPassager" class="form-label">Nom Passager</label>
-                            <input type="text" class="form-control" id="nomPassager" name="nomPassager" required>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="dateReservation" class="form-label">Date de reservation</label>
-                            <input type="datetime-local" class="form-control" id="dateReservation" name="dateReservation" required>
-                        </div>
-
-
-                        <div class="mb-3">
-                            <label for="numeroSiege" class="form-label">Numéro Siège</label>
-                            <input type="text" class="form-control" id="numeroSiege" name="numeroSiege">
-                        </div>
-                        <div class="mb-3">
-                            <label for="idReservationStatut" class="form-label">Statut</label>
-                            <select class="form-control" id="idReservationStatut" name="idReservationStatut" required>
-                                <option value="">Choisir...</option>
-                                <% if (reservationStatuts != null) {
-                                    for (TypeObjectDTO s : reservationStatuts) { %>
-                                <option value="<%= s.getId() %>"><%= s.getLibelle() %>
-                                </option>
-                                <% }
-                                } %>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="nombrePlaceReservation" class="form-label">Nombre Places</label>
-                            <input type="number" class="form-control" id="nombrePlaceReservation"
-                                   name="nombrePlaceReservation" required>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary">Enregistrer</button>
-                    </form>
-                </div>
+    <!-- Breakdown Table -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Détails par Type de Place</h6>
+        </div>
+        <div class="card-body">
+            <% if (tarifPlaces != null && !tarifPlaces.isEmpty()) { %>
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th>Type de Place</th>
+                        <th>Places Vendues</th>
+                        <th>Places Restantes</th>
+                        <th>Tarif Unitaire (Ar)</th>
+                        <th>Sous-total (Ar)</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <%
+                        for (VehiculeTarifTypePlace tp : tarifPlaces) {
+                            double sold = soldPerType.getOrDefault(tp.getTypePlace().getId(), 0.0);
+                            double remaining = tp.getNombrePlace() - sold;
+                            double subtotal = sold * tp.getTarifUnitaire();
+                    %>
+                    <tr>
+                        <td><%= tp.getTypePlace().getNomTypePlace() %>
+                        </td>
+                        <td><%= String.format("%.1f", sold) %>
+                        </td>
+                        <td><%= String.format("%.1f", remaining) %>
+                        </td>
+                        <td class="text-right"><%= String.format("%.2f", tp.getTarifUnitaire()) %>
+                        </td>
+                        <td class="text-right"><%= String.format("%.2f", subtotal) %>
+                        </td>
+                    </tr>
+                    <% } %>
+                    </tbody>
+                    <tfoot>
+                    <tr>
+                        <th colspan="4" class="text-right">Total</th>
+                        <th class="text-right"><%= String.format("%.2f", totalCA) %> Ar</th>
+                    </tr>
+                    </tfoot>
+                </table>
             </div>
+            <% } else { %>
+            <div class="alert alert-info">Aucune configuration de places disponible pour ce véhicule.</div>
+            <% } %>
+        </div>
+    </div>
+
+    <!-- Nouvelle Réservation -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Nouvelle Réservation</h6>
+        </div>
+        <div class="card-body">
+            <form action="<%= request.getContextPath() %>/reservations" method="post">
+                <input type="hidden" name="idTrajet" value="<%= trajet.getId() %>">
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="idClient" class="form-label">Client</label>
+                        <select class="form-control" id="idClient" name="idClient" required>
+                            <option value="">Choisir...</option>
+                            <% if (clients != null) {
+                                for (Client c : clients) { %>
+                            <option value="<%= c.getId() %>"><%= c.getNomClient() %>
+                            </option>
+                            <% }
+                            } %>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="nomPassager" class="form-label">Nom Passager</label>
+                        <input type="text" class="form-control" id="nomPassager" name="nomPassager" required>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="numeroSiege" class="form-label">Numéro Siège</label>
+                        <input type="text" class="form-control" id="numeroSiege" name="numeroSiege">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="idReservationStatut" class="form-label">Statut</label>
+                        <select class="form-control" id="idReservationStatut" name="idReservationStatut" required>
+                            <option value="">Choisir...</option>
+                            <% if (reservationStatuts != null) {
+                                for (TypeObjectDTO s : reservationStatuts) { %>
+                            <option value="<%= s.getId() %>"><%= s.getLibelle() %>
+                            </option>
+                            <% }
+                            } %>
+                        </select>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="nombrePlaceReservation" class="form-label">Places</label>
+                    <input type="number" class="form-control" id="nombrePlaceReservation"
+                           name="nombrePlaceReservation" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Enregistrer</button>
+            </form>
         </div>
     </div>
 
@@ -208,10 +272,6 @@
                                 <td><%= r.getClient().getNomClient() %>
                                 </td>
                                 <td><%= r.getNomPassager() %>
-                                </td>
-                                <td><%= r.getNumeroSiege() != null ? r.getNumeroSiege() : "-" %>
-                                </td>
-                                <td><%= r.getNombrePlaceReservation() %>
                                 </td>
                                 <td>
                                                 <span class="badge bg-info">

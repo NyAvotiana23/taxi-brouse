@@ -1,15 +1,16 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.mdgtaxi.entity.Vehicule" %>
 <%@ page import="com.mdgtaxi.dto.TypeObjectDTO" %>
+<%@ page import="com.mdgtaxi.entity.VehiculeTarifTypePlace" %>
 <%@ page import="java.util.List" %>
+<%@ page import="java.util.Map" %>
+<%@ page import="com.mdgtaxi.entity.TypePlace" %>
 <%
     Vehicule vehicule = (Vehicule) request.getAttribute("vehicule");
     List<TypeObjectDTO> vehiculeTypes = (List<TypeObjectDTO>) request.getAttribute("vehiculeTypes");
     List<TypeObjectDTO> carburantTypes = (List<TypeObjectDTO>) request.getAttribute("carburantTypes");
-    Double premiumPlaces = (Double) request.getAttribute("premiumPlaces");
-    Double premiumTarif = (Double) request.getAttribute("premiumTarif");
-    Double standardPlaces = (Double) request.getAttribute("standardPlaces");
-    Double standardTarif = (Double) request.getAttribute("standardTarif");
+    List<TypePlace> typePlaces = (List<TypePlace>) request.getAttribute("typePlaces");
+    Map<Long, VehiculeTarifTypePlace> tarifMap = (Map<Long, VehiculeTarifTypePlace>) request.getAttribute("tarifMap");
     String error = (String) request.getAttribute("error");
 %>
 
@@ -31,6 +32,7 @@
         <% } %>
 
         <form action="<%= request.getContextPath() %>/vehicules" method="post">
+            <input type="hidden" name="action" value="save">
             <input type="hidden" name="id" value="<%= vehicule != null ? vehicule.getId() : "" %>">
 
             <div class="row">
@@ -154,58 +156,50 @@
                 </div>
             </div>
 
-            <!-- New section for seat types -->
+            <!-- Dynamic Configuration des Types de Places -->
             <div class="card mb-4">
                 <div class="card-header">
                     <h6 class="m-0 font-weight-bold text-primary">Configuration des Types de Places</h6>
                 </div>
                 <div class="card-body">
+                    <% if (typePlaces != null && !typePlaces.isEmpty()) { %>
                     <div class="row">
+                        <% for (TypePlace type : typePlaces) {
+                            VehiculeTarifTypePlace existing = (tarifMap != null) ? tarifMap.get(type.getId()) : null;
+                            double places = (existing != null) ? existing.getNombrePlace() : 0.0;
+                            double tarif = (existing != null) ? existing.getTarifUnitaire() : 0.0;
+                        %>
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="premiumPlaces" class="form-label">Nombre de Places Premium</label>
+                                <label for="places_<%= type.getId() %>" class="form-label">
+                                    Nombre de Places <%= type.getNomTypePlace() %>
+                                </label>
                                 <input type="number"
                                        step="1"
                                        class="form-control"
-                                       id="premiumPlaces"
-                                       name="premiumPlaces"
+                                       id="places_<%= type.getId() %>"
+                                       name="places_<%= type.getId() %>"
                                        min="0"
-                                       value="<%= premiumPlaces != null ? premiumPlaces : "0" %>">
+                                       value="<%= places %>">
                             </div>
                             <div class="mb-3">
-                                <label for="premiumTarif" class="form-label">Tarif Unitaire Premium (Ar)</label>
+                                <label for="tarif_<%= type.getId() %>" class="form-label">
+                                    Tarif Unitaire <%= type.getNomTypePlace() %> (Ar)
+                                </label>
                                 <input type="number"
                                        step="0.01"
                                        class="form-control"
-                                       id="premiumTarif"
-                                       name="premiumTarif"
+                                       id="tarif_<%= type.getId() %>"
+                                       name="tarif_<%= type.getId() %>"
                                        min="0"
-                                       value="<%= premiumTarif != null ? premiumTarif : "140000.0" %>">
+                                       value="<%= tarif %>">
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="standardPlaces" class="form-label">Nombre de Places Standard</label>
-                                <input type="number"
-                                       step="1"
-                                       class="form-control"
-                                       id="standardPlaces"
-                                       name="standardPlaces"
-                                       min="0"
-                                       value="<%= standardPlaces != null ? standardPlaces : "0" %>">
-                            </div>
-                            <div class="mb-3">
-                                <label for="standardTarif" class="form-label">Tarif Unitaire Standard (Ar)</label>
-                                <input type="number"
-                                       step="0.01"
-                                       class="form-control"
-                                       id="standardTarif"
-                                       name="standardTarif"
-                                       min="0"
-                                       value="<%= standardTarif != null ? standardTarif : "80000.0" %>">
-                            </div>
-                        </div>
+                        <% } %>
                     </div>
+                    <% } else { %>
+                    <p class="text-warning">Aucun type de place configuré dans la base de données.</p>
+                    <% } %>
                 </div>
             </div>
 

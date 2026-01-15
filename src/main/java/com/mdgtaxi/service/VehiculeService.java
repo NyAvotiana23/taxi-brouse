@@ -1,13 +1,8 @@
 package com.mdgtaxi.service;
 
-import com.mdgtaxi.entity.CarburantType;
-import com.mdgtaxi.entity.Vehicule;
-import com.mdgtaxi.entity.VehiculeEntretien;
-import com.mdgtaxi.entity.VehiculeMouvementStatut;
-import com.mdgtaxi.entity.VehiculeStatut;
-import com.mdgtaxi.entity.VehiculeTarifTypePlace;
-import com.mdgtaxi.entity.VehiculeType;
+import com.mdgtaxi.entity.*;
 import com.mdgtaxi.util.HibernateUtil;
+import com.mdgtaxi.util.TableUtil;
 import com.mdgtaxi.view.VmVehiculeCoutEntretien;
 import com.mdgtaxi.view.VmVehiculeDetail;
 import com.mdgtaxi.view.VmVehiculeHistoriqueStatut;
@@ -46,6 +41,33 @@ public class VehiculeService {
         }
     }
 
+    public void deleteTarifTypePlace(Long id) {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            VehiculeTarifTypePlace vttp = em.find(VehiculeTarifTypePlace.class, id);
+            if (vttp != null) {
+                em.remove(vttp);
+            }
+            tx.commit();
+        } catch (Exception e) {
+            if (tx.isActive()) tx.rollback();
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
+
+    public VehiculeTarifTypePlace getTarifTypePlaceById(Long id) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            return em.find(VehiculeTarifTypePlace.class, id);
+        } finally {
+            em.close();
+        }
+    }
+
     public Vehicule getVehiculeById(Long id) {
         EntityManager em = emf.createEntityManager();
         try {
@@ -55,10 +77,21 @@ public class VehiculeService {
         }
     }
 
+
     public List<Vehicule> getAllVehicules() {
         EntityManager em = emf.createEntityManager();
         try {
             TypedQuery<Vehicule> query = em.createQuery("SELECT v FROM Vehicule v", Vehicule.class);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    public List<TypePlace> getAllTypePlaces() {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<TypePlace> query = em.createQuery("SELECT v FROM TypePlace v", TypePlace.class);
             return query.getResultList();
         } finally {
             em.close();
@@ -311,7 +344,27 @@ public class VehiculeService {
         }
     }
 
-    public VehiculeTarifTypePlace createOrUpdateTarifTypePlace(VehiculeTarifTypePlace vttp) {
+    public double getTotalTypePlaceSet (Long idVoiture) {
+        List<VehiculeTarifTypePlace> typePlaces = getTarifTypePlacesByVehicule(idVoiture);
+
+        return TableUtil.sum(typePlaces, "nombrePlace");
+    }
+
+    public VehiculeTarifTypePlace createOrUpdateTarifTypePlace(VehiculeTarifTypePlace vttp) throws Exception {
+
+        Vehicule v = getVehiculeById(vttp.getVehicule().getId());
+
+        double plcPrise = getTotalTypePlaceSet(v.getId());
+        if(vttp.getId() != null){
+            VehiculeTarifTypePlace vttOld = getTarifTypePlaceById(vttp.getId());
+
+            plcPrise -= vttOld.getNombrePlace();
+        }
+
+        if (plcPrise + vttp.getNombrePlace() > v.getMaximumPassager()) {
+            throw new Exception("Nombre de place erreur : total prise " + plcPrise + " Ajoute : " + vttp.getNombrePlace() + " Capacite : " + v.getMaximumPassager() );
+        }
+
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
