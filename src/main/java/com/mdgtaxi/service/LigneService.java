@@ -1,6 +1,8 @@
 package com.mdgtaxi.service;
 
 import com.mdgtaxi.entity.Ligne;
+import com.mdgtaxi.entity.LigneDetail;
+import com.mdgtaxi.entity.Trajet;
 import com.mdgtaxi.util.HibernateUtil;
 
 import javax.persistence.EntityManager;
@@ -11,6 +13,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
@@ -18,6 +21,21 @@ import java.util.ArrayList;
 public class LigneService {
 
     private final EntityManagerFactory emf = HibernateUtil.getEntityManagerFactory();
+
+    public List<LigneDetail> getLigneDetailList (Long idLigne) {
+
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<LigneDetail> query = em.createQuery(
+                    "SELECT l FROM LigneDetail l WHERE l.ligne.id = :ligneId",
+                    LigneDetail.class
+            );
+            query.setParameter("ligneId", idLigne);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
 
     public List<Ligne> searchLignesWithFilters(Map<String, Object> filters) {
         EntityManager em = emf.createEntityManager();
@@ -38,13 +56,18 @@ public class LigneService {
                     case "distanceKm":
                         predicates.add(cb.equal(root.get("distanceKm"), value));
                         break;
+                    case "distanceKm>=":
+                        predicates.add(cb.greaterThanOrEqualTo(root.get("distanceKm"), (BigDecimal) value));
+                        break;
+                    case "distanceKm<=":
+                        predicates.add(cb.lessThanOrEqualTo(root.get("distanceKm"), (BigDecimal) value));
+                        break;
                     case "villeDepart.id":
                         predicates.add(cb.equal(root.get("villeDepart").get("id"), value));
                         break;
                     case "villeArrivee.id":
                         predicates.add(cb.equal(root.get("villeArrivee").get("id"), value));
                         break;
-                    // Add more fields as needed
                     default:
                         // Ignore unknown filters
                         break;

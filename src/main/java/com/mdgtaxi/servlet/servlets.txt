@@ -124,7 +124,10 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @WebServlet("/chauffeures")
 public class ChauffeurServlet extends HttpServlet {
@@ -146,8 +149,36 @@ public class ChauffeurServlet extends HttpServlet {
             return;
         }
 
-        // Load all chauffeurs
-        List<Chauffeur> chauffeurs = chauffeurService.getAllChauffeurs();
+        // Collect filters
+        Map<String, Object> filters = new HashMap<>();
+
+        String nom = req.getParameter("filter_nom");
+        if (nom != null && !nom.isEmpty()) {
+            filters.put("nom", nom);
+        }
+
+        String prenom = req.getParameter("filter_prenom");
+        if (prenom != null && !prenom.isEmpty()) {
+            filters.put("prenom", prenom);
+        }
+
+        String numeroPermis = req.getParameter("filter_numeroPermis");
+        if (numeroPermis != null && !numeroPermis.isEmpty()) {
+            filters.put("numeroPermis", numeroPermis);
+        }
+
+        String dateNaissanceStr = req.getParameter("filter_dateNaissance");
+        if (dateNaissanceStr != null && !dateNaissanceStr.isEmpty()) {
+            try {
+                LocalDate date = LocalDate.parse(dateNaissanceStr);
+                filters.put("dateNaissance", date);
+            } catch (DateTimeParseException e) {
+                // Ignore invalid date
+            }
+        }
+
+        // Load chauffeurs with filters
+        List<Chauffeur> chauffeurs = filters.isEmpty() ? chauffeurService.getAllChauffeurs() : chauffeurService.searchChauffeursWithFilters(filters);
         req.setAttribute("chauffeurs", chauffeurs);
 
         req.getRequestDispatcher("/chauffeures.jsp").forward(req, resp);
@@ -218,6 +249,7 @@ public class ChauffeurServlet extends HttpServlet {
 package com.mdgtaxi.servlet;
 
 import com.mdgtaxi.entity.Ligne;
+import com.mdgtaxi.entity.LigneDetail;
 import com.mdgtaxi.entity.Trajet;
 import com.mdgtaxi.service.LigneService;
 import com.mdgtaxi.service.TrajetService;
@@ -241,9 +273,12 @@ public class LigneDetailServlet extends HttpServlet {
         Long id = Long.valueOf(req.getParameter("id"));
         Ligne ligne = ligneService.getLigneById(id);
         List<Trajet> trajets = trajetService.getTrajetsByLigneId(id);
+        List<LigneDetail> ligneDetails = ligneService.getLigneDetailList(id);
 
         req.setAttribute("ligne", ligne);
         req.setAttribute("trajets", trajets);
+        req.setAttribute("ligneDetails", ligneDetails);
+
 
         req.getRequestDispatcher("/ligne-detail.jsp").forward(req, resp);
     }
@@ -262,7 +297,9 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @WebServlet("/lignes")
 public class LigneServlet extends HttpServlet {
@@ -280,7 +317,42 @@ public class LigneServlet extends HttpServlet {
             req.setAttribute("ligne", ligne);
         }
 
-        List<Ligne> lignes = ligneService.getAllLignes();
+        // Build filters map from request parameters
+        Map<String, Object> filters = new HashMap<>();
+
+        String idVilleDepart = req.getParameter("idVilleDepart");
+        if (idVilleDepart != null && !idVilleDepart.isEmpty()) {
+            filters.put("villeDepart.id", Long.valueOf(idVilleDepart));
+        }
+
+        String idVilleArrivee = req.getParameter("idVilleArrivee");
+        if (idVilleArrivee != null && !idVilleArrivee.isEmpty()) {
+            filters.put("villeArrivee.id", Long.valueOf(idVilleArrivee));
+        }
+
+        String distanceKm = req.getParameter("distanceKm");
+        if (distanceKm != null && !distanceKm.isEmpty()) {
+            filters.put("distanceKm", new BigDecimal(distanceKm));
+        }
+
+        String minDistance = req.getParameter("minDistance");
+        if (minDistance != null && !minDistance.isEmpty()) {
+            filters.put("distanceKm>=", new BigDecimal(minDistance));
+        }
+
+        String maxDistance = req.getParameter("maxDistance");
+        if (maxDistance != null && !maxDistance.isEmpty()) {
+            filters.put("distanceKm<=", new BigDecimal(maxDistance));
+        }
+
+        // Get filtered or all lignes
+        List<Ligne> lignes;
+        if (!filters.isEmpty()) {
+            lignes = ligneService.searchLignesWithFilters(filters);
+        } else {
+            lignes = ligneService.getAllLignes();
+        }
+
         List<Ville> villes = villeService.getAllVilles();
 
         req.setAttribute("lignes", lignes);
@@ -320,14 +392,14 @@ public class LigneServlet extends HttpServlet {
         resp.sendRedirect(req.getContextPath() + "/lignes");
     }
 }
+// Update to servlets.txt (ReservationDetailServlet class, using correct entity names)
 package com.mdgtaxi.servlet;
 
+import com.mdgtaxi.dto.MouvementStatusDto;
+import com.mdgtaxi.dto.StatusObjectDto;
 import com.mdgtaxi.dto.TypeObjectDTO;
 import com.mdgtaxi.entity.*;
-import com.mdgtaxi.service.ClientService;
-import com.mdgtaxi.service.ReservationService;
-import com.mdgtaxi.service.TrajetService;
-import com.mdgtaxi.service.TypeObjectService;
+import com.mdgtaxi.service.*;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -335,6 +407,144 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
+
+@WebServlet("/reservations/detail")
+public class ReservationDetailServlet extends HttpServlet {
+
+    private final ReservationService reservationService = new ReservationService();
+    private final ClientService clientService = new ClientService(); // Assume exists
+    private final TrajetService trajetService = new TrajetService(); // Assume exists
+    private final StatusService statusService = new StatusService();
+    private final TypeObjectService typeObjectService = new TypeObjectService(); // Assume exists for ModePaiement, but adjust if needed
+
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String idParam = req.getParameter("id");
+
+        if (idParam == null || idParam.isEmpty()) {
+            resp.sendRedirect(req.getContextPath() + "/reservations");
+            return;
+        }
+
+        Long id = Long.parseLong(idParam);
+        loadReservationDetails(req, id);
+
+        req.getRequestDispatcher("/reservation-detail-content.jsp").forward(req, resp);
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String action = req.getParameter("action");
+        String idParam = req.getParameter("id");
+
+        if (idParam == null || idParam.isEmpty()) {
+            resp.sendRedirect(req.getContextPath() + "/reservations");
+            return;
+        }
+
+        Long id = Long.parseLong(idParam);
+
+        try {
+            if ("changeStatut".equals(action)) {
+                handleChangeStatut(req, id);
+            } else if ("addPayment".equals(action)) {
+                handleAddPayment(req, id);
+            }
+
+            resp.sendRedirect(req.getContextPath() + "/reservations/detail?id=" + id);
+        } catch (Exception e) {
+            req.setAttribute("error", "Erreur: " + e.getMessage());
+            loadReservationDetails(req, id);
+            req.getRequestDispatcher("/reservation-detail-content.jsp").forward(req, resp);
+        }
+    }
+
+    private void loadReservationDetails(HttpServletRequest req, Long id) {
+        TrajetReservation reservation = reservationService.getReservationById(id);
+        req.setAttribute("reservation", reservation);
+
+        List<TrajetReservationPaiement> payments = reservationService.getPaymentsByReservation(id);
+        req.setAttribute("payments", payments);
+
+        List<TrajetReservationMouvementStatut> statusHistory = reservationService.getStatusHistoryByReservation(id);
+        req.setAttribute("statusHistory", statusHistory);
+
+        List<Client> clients = clientService.getAllClients(); // For form if needed
+        req.setAttribute("clients", clients);
+
+        List<Trajet> trajets = trajetService.getAllTrajets(); // For form if needed
+        req.setAttribute("trajets", trajets);
+
+        List<StatusObjectDto> reservationStatuts = statusService.findAllStatuses("Reservation");
+        req.setAttribute("reservationStatuts", reservationStatuts);
+
+        // Assuming ModePaiement is a TypeObject, or adjust service accordingly
+        List<TypeObjectDTO> modePaiements = typeObjectService.findAllTypeObject("Mode_Paiement");
+        req.setAttribute("modePaiements", modePaiements);
+    }
+
+    private void handleChangeStatut(HttpServletRequest req, Long reservationId) {
+        Long idStatut = Long.valueOf(req.getParameter("idStatut"));
+        String observation = req.getParameter("observation");
+        LocalDateTime dateChangement = LocalDateTime.now(); // Or parse from param
+
+        TrajetReservationMouvementStatut mouvement = new TrajetReservationMouvementStatut();
+        TrajetReservation reservation = new TrajetReservation();
+        reservation.setId(reservationId);
+        mouvement.setTrajetReservation(reservation);
+        ReservationStatut statut = new ReservationStatut();
+        statut.setId(idStatut);
+        mouvement.setNouveauStatut(statut);
+        mouvement.setDateMouvement(dateChangement);
+        mouvement.setObservation(observation);
+
+        reservationService.changeStatus(mouvement);
+    }
+
+    private void handleAddPayment(HttpServletRequest req, Long reservationId) {
+        BigDecimal montant = new BigDecimal(req.getParameter("montant"));
+        Long idModePaiement = Long.valueOf(req.getParameter("idModePaiement"));
+        Long idClient = Long.valueOf(req.getParameter("idClient")); // Assuming from form, or use reservation's client
+        Long idCaisse = req.getParameter("idCaisse") != null ? Long.valueOf(req.getParameter("idCaisse")) : null;
+        LocalDateTime datePaiement = LocalDateTime.now(); // Or parse
+
+        TrajetReservationPaiement paiement = new TrajetReservationPaiement();
+        Client client = new Client();
+        client.setId(idClient);
+        paiement.setClient(client);
+        TrajetReservation reservation = new TrajetReservation();
+        reservation.setId(reservationId);
+        paiement.setTrajetReservation(reservation);
+        if (idCaisse != null) {
+            Caisse caisse = new Caisse();
+            caisse.setId(idCaisse);
+            paiement.setCaisse(caisse);
+        }
+        paiement.setMontant(montant);
+        ModePaiement mode = new ModePaiement();
+        mode.setId(idModePaiement);
+        paiement.setModePaiement(mode);
+        paiement.setDatePaiement(datePaiement);
+
+        reservationService.createPayment(paiement);
+    }
+}
+package com.mdgtaxi.servlet;
+
+import com.mdgtaxi.dto.TypeObjectDTO;
+import com.mdgtaxi.entity.*;
+import com.mdgtaxi.service.*;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -379,7 +589,14 @@ public class ReservationServlet extends HttpServlet {
         Long idTrajet = Long.valueOf(req.getParameter("idTrajet"));
         Long idClient = Long.valueOf(req.getParameter("idClient"));
         String nomPassager = req.getParameter("nomPassager");
+
+
+        String dateReservation = req.getParameter("dateReservation");
+        LocalDateTime localDateTimeReservation = LocalDateTime.parse(dateReservation);
+
         String numeroSiege = req.getParameter("numeroSiege");
+
+
         Long idReservationStatut = Long.valueOf(req.getParameter("idReservationStatut"));
         Integer nombrePlaceReservation = Integer.valueOf(req.getParameter("nombrePlaceReservation"));
 
@@ -396,10 +613,13 @@ public class ReservationServlet extends HttpServlet {
         client.setId(idClient);
         reservation.setClient(client);
 
+        reservation.setDateReservation(localDateTimeReservation);
+
         reservation.setNomPassager(nomPassager);
         reservation.setNumeroSiege(numeroSiege);
 
         ReservationStatut statut = new ReservationStatut();
+
         statut.setId(idReservationStatut);
         reservation.setReservationStatut(statut);
 
@@ -420,14 +640,78 @@ public class ReservationServlet extends HttpServlet {
 }
 package com.mdgtaxi.servlet;
 
+import com.mdgtaxi.entity.Ligne;
+import com.mdgtaxi.entity.Trajet;
+import com.mdgtaxi.service.LigneService;
+import com.mdgtaxi.service.TrajetService;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
+import java.util.List;
+
+@WebServlet("/trajets-a-venir")
+public class TrajetAVenirServlet extends HttpServlet {
+    private final TrajetService trajetService = new TrajetService();
+    private final LigneService ligneService = new LigneService();
+
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        LocalDateTime now = LocalDateTime.now();
+        List<Ligne> lignes = ligneService.getAllLignes();
+        req.setAttribute("lignes", lignes);
+
+        String ligneIdStr = req.getParameter("idLigne");
+        String dateStr = req.getParameter("date");
+
+        Long selectedLigneId = null;
+        LocalDate selectedDate = null;
+        List<Trajet> trajets;
+        List<LocalDate> dates = null;
+
+        if (ligneIdStr != null && !ligneIdStr.isEmpty()) {
+            try {
+                selectedLigneId = Long.parseLong(ligneIdStr);
+                req.setAttribute("selectedLigneId", selectedLigneId);
+                dates = trajetService.getDistinctUpcomingDatesByLigne(now, selectedLigneId);
+                req.setAttribute("dates", dates);
+
+                if (dateStr != null && !dateStr.isEmpty()) {
+                    try {
+                        selectedDate = LocalDate.parse(dateStr);
+                        req.setAttribute("selectedDate", selectedDate);
+                        trajets = trajetService.getUpcomingTrajetsByLigneAndDate(now, selectedLigneId, selectedDate);
+                    } catch (DateTimeParseException e) {
+                        trajets = trajetService.getUpcomingTrajetsByLigne(now, selectedLigneId);
+                    }
+                } else {
+                    trajets = trajetService.getUpcomingTrajetsByLigne(now, selectedLigneId);
+                }
+            } catch (NumberFormatException e) {
+                trajets = trajetService.getAllUpcomingTrajets(now);
+            }
+        } else {
+            trajets = trajetService.getAllUpcomingTrajets(now);
+        }
+
+        req.setAttribute("trajets", trajets);
+        req.getRequestDispatcher("/trajets-a-venir.jsp").forward(req, resp);
+    }
+}
+package com.mdgtaxi.servlet;
+
 import com.mdgtaxi.dto.TypeObjectDTO;
 import com.mdgtaxi.entity.Client;
+import com.mdgtaxi.entity.LigneDetail;
 import com.mdgtaxi.entity.Trajet;
 import com.mdgtaxi.entity.TrajetReservation;
-import com.mdgtaxi.service.ClientService;
-import com.mdgtaxi.service.ReservationService;
-import com.mdgtaxi.service.TrajetService;
-import com.mdgtaxi.service.TypeObjectService;
+import com.mdgtaxi.service.*;
+import com.mdgtaxi.util.ExceptionUtil;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -444,11 +728,21 @@ public class TrajetDetailServlet extends HttpServlet {
     private final ReservationService reservationService = new ReservationService();
     private final ClientService clientService = new ClientService();
     private final TypeObjectService typeObjectService = new TypeObjectService();
+    private final LigneService ligneService = new LigneService();
+
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Long id = Long.valueOf(req.getParameter("id"));
         Trajet trajet = trajetService.getTrajetById(id);
+
+        ExceptionUtil.throwExceptionOnObjectNull(trajet);
+
+
+
+        List<LigneDetail> ligneDetails = ligneService.getLigneDetailList(trajet.getLigne().getId());
+
+
         List<TrajetReservation> reservations = reservationService.getReservationsByTrajetId(id);
         int placesPrises = reservationService.getPlacesPrisesForTrajet(id);
         int placesRestantes = trajet.getVehicule().getMaximumPassager() - placesPrises;
@@ -461,6 +755,8 @@ public class TrajetDetailServlet extends HttpServlet {
         req.setAttribute("reservations", reservations);
         req.setAttribute("clients", clients);
         req.setAttribute("reservationStatuts", reservationStatuts);
+        req.setAttribute("ligneDetails", ligneDetails);
+
 
         req.getRequestDispatcher("/trajet-detail.jsp").forward(req, resp);
     }
@@ -479,7 +775,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @WebServlet("/trajets")
 public class TrajetServlet extends HttpServlet {
@@ -500,7 +798,47 @@ public class TrajetServlet extends HttpServlet {
             req.setAttribute("trajet", trajet);
         }
 
-        List<Trajet> trajets = trajetService.getAllTrajets();
+        // Build filters map from request parameters
+        Map<String, Object> filters = new HashMap<>();
+
+        String idLigne = req.getParameter("idLigne");
+        if (idLigne != null && !idLigne.isEmpty()) {
+            filters.put("ligne.id", Long.valueOf(idLigne));
+        }
+
+        String idChauffeur = req.getParameter("idChauffeur");
+        if (idChauffeur != null && !idChauffeur.isEmpty()) {
+            filters.put("chauffeur.id", Long.valueOf(idChauffeur));
+        }
+
+        String idVehicule = req.getParameter("idVehicule");
+        if (idVehicule != null && !idVehicule.isEmpty()) {
+            filters.put("vehicule.id", Long.valueOf(idVehicule));
+        }
+
+        String idTrajetStatut = req.getParameter("idTrajetStatut");
+        if (idTrajetStatut != null && !idTrajetStatut.isEmpty()) {
+            filters.put("trajetStatut.id", Long.valueOf(idTrajetStatut));
+        }
+
+        String startDate = req.getParameter("startDate");
+        if (startDate != null && !startDate.isEmpty()) {
+            filters.put("datetimeDepart>=", LocalDateTime.parse(startDate + "T00:00:00"));
+        }
+
+        String endDate = req.getParameter("endDate");
+        if (endDate != null && !endDate.isEmpty()) {
+            filters.put("datetimeDepart<=", LocalDateTime.parse(endDate + "T23:59:59"));
+        }
+
+        // Get filtered or all trajets
+        List<Trajet> trajets;
+        if (!filters.isEmpty()) {
+            trajets = trajetService.searchTrajetsWithFilters(filters);
+        } else {
+            trajets = trajetService.getAllTrajets();
+        }
+
         List<Ligne> lignes = ligneService.getAllLignes();
         List<Chauffeur> chauffeurs = chauffeurService.getAllChauffeurs();
         List<Vehicule> vehicules = vehiculeService.getAllVehicules();
@@ -526,6 +864,8 @@ public class TrajetServlet extends HttpServlet {
                 ? LocalDateTime.parse(req.getParameter("datetimeArrivee")) : null;
         Long idTrajetStatut = Long.valueOf(req.getParameter("idTrajetStatut"));
         BigDecimal fraisUnitaire = new BigDecimal(req.getParameter("fraisUnitaire"));
+        Integer nombrePassager = req.getParameter("nombrePassager") != null && !req.getParameter("nombrePassager").isEmpty()
+                ? Integer.valueOf(req.getParameter("nombrePassager")) : 0;
 
         Trajet trajet = new Trajet();
         if (idStr != null && !idStr.isEmpty()) {
@@ -552,6 +892,7 @@ public class TrajetServlet extends HttpServlet {
         trajet.setTrajetStatut(statut);
 
         trajet.setFraisUnitaire(fraisUnitaire);
+        trajet.setNombrePassager(nombrePassager);
 
         if (trajet.getId() == null) {
             trajetService.createTrajet(trajet);
@@ -726,7 +1067,9 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @WebServlet("/vehicules")
 public class VehiculeServlet extends HttpServlet {
@@ -749,8 +1092,66 @@ public class VehiculeServlet extends HttpServlet {
             return;
         }
 
-        // Load all vehicles for the list
-        List<Vehicule> vehicules = vehiculeService.getAllVehicules();
+        // Collect filters
+        Map<String, Object> filters = new HashMap<>();
+
+        String marque = req.getParameter("filter_marque");
+        if (marque != null && !marque.isEmpty()) {
+            filters.put("marque", marque);
+        }
+
+        String modele = req.getParameter("filter_modele");
+        if (modele != null && !modele.isEmpty()) {
+            filters.put("modele", modele);
+        }
+
+        String immatriculation = req.getParameter("filter_immatriculation");
+        if (immatriculation != null && !immatriculation.isEmpty()) {
+            filters.put("immatriculation", immatriculation);
+        }
+
+        String maximumPassagerStr = req.getParameter("filter_maximumPassager");
+        if (maximumPassagerStr != null && !maximumPassagerStr.isEmpty()) {
+            try {
+                Integer max = Integer.parseInt(maximumPassagerStr);
+                filters.put("maximumPassager", max);
+            } catch (NumberFormatException e) {
+                // Ignore invalid number
+            }
+        }
+
+        String capaciteCarburantStr = req.getParameter("filter_capaciteCarburant");
+        if (capaciteCarburantStr != null && !capaciteCarburantStr.isEmpty()) {
+            try {
+                BigDecimal cap = new BigDecimal(capaciteCarburantStr);
+                filters.put("capaciteCarburant", cap);
+            } catch (NumberFormatException e) {
+                // Ignore invalid number
+            }
+        }
+
+        String depenseCarburant100kmStr = req.getParameter("filter_depenseCarburant100km");
+        if (depenseCarburant100kmStr != null && !depenseCarburant100kmStr.isEmpty()) {
+            try {
+                BigDecimal dep = new BigDecimal(depenseCarburant100kmStr);
+                filters.put("depenseCarburant100km", dep);
+            } catch (NumberFormatException e) {
+                // Ignore invalid number
+            }
+        }
+
+        String vehiculeTypeLibelle = req.getParameter("filter_vehiculeType");
+        if (vehiculeTypeLibelle != null && !vehiculeTypeLibelle.isEmpty()) {
+            filters.put("vehiculeType.libelle", vehiculeTypeLibelle);
+        }
+
+        String carburantTypeLibelle = req.getParameter("filter_carburantType");
+        if (carburantTypeLibelle != null && !carburantTypeLibelle.isEmpty()) {
+            filters.put("carburantType.libelle", carburantTypeLibelle);
+        }
+
+        // Load vehicles with filters
+        List<Vehicule> vehicules = filters.isEmpty() ? vehiculeService.getAllVehicules() : vehiculeService.searchVehiculesWithFilters(filters);
         req.setAttribute("vehicules", vehicules);
 
         req.getRequestDispatcher("/vehicules.jsp").forward(req, resp);

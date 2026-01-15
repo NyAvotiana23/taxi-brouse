@@ -11,9 +11,12 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class TrajetService {
 
@@ -48,7 +51,7 @@ public class TrajetService {
     public List<Trajet> getAllTrajets() {
         EntityManager em = emf.createEntityManager();
         try {
-            TypedQuery<Trajet> query = em.createQuery("SELECT t FROM Trajet t", Trajet.class);
+            TypedQuery<Trajet> query = em.createQuery("SELECT t FROM Trajet t ORDER BY t.datetimeDepart DESC", Trajet.class);
             return query.getResultList();
         } finally {
             em.close();
@@ -67,6 +70,7 @@ public class TrajetService {
             em.close();
         }
     }
+
     public List<Trajet> searchTrajetsWithFilters(Map<String, Object> filters) {
         EntityManager em = emf.createEntityManager();
         try {
@@ -89,8 +93,20 @@ public class TrajetService {
                     case "datetimeDepart":
                         predicates.add(cb.equal(root.get("datetimeDepart"), value));
                         break;
+                    case "datetimeDepart>=":
+                        predicates.add(cb.greaterThanOrEqualTo(root.get("datetimeDepart"), (LocalDateTime) value));
+                        break;
+                    case "datetimeDepart<=":
+                        predicates.add(cb.lessThanOrEqualTo(root.get("datetimeDepart"), (LocalDateTime) value));
+                        break;
                     case "datetimeArrivee":
                         predicates.add(cb.equal(root.get("datetimeArrivee"), value));
+                        break;
+                    case "datetimeArrivee>=":
+                        predicates.add(cb.greaterThanOrEqualTo(root.get("datetimeArrivee"), (LocalDateTime) value));
+                        break;
+                    case "datetimeArrivee<=":
+                        predicates.add(cb.lessThanOrEqualTo(root.get("datetimeArrivee"), (LocalDateTime) value));
                         break;
                     case "fraisUnitaire":
                         predicates.add(cb.equal(root.get("fraisUnitaire"), value));
@@ -107,7 +123,6 @@ public class TrajetService {
                     case "trajetStatut.id":
                         predicates.add(cb.equal(root.get("trajetStatut").get("id"), value));
                         break;
-                    // Add more fields as needed
                     default:
                         // Ignore unknown filters
                         break;
@@ -118,67 +133,9 @@ public class TrajetService {
                 cq.where(cb.and(predicates.toArray(new Predicate[0])));
             }
 
+            cq.orderBy(cb.desc(root.get("datetimeDepart")));
+
             TypedQuery<Trajet> query = em.createQuery(cq);
-            return query.getResultList();
-        } finally {
-            em.close();
-        }
-    }
-
-    public List<Trajet> getFilteredTrajets(Long idLigne, Long idChauffeur, Long idVehicule,
-            Long idTrajetStatut, String dateDebut, String dateFin, Integer minScore) {
-        EntityManager em = emf.createEntityManager();
-        try {
-            StringBuilder jpql = new StringBuilder("SELECT t FROM Trajet t WHERE 1=1");
-
-            if (idLigne != null) {
-                jpql.append(" AND t.ligne.id = :idLigne");
-            }
-            if (idChauffeur != null) {
-                jpql.append(" AND t.chauffeur.id = :idChauffeur");
-            }
-            if (idVehicule != null) {
-                jpql.append(" AND t.vehicule.id = :idVehicule");
-            }
-            if (idTrajetStatut != null) {
-                jpql.append(" AND t.trajetStatut.id = :idTrajetStatut");
-            }
-            if (dateDebut != null && !dateDebut.isEmpty()) {
-                jpql.append(" AND t.datetimeDepart >= :dateDebut");
-            }
-            if (dateFin != null && !dateFin.isEmpty()) {
-                jpql.append(" AND t.datetimeDepart <= :dateFin");
-            }
-            if (minScore != null) {
-                jpql.append(" AND t.trajetStatut.score >= :minScore");
-            }
-
-            jpql.append(" ORDER BY t.datetimeDepart DESC");
-
-            TypedQuery<Trajet> query = em.createQuery(jpql.toString(), Trajet.class);
-
-            if (idLigne != null) {
-                query.setParameter("idLigne", idLigne);
-            }
-            if (idChauffeur != null) {
-                query.setParameter("idChauffeur", idChauffeur);
-            }
-            if (idVehicule != null) {
-                query.setParameter("idVehicule", idVehicule);
-            }
-            if (idTrajetStatut != null) {
-                query.setParameter("idTrajetStatut", idTrajetStatut);
-            }
-            if (dateDebut != null && !dateDebut.isEmpty()) {
-                query.setParameter("dateDebut", java.time.LocalDateTime.parse(dateDebut));
-            }
-            if (dateFin != null && !dateFin.isEmpty()) {
-                query.setParameter("dateFin", java.time.LocalDateTime.parse(dateFin));
-            }
-            if (minScore != null) {
-                query.setParameter("minScore", minScore);
-            }
-
             return query.getResultList();
         } finally {
             em.close();
@@ -216,6 +173,72 @@ public class TrajetService {
             if (tx.isActive())
                 tx.rollback();
             throw e;
+        } finally {
+            em.close();
+        }
+    }
+    public List<Trajet> getAllUpcomingTrajets(LocalDateTime now) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<Trajet> query = em.createQuery(
+                    "SELECT t FROM Trajet t WHERE t.datetimeDepart >= :now ORDER BY t.datetimeDepart ASC",
+                    Trajet.class
+            );
+            query.setParameter("now", now);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    public List<Trajet> getUpcomingTrajetsByLigne(LocalDateTime now, Long ligneId) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<Trajet> query = em.createQuery(
+                    "SELECT t FROM Trajet t WHERE t.datetimeDepart >= :now AND t.ligne.id = :ligneId ORDER BY t.datetimeDepart ASC",
+                    Trajet.class
+            );
+            query.setParameter("now", now);
+            query.setParameter("ligneId", ligneId);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    public List<Trajet> getUpcomingTrajetsByLigneAndDate(LocalDateTime now, Long ligneId, LocalDate date) {
+        LocalDateTime start = now.isAfter(date.atStartOfDay()) ? now : date.atStartOfDay();
+        LocalDateTime end = date.plusDays(1).atStartOfDay();
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<Trajet> query = em.createQuery(
+                    "SELECT t FROM Trajet t WHERE t.datetimeDepart >= :start AND t.datetimeDepart < :end AND t.ligne.id = :ligneId ORDER BY t.datetimeDepart ASC",
+                    Trajet.class
+            );
+            query.setParameter("start", start);
+            query.setParameter("end", end);
+            query.setParameter("ligneId", ligneId);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    public List<LocalDate> getDistinctUpcomingDatesByLigne(LocalDateTime now, Long ligneId) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<LocalDateTime> query = em.createQuery(
+                    "SELECT t.datetimeDepart FROM Trajet t WHERE t.datetimeDepart >= :now AND t.ligne.id = :ligneId ORDER BY t.datetimeDepart ASC",
+                    LocalDateTime.class
+            );
+            query.setParameter("now", now);
+            query.setParameter("ligneId", ligneId);
+            List<LocalDateTime> dateTimes = query.getResultList();
+            return dateTimes.stream()
+                    .map(LocalDateTime::toLocalDate)
+                    .distinct()
+                    .sorted()
+                    .collect(Collectors.toList());
         } finally {
             em.close();
         }

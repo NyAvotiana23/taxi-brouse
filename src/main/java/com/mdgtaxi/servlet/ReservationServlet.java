@@ -2,10 +2,7 @@ package com.mdgtaxi.servlet;
 
 import com.mdgtaxi.dto.TypeObjectDTO;
 import com.mdgtaxi.entity.*;
-import com.mdgtaxi.service.ClientService;
-import com.mdgtaxi.service.ReservationService;
-import com.mdgtaxi.service.TrajetService;
-import com.mdgtaxi.service.TypeObjectService;
+import com.mdgtaxi.service.*;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -13,6 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -57,7 +55,14 @@ public class ReservationServlet extends HttpServlet {
         Long idTrajet = Long.valueOf(req.getParameter("idTrajet"));
         Long idClient = Long.valueOf(req.getParameter("idClient"));
         String nomPassager = req.getParameter("nomPassager");
+
+
+        String dateReservation = req.getParameter("dateReservation");
+        LocalDateTime localDateTimeReservation = LocalDateTime.parse(dateReservation);
+
         String numeroSiege = req.getParameter("numeroSiege");
+
+
         Long idReservationStatut = Long.valueOf(req.getParameter("idReservationStatut"));
         Integer nombrePlaceReservation = Integer.valueOf(req.getParameter("nombrePlaceReservation"));
 
@@ -74,10 +79,13 @@ public class ReservationServlet extends HttpServlet {
         client.setId(idClient);
         reservation.setClient(client);
 
+        reservation.setDateReservation(localDateTimeReservation);
+
         reservation.setNomPassager(nomPassager);
         reservation.setNumeroSiege(numeroSiege);
 
         ReservationStatut statut = new ReservationStatut();
+
         statut.setId(idReservationStatut);
         reservation.setReservationStatut(statut);
 

@@ -42,12 +42,16 @@
                             <p><strong>Chauffeur:</strong>
                                 <%= trajet.getChauffeur().getNom() %> <%= trajet.getChauffeur().getPrenom() %>
                             </p>
-                            <p><strong>Véhicule:</strong> <%= trajet.getVehicule().getImmatriculation() %></p>
+                            <p><strong>Véhicule:</strong> <%= trajet.getVehicule().getImmatriculation() %>
+                            </p>
                         </div>
                         <div class="col-md-6">
-                            <p><strong>Date Départ:</strong> <%= trajet.getDatetimeDepart() %></p>
-                            <p><strong>Date Arrivée:</strong> <%= trajet.getDatetimeArrivee() %></p>
-                            <p><strong>Statut:</strong> <%= trajet.getTrajetStatut().getLibelle() %></p>
+                            <p><strong>Date Départ:</strong> <%= trajet.getDatetimeDepart() %>
+                            </p>
+                            <p><strong>Date Arrivée:</strong> <%= trajet.getDatetimeArrivee() %>
+                            </p>
+                            <p><strong>Statut:</strong> <%= trajet.getTrajetStatut().getLibelle() %>
+                            </p>
                             <p><strong>Frais Unitaire:</strong> <%= trajet.getFraisUnitaire() %> Ar</p>
                         </div>
                     </div>
@@ -66,7 +70,8 @@
                             <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
                                 Places Prises
                             </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800"><%= placesPrises %></div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800"><%= placesPrises %>
+                            </div>
                         </div>
                         <div class="col-auto">
                             <i class="bi bi-people-fill fs-2 text-gray-300"></i>
@@ -83,7 +88,8 @@
                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
                                 Places Restantes
                             </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800"><%= placesRestantes %></div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800"><%= placesRestantes %>
+                            </div>
                         </div>
                         <div class="col-auto">
                             <i class="bi bi-seat-fill fs-2 text-gray-300"></i>
@@ -110,6 +116,67 @@
             </div>
         </div>
     </div>
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Ajouter une Réservation</h6>
+                </div>
+                <div class="card-body">
+                    <form action="<%= request.getContextPath() %>/reservations" method="post">
+                        <input type="hidden" name="idTrajet" value="<%= trajet.getId() %>">
+
+                        <div class="mb-3">
+                            <label for="idClient" class="form-label">Client</label>
+                            <select class="form-control" id="idClient" name="idClient" required>
+                                <option value="">Choisir...</option>
+                                <% if (clients != null) {
+                                    for (Client c : clients) { %>
+                                <option value="<%= c.getId() %>"><%= c.getNomClient() %>
+                                </option>
+                                <% }
+                                } %>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="nomPassager" class="form-label">Nom Passager</label>
+                            <input type="text" class="form-control" id="nomPassager" name="nomPassager" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="dateReservation" class="form-label">Date de reservation</label>
+                            <input type="datetime-local" class="form-control" id="dateReservation" name="dateReservation" required>
+                        </div>
+
+
+                        <div class="mb-3">
+                            <label for="numeroSiege" class="form-label">Numéro Siège</label>
+                            <input type="text" class="form-control" id="numeroSiege" name="numeroSiege">
+                        </div>
+                        <div class="mb-3">
+                            <label for="idReservationStatut" class="form-label">Statut</label>
+                            <select class="form-control" id="idReservationStatut" name="idReservationStatut" required>
+                                <option value="">Choisir...</option>
+                                <% if (reservationStatuts != null) {
+                                    for (TypeObjectDTO s : reservationStatuts) { %>
+                                <option value="<%= s.getId() %>"><%= s.getLibelle() %>
+                                </option>
+                                <% }
+                                } %>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="nombrePlaceReservation" class="form-label">Nombre Places</label>
+                            <input type="number" class="form-control" id="nombrePlaceReservation"
+                                   name="nombrePlaceReservation" required>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Enregistrer</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Liste des Reservations -->
     <div class="row">
@@ -132,19 +199,28 @@
                                 <th>Siège</th>
                                 <th>Places</th>
                                 <th>Statut</th>
+                                <th>Detail</th>
                             </tr>
                             </thead>
                             <tbody>
                             <% for (TrajetReservation r : reservations) { %>
                             <tr>
-                                <td><%= r.getClient().getNomClient() %></td>
-                                <td><%= r.getNomPassager() %></td>
-                                <td><%= r.getNumeroSiege() != null ? r.getNumeroSiege() : "-" %></td>
-                                <td><%= r.getNombrePlaceReservation() %></td>
+                                <td><%= r.getClient().getNomClient() %>
+                                </td>
+                                <td><%= r.getNomPassager() %>
+                                </td>
+                                <td><%= r.getNumeroSiege() != null ? r.getNumeroSiege() : "-" %>
+                                </td>
+                                <td><%= r.getNombrePlaceReservation() %>
+                                </td>
                                 <td>
                                                 <span class="badge bg-info">
                                                     <%= r.getReservationStatut().getLibelle() %>
                                                 </span>
+                                </td>
+                                <td>
+                                    <a href="<%= request.getContextPath() %>/reservations/detail?id=<%= r.getId() %>"
+                                       class="btn btn-sm btn-primary">Détail</a>
                                 </td>
                             </tr>
                             <% } %>

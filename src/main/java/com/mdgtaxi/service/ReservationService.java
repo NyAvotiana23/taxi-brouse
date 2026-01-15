@@ -2,6 +2,8 @@ package com.mdgtaxi.service;
 
 import com.mdgtaxi.entity.Trajet;
 import com.mdgtaxi.entity.TrajetReservation;
+import com.mdgtaxi.entity.TrajetReservationMouvementStatut;
+import com.mdgtaxi.entity.TrajetReservationPaiement;
 import com.mdgtaxi.util.HibernateUtil;
 
 import javax.persistence.EntityManager;
@@ -266,6 +268,63 @@ public class ReservationService {
 
             int totalPlacesPrises = getTotalPlacesPrises();
             return totalCapacite - totalPlacesPrises;
+        } finally {
+            em.close();
+        }
+    }
+    public List<TrajetReservationPaiement> getPaymentsByReservation(Long reservationId) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<TrajetReservationPaiement> query = em.createQuery(
+                    "SELECT p FROM TrajetReservationPaiement p WHERE p.trajetReservation.id = :id ORDER BY p.datePaiement DESC",
+                    TrajetReservationPaiement.class);
+            query.setParameter("id", reservationId);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    public TrajetReservationPaiement createPayment(TrajetReservationPaiement paiement) {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            em.persist(paiement);
+            tx.commit();
+            return paiement;
+        } catch (Exception e) {
+            if (tx.isActive()) tx.rollback();
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
+
+    public List<TrajetReservationMouvementStatut> getStatusHistoryByReservation(Long reservationId) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<TrajetReservationMouvementStatut> query = em.createQuery(
+                    "SELECT rms FROM TrajetReservationMouvementStatut rms WHERE rms.trajetReservation.id = :id ORDER BY rms.dateMouvement DESC",
+                    TrajetReservationMouvementStatut.class);
+            query.setParameter("id", reservationId);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    public TrajetReservationMouvementStatut changeStatus(TrajetReservationMouvementStatut mouvement) {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            em.persist(mouvement);
+            tx.commit();
+            return mouvement;
+        } catch (Exception e) {
+            if (tx.isActive()) tx.rollback();
+            throw e;
         } finally {
             em.close();
         }

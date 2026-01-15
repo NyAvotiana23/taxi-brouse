@@ -20,6 +20,38 @@
         <% } %>
     </div>
 
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Filtres</h6>
+        </div>
+        <div class="card-body">
+            <form method="get" action="<%= request.getContextPath() %>/chauffeures">
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <label>Nom</label>
+                        <input type="text" name="filter_nom" class="form-control" value="<%= request.getParameter("filter_nom") != null ? request.getParameter("filter_nom") : "" %>">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label>Prénom</label>
+                        <input type="text" name="filter_prenom" class="form-control" value="<%= request.getParameter("filter_prenom") != null ? request.getParameter("filter_prenom") : "" %>">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label>Date de Naissance</label>
+                        <input type="date" name="filter_dateNaissance" class="form-control" value="<%= request.getParameter("filter_dateNaissance") != null ? request.getParameter("filter_dateNaissance") : "" %>">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label>Numéro Permis</label>
+                        <input type="text" name="filter_numeroPermis" class="form-control" value="<%= request.getParameter("filter_numeroPermis") != null ? request.getParameter("filter_numeroPermis") : "" %>">
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <button type="submit" class="btn btn-primary">Appliquer Filtres</button>
+                    <a href="<%= request.getContextPath() %>/chauffeures" class="btn btn-secondary">Réinitialiser</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div class="row">
         <% if (chauffeur != null || request.getParameter("action") != null && "edit".equals(request.getParameter("action"))) { %>
         <div class="col-lg-4">
@@ -70,12 +102,12 @@
                                             <a href="<%= request.getContextPath() %>/chauffeures/detail?id=<%= c.getId() %>"
                                                class="btn btn-sm btn-info"
                                                title="Voir détails">
-                                                <i class="fas fa-eye"></i>
+                                                Détails
                                             </a>
                                             <a href="<%= request.getContextPath() %>/chauffeures?action=edit&id=<%= c.getId() %>"
                                                class="btn btn-sm btn-warning"
                                                title="Modifier">
-                                                <i class="fas fa-edit"></i>
+                                                Modifier
                                             </a>
                                         </div>
                                     </td>

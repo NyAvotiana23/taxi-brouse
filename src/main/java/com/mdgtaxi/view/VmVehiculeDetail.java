@@ -29,9 +29,17 @@ import java.time.LocalDateTime;
     FROM Vehicule v
              INNER JOIN Vehicule_Type vt ON v.id_type = vt.id
              INNER JOIN Carburant_Type ct ON v.id_type_carburant = ct.id
-             LEFT JOIN VM_Vehicule_Statut_Actuel vsa ON v.id = vsa.id_vehicule
+             LEFT JOIN (
+                 SELECT DISTINCT ON (vms.id_vehicule)
+                     vms.id_vehicule,
+                     vs.libelle AS libelle_statut,
+                     vms.date_mouvement
+                 FROM Vehicule_Mouvement_Statut vms
+                          INNER JOIN Vehicule_Statut vs ON vms.id_nouveau_statut = vs.id
+                 ORDER BY vms.id_vehicule, vms.date_mouvement DESC
+             ) vsa ON v.id = vsa.id_vehicule
 """)
-@Synchronize({"Vehicule", "Vehicule_Type", "Carburant_Type", "VM_Vehicule_Statut_Actuel"})
+@Synchronize({"Vehicule", "Vehicule_Type", "Carburant_Type", "Vehicule_Mouvement_Statut", "Vehicule_Statut"})
 public class VmVehiculeDetail implements Serializable {
     @Id
     @Column(name = "id_vehicule")

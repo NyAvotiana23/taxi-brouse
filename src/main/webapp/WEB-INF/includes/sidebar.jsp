@@ -13,6 +13,9 @@
     <a class="nav-link" href="<%= request.getContextPath() %>/lignes">
       <i class="bi bi-signpost-2-fill"></i> Lignes
     </a>
+    <a class="nav-link" href="<%= request.getContextPath() %>/trajets-a-venir">
+      <i class="bi bi-geo-alt-fill"></i> Trajets à venir
+    </a>
     <a class="nav-link" href="<%= request.getContextPath() %>/trajets">
       <i class="bi bi-geo-alt-fill"></i> Trajets
     </a>

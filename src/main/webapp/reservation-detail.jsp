@@ -1,16 +1,4 @@
-<%--
-  Created by IntelliJ IDEA.
-  User: ACER
-  Date: 13/01/2026
-  Time: 20:39
-  To change this template use File | Settings | File Templates.
---%>
+<%-- Update reservation-detail.jsp (no changes needed) --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<html>
-<head>
-    <title>Title</title>
-</head>
-<body>
-
-</body>
-</html>
+<% request.setAttribute("contentPage", "/WEB-INF/content/reservation-detail-content.jsp"); %>
+<jsp:include page="/WEB-INF/layouts/main-layout.jsp" />

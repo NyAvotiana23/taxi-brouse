@@ -18,16 +18,22 @@ import java.time.LocalDateTime;
         c.id AS id_chauffeur,
         c.nom,
         c.prenom,
-        c.nom || ' ' || c.prenom AS nom_complet,
         c.date_naissance,
-        EXTRACT(YEAR FROM AGE(c.date_naissance)) AS age,
         c.numero_permis,
         csa.libelle_statut,
         csa.date_mouvement AS date_dernier_statut
     FROM Chauffeur c
-             LEFT JOIN VM_Chauffeur_Statut_Actuel csa ON c.id = csa.id_chauffeur
+             LEFT JOIN (
+                 SELECT DISTINCT ON (cms.id_chauffeur)
+                     cms.id_chauffeur,
+                     cs.libelle AS libelle_statut,
+                     cms.date_mouvement
+                 FROM Chauffeur_Mouvement_Statut cms
+                          INNER JOIN Chauffeur_Statut cs ON cms.id_nouveau_statut = cs.id
+                 ORDER BY cms.id_chauffeur, cms.date_mouvement DESC
+             ) csa ON c.id = csa.id_chauffeur
 """)
-@Synchronize({"Chauffeur", "VM_Chauffeur_Statut_Actuel"})
+@Synchronize({"Chauffeur", "Chauffeur_Mouvement_Statut", "Chauffeur_Statut"})
 public class VmChauffeurDetail implements Serializable {
     @Id
     @Column(name = "id_chauffeur")
@@ -39,14 +45,8 @@ public class VmChauffeurDetail implements Serializable {
     @Column(name = "prenom")
     private String prenom;
 
-    @Column(name = "nom_complet")
-    private String nomComplet;
-
     @Column(name = "date_naissance")
     private LocalDate dateNaissance;
-
-    @Column(name = "age")
-    private Integer age;
 
     @Column(name = "numero_permis")
     private String numeroPermis;

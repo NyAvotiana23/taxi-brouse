@@ -1,3 +1,12 @@
+-- ============================================
+-- Complete Database INSERT Script
+-- Taxi Management System (MDG Taxi)
+-- ============================================
+
+-- ============================================
+-- CARBURANT (Fuel Types and Rates)
+-- ============================================
+
 -- Carburant_Type
 INSERT INTO Carburant_Type (libelle, dernier_taux)
 VALUES ('Essence', 1.5),
@@ -10,6 +19,22 @@ VALUES (1, 1.4, 1.5, '2026-01-01 00:00:00'),
        (2, 1.1, 1.2, '2026-01-01 00:00:00'),
        (3, 0.7, 0.8, '2026-01-01 00:00:00');
 
+-- Additional Carburant_Type
+INSERT INTO Carburant_Type (libelle, dernier_taux)
+VALUES ('Éthanol', 1.1),
+       ('Hybride', 1.3),
+       ('Électrique', 0.0);
+
+-- Additional Carburant_Mouvement_Taux
+INSERT INTO Carburant_Mouvement_Taux (id_carburant_type, ancien_taux, nouveau_taux, date_mouvement)
+VALUES (4, 1.0, 1.1, '2026-02-01 00:00:00'),
+       (5, 1.2, 1.3, '2026-02-01 00:00:00'),
+       (6, 0.0, 0.0, '2026-02-01 00:00:00');
+
+-- ============================================
+-- DEVISE (Currency and Exchange Rates)
+-- ============================================
+
 -- Devise
 INSERT INTO Devise (libelle, dernier_taux)
 VALUES ('USD', 1.0),
@@ -21,6 +46,22 @@ INSERT INTO Devise_Mouvement_Taux (id_devise, ancien_taux, nouveau_taux, date_mo
 VALUES (1, 0.9, 1.0, '2026-01-01 00:00:00'),
        (2, 0.8, 0.9, '2026-01-01 00:00:00'),
        (3, 3500.0, 4000.0, '2026-01-01 00:00:00');
+
+-- Additional Devise
+INSERT INTO Devise (libelle, dernier_taux)
+VALUES ('GBP', 0.75),
+       ('JPY', 110.0),
+       ('CHF', 0.92);
+
+-- Additional Devise_Mouvement_Taux
+INSERT INTO Devise_Mouvement_Taux (id_devise, ancien_taux, nouveau_taux, date_mouvement)
+VALUES (4, 0.7, 0.75, '2026-02-01 00:00:00'),
+       (5, 100.0, 110.0, '2026-02-01 00:00:00'),
+       (6, 0.9, 0.92, '2026-02-01 00:00:00');
+
+-- ============================================
+-- VEHICULE (Vehicles)
+-- ============================================
 
 -- Vehicule_Type
 INSERT INTO Vehicule_Type (libelle)
@@ -53,6 +94,41 @@ VALUES (1, 'Maintenance régulière', '2026-01-01 00:00:00', '2026-01-02 00:00:0
        (2, 'Maintenance régulière', '2026-01-01 00:00:00', '2026-01-02 00:00:00', 200.0),
        (3, 'Maintenance régulière', '2026-01-01 00:00:00', '2026-01-02 00:00:00', 300.0);
 
+-- Additional Vehicule_Type
+INSERT INTO Vehicule_Type (libelle)
+VALUES ('Moto'),
+       ('Van'),
+       ('SUV');
+
+-- Additional Vehicule_Statut
+INSERT INTO Vehicule_Statut (libelle, score, span_html)
+VALUES ('En transit', 8, '<span class="badge bg-primary">En transit</span>'),
+       ('Réservé', 7, '<span class="badge bg-info">Réservé</span>'),
+       ('En test', 6, '<span class="badge bg-secondary">En test</span>');
+
+-- Additional Vehicule
+INSERT INTO Vehicule (id_type, id_type_carburant, marque, modele, maximum_passager, immatriculation, capacite_carburant,
+                      depense_carburant_100km)
+VALUES (4, 1, 'Honda', 'CB500', 2, 'JKL012', 20.0, 3.0),
+       (5, 2, 'Ford', 'Transit', 15, 'MNO345', 80.0, 8.0),
+       (6, 1, 'Jeep', 'Wrangler', 5, 'PQR678', 60.0, 12.0);
+
+-- Additional Vehicule_Mouvement_Statut
+INSERT INTO Vehicule_Mouvement_Statut (id_vehicule, date_mouvement, id_nouveau_statut, observation)
+VALUES (4, '2026-02-01 00:00:00', 4, 'Changed to transit'),
+       (5, '2026-02-01 00:00:00', 5, 'Reserved for trip'),
+       (6, '2026-02-01 00:00:00', 6, 'Testing new vehicle');
+
+-- Additional Vehicule_Entretien
+INSERT INTO Vehicule_Entretien (id_vehicule, motif, date_debut_entretien, date_fin_entretien, montant_depense)
+VALUES (4, 'Changement d''huile', '2026-02-01 00:00:00', '2026-02-02 00:00:00', 50.0),
+       (5, 'Réparation freins', '2026-02-01 00:00:00', '2026-02-03 00:00:00', 150.0),
+       (6, 'Vérification batterie', '2026-02-01 00:00:00', '2026-02-02 00:00:00', 80.0);
+
+-- ============================================
+-- CHAUFFEUR (Drivers)
+-- ============================================
+
 -- Chauffeur_Statut
 INSERT INTO Chauffeur_Statut (libelle, score, span_html)
 VALUES ('Actif', 10, '<span class="badge bg-success">Actif</span>'),
@@ -71,6 +147,28 @@ VALUES (1, '2026-01-01 00:00:00', 1, 'Initial status'),
        (2, '2026-01-01 00:00:00', 1, 'Initial status'),
        (3, '2026-01-01 00:00:00', 1, 'Initial status');
 
+-- Additional Chauffeur_Statut
+INSERT INTO Chauffeur_Statut (libelle, score, span_html)
+VALUES ('En formation', 8, '<span class="badge bg-primary">En formation</span>'),
+       ('Disponible', 9, '<span class="badge bg-success">Disponible</span>'),
+       ('Retraité', 1, '<span class="badge bg-secondary">Retraité</span>');
+
+-- Additional Chauffeur
+INSERT INTO Chauffeur (nom, prenom, date_naissance, numero_permis)
+VALUES ('Razafy', 'Marie', '1995-01-01', 'PERMIS4'),
+       ('Andriana', 'Luc', '1975-01-01', 'PERMIS5'),
+       ('Rakotomalala', 'Sophie', '1988-01-01', 'PERMIS6');
+
+-- Additional Chauffeur_Mouvement_Statut
+INSERT INTO Chauffeur_Mouvement_Statut (id_chauffeur, date_mouvement, id_nouveau_statut, observation)
+VALUES (4, '2026-02-01 00:00:00', 4, 'Started training'),
+       (5, '2026-02-01 00:00:00', 5, 'Now available'),
+       (6, '2026-02-01 00:00:00', 6, 'Retired');
+
+-- ============================================
+-- GEOGRAPHIE (Geography: Province, Region, Ville)
+-- ============================================
+
 -- Province
 INSERT INTO Province (nom)
 VALUES ('Antananarivo'),
@@ -88,6 +186,28 @@ INSERT INTO Ville (id_region, nom)
 VALUES (1, 'Antananarivo'),
        (2, 'Toamasina'),
        (3, 'Fianarantsoa');
+
+-- Additional Province
+INSERT INTO Province (nom)
+VALUES ('Mahajanga'),
+       ('Antsiranana'),
+       ('Toliara');
+
+-- Additional Region
+INSERT INTO Region (id_province, nom)
+VALUES (4, 'Boeny'),
+       (5, 'Diana'),
+       (6, 'Atsimo-Andrefana');
+
+-- Additional Ville
+INSERT INTO Ville (id_region, nom)
+VALUES (4, 'Mahajanga'),
+       (5, 'Antsiranana'),
+       (6, 'Toliara');
+
+-- ============================================
+-- LIGNE (Routes and Stops)
+-- ============================================
 
 -- Ligne
 INSERT INTO Ligne (id_ville_depart, id_ville_arrivee, distance_km)
@@ -109,6 +229,31 @@ VALUES (1, 1, 1),
        (2, 2, 3),
        (3, 1, 3),
        (3, 2, 1);
+
+-- Additional Ligne
+INSERT INTO Ligne (id_ville_depart, id_ville_arrivee, distance_km)
+VALUES (4, 5, 600.0),
+       (5, 6, 700.0),
+       (6, 4, 800.0);
+
+-- Additional Ligne_Arret
+INSERT INTO Ligne_Arret (id_ville, nom_arret)
+VALUES (4, 'Arret4'),
+       (5, 'Arret5'),
+       (6, 'Arret6');
+
+-- Additional Ligne_Detail
+INSERT INTO Ligne_Detail (id_ligne, ordre, id_ligne_arret)
+VALUES (4, 1, 4),
+       (4, 2, 5),
+       (5, 1, 5),
+       (5, 2, 6),
+       (6, 1, 6),
+       (6, 2, 4);
+
+-- ============================================
+-- TRAJET (Trips)
+-- ============================================
 
 -- Trajet_Statut
 INSERT INTO Trajet_Statut (libelle, score, span_html)
@@ -149,6 +294,49 @@ VALUES (1, NULL, 1, 1, '2026-01-01 05:00:00', 10.0, 1.5),
        (2, NULL, 2, 2, '2026-01-01 06:00:00', 20.0, 1.2),
        (3, NULL, 3, 2, '2026-01-01 07:00:00', 30.0, 1.2);
 
+-- Additional Trajet_Statut
+INSERT INTO Trajet_Statut (libelle, score, span_html)
+VALUES ('Prévu', 5, '<span class="badge bg-warning">Prévu</span>'),
+       ('En retard', 15, '<span class="badge bg-danger">En retard</span>'),
+       ('Avancé', 25, '<span class="badge bg-primary">Avancé</span>');
+
+-- Additional Trajet
+INSERT INTO Trajet (id_ligne, id_chauffeur, id_vehicule, nombre_passager, id_trajet_statut, datetime_depart,
+                    datetime_arrivee, frais_unitaire)
+VALUES (4, 4, 4, 2, 4, '2026-02-01 00:00:00', '2026-02-01 12:00:00', 40.0),
+       (5, 5, 5, 15, 5, '2026-02-01 00:00:00', '2026-02-01 14:00:00', 50.0),
+       (6, 6, 6, 5, 6, '2026-02-01 00:00:00', '2026-02-01 16:00:00', 60.0);
+
+-- Additional Trajet_Mouvement_Statut
+INSERT INTO Trajet_Mouvement_Statut (id_trajet, date_mouvement, id_nouveau_statut, observation)
+VALUES (4, '2026-02-01 00:00:00', 4, 'Scheduled'),
+       (5, '2026-02-01 00:00:00', 5, 'Delayed'),
+       (6, '2026-02-01 00:00:00', 6, 'Advanced');
+
+-- Additional Trajet_Motif_Arret
+INSERT INTO Trajet_Motif_Arret (libelle)
+VALUES ('Contrôle police'),
+       ('Pause repas'),
+       ('Changement pneu');
+
+-- Additional Trajet_Arret_Detail
+INSERT INTO Trajet_Arret_Detail (id_trajet, id_caisse, id_ville, id_trajet_motif_arret, montant_depense, datetime_debut,
+                                 datetime_fin)
+VALUES (4, NULL, 4, 4, 200.0, '2026-02-01 06:00:00', '2026-02-01 07:00:00'),
+       (5, NULL, 5, 5, 250.0, '2026-02-01 07:00:00', '2026-02-01 08:00:00'),
+       (6, NULL, 6, 6, 300.0, '2026-02-01 08:00:00', '2026-02-01 09:00:00');
+
+-- Additional Trajet_Carburant_Detail
+INSERT INTO Trajet_Carburant_Detail (id_trajet, id_caisse, id_ville, id_carburant_type, datetime,
+                                     quantite_carburant_ajoute, taux_carburant)
+VALUES (4, NULL, 4, 4, '2026-02-01 06:00:00', 15.0, 1.1),
+       (5, NULL, 5, 5, '2026-02-01 07:00:00', 25.0, 1.3),
+       (6, NULL, 6, 6, '2026-02-01 08:00:00', 35.0, 0.0);
+
+-- ============================================
+-- CLIENT (Clients and Reservations)
+-- ============================================
+
 -- Type_Client
 INSERT INTO Type_Client (libelle)
 VALUES ('Particulier'),
@@ -159,6 +347,22 @@ INSERT INTO Client (id_type_client, nom_client, telephone, email)
 VALUES (1, 'ClientDefault', '0341234567', 'default@example.com'),
        (2, 'Client2', '0342345678', 'client2@example.com'),
        (1, 'Client3', '0343456789', 'client3@example.com');
+
+-- Additional Type_Client
+INSERT INTO Type_Client (libelle)
+VALUES ('Groupe'),
+       ('VIP'),
+       ('Étudiant');
+
+-- Additional Client
+INSERT INTO Client (id_type_client, nom_client, telephone, email)
+VALUES (3, 'Client4', '0344567890', 'client4@example.com'),
+       (4, 'Client5', '0345678901', 'client5@example.com'),
+       (5, 'Client6', '0346789012', 'client6@example.com');
+
+-- ============================================
+-- PAIEMENT (Payment Methods)
+-- ============================================
 
 -- Type_Mouvement
 INSERT INTO Type_Mouvement (libelle)
@@ -171,19 +375,34 @@ VALUES ('Cash'),
        ('Carte'),
        ('Virement');
 
+-- Additional Type_Mouvement
+INSERT INTO Type_Mouvement (libelle)
+VALUES ('Ajustement'),
+       ('Remboursement'),
+       ('Transfert');
+
+-- Additional Mode_Paiement
+INSERT INTO Mode_Paiement (libelle)
+VALUES ('Mobile Money'),
+       ('Chèque'),
+       ('Crypto');
+
+-- ============================================
+-- RESERVATION (Reservations)
+-- ============================================
+
 -- Reservation_Statut
-INSERT INTO Reservation_Statut (libelle, score)
-VALUES ('Confirmée', 10),
-       ('Annulée', 0),
-       ('En attente', 5);
+INSERT INTO Reservation_Statut (libelle, score, span_html)
+VALUES ('Confirmée', 10, '<span class="badge bg-success">Confirmée</span>'),
+       ('Annulée', 0, '<span class="badge bg-danger">Annulée</span>'),
+       ('En attente', 5, '<span class="badge bg-warning">En attente</span>');
 
 -- Trajet_Reservation
 INSERT INTO Trajet_Reservation (id_client, id_trajet, id_reservation_statut, numero_siege, nom_passager,
                                 date_reservation, nombre_place_reservation)
 VALUES (1, 1, 1, 'A1', 'Passager1', '2026-01-01 00:00:00', 1),
        (2, 2, 1, 'A2', 'Passager2', '2026-01-01 00:00:00', 1),
-       (3, 3, 1, 'A3', 'Passager3', '2026-01-01 00:00:00', 1)
-;
+       (3, 3, 1, 'A3', 'Passager3', '2026-01-01 00:00:00', 1);
 
 -- Trajet_Reservation_Mouvement_Statut
 INSERT INTO Trajet_Reservation_Mouvement_Statut (id_trajet_reservation, date_mouvement, id_nouveau_statut, observation)
@@ -197,6 +416,36 @@ INSERT INTO Trajet_Reservation_Paiement (id_client, id_trajet_reservation, id_ca
 VALUES (1, 1, NULL, 10.0, 1, '2026-01-01 00:00:00'),
        (2, 2, NULL, 20.0, 2, '2026-01-01 00:00:00'),
        (3, 3, NULL, 30.0, 3, '2026-01-01 00:00:00');
+
+-- Additional Reservation_Statut
+INSERT INTO Reservation_Statut (libelle, score, span_html)
+VALUES ('Payée', 15, '<span class="badge bg-primary">Payée</span>'),
+       ('Remboursée', 2, '<span class="badge bg-info">Remboursée</span>'),
+       ('Expirée', 0, '<span class="badge bg-secondary">Expirée</span>');
+
+-- Additional Trajet_Reservation
+INSERT INTO Trajet_Reservation (id_client, id_trajet, id_reservation_statut, numero_siege, nom_passager,
+                                date_reservation, nombre_place_reservation)
+VALUES (4, 4, 4, 'B1', 'Passager4', '2026-02-01 00:00:00', 2),
+       (5, 5, 5, 'B2', 'Passager5', '2026-02-01 00:00:00', 3),
+       (6, 6, 6, 'B3', 'Passager6', '2026-02-01 00:00:00', 1);
+
+-- Additional Trajet_Reservation_Mouvement_Statut
+INSERT INTO Trajet_Reservation_Mouvement_Statut (id_trajet_reservation, date_mouvement, id_nouveau_statut, observation)
+VALUES (4, '2026-02-01 00:00:00', 4, 'Paid'),
+       (5, '2026-02-01 00:00:00', 5, 'Refunded'),
+       (6, '2026-02-01 00:00:00', 6, 'Expired');
+
+-- Additional Trajet_Reservation_Paiement
+INSERT INTO Trajet_Reservation_Paiement (id_client, id_trajet_reservation, id_caisse, montant, id_mode_paiement,
+                                         date_paiement)
+VALUES (4, 4, NULL, 40.0, 4, '2026-02-01 00:00:00'),
+       (5, 5, NULL, 50.0, 5, '2026-02-01 00:00:00'),
+       (6, 6, NULL, 60.0, 6, '2026-02-01 00:00:00');
+
+-- ============================================
+-- FINANCE (Financial Tracking)
+-- ============================================
 
 -- Trajet_Finance
 INSERT INTO Trajet_Finance (id_trajet, montant, id_type_mouvement, date_mouvement)
@@ -218,19 +467,24 @@ VALUES (1, 1, 1, 5, 1, '2026-01-01 00:00:00', '2026-01-01 10:00:00', 10.0),
        (2, 2, 2, 20, 1, '2026-01-01 00:00:00', '2026-01-01 12:00:00', 20.0),
        (3, 3, 3, 2, 1, '2026-01-01 00:00:00', '2026-01-01 14:00:00', 30.0);
 
--- Caisse_Type
-INSERT INTO Caisse_Type (libelle)
-VALUES ('Principale'),
-       ('Secondaire');
+-- Additional Trajet_Finance
+INSERT INTO Trajet_Finance (id_trajet, montant, id_type_mouvement, date_mouvement)
+VALUES (4, 40.0, 3, '2026-02-01 00:00:00'),
+       (5, 50.0, 4, '2026-02-01 00:00:00'),
+       (6, 60.0, 5, '2026-02-01 00:00:00');
 
--- Caisse
-INSERT INTO Caisse (id_caisse_type, nom, solde_initial)
-VALUES (1, 'Caisse1', 1000.0),
-       (2, 'Caisse2', 2000.0);
+-- Additional Prevision_Finance
+INSERT INTO Prevision_Finance (id_trajet, id_entite_origine, table_origine, montant, id_type_mouvement, date,
+                               description)
+VALUES (4, NULL, 'Trajet', 40.0, 3, '2026-02-01 00:00:00', 'Prévision pour trajet 4'),
+       (5, NULL, 'Trajet', 50.0, 4, '2026-02-01 00:00:00', 'Prévision pour trajet 5'),
+       (6, NULL, 'Trajet', 60.0, 5, '2026-02-01 00:00:00', 'Prévision pour trajet 6');
 
--- Caisse_Mouvement
-INSERT INTO Caisse_Mouvement (id_caisse, id_entite_origine, table_origine, id_type_mouvement, montant, motif,
-                              date_mouvement)
-VALUES (1, NULL, 'Trajet', 1, 10.0, 'Paiement trajet 1', '2026-01-01 00:00:00'),
-       (2, NULL, 'Trajet', 1, 20.0, 'Paiement trajet 2', '2026-01-01 00:00:00'),
-       (1, NULL, 'Trajet', 2, 5.0, 'Remboursement trajet 1', '2026-01-01 00:00:00');
+-- Additional Prevision_Trajet
+INSERT INTO Prevision_Trajet (id_ligne, id_chauffeur, id_vehicule, nombre_passager, id_trajet_statut, datetime_depart,
+                              datetime_arrivee, frais_unitaire)
+VALUES (4, 4, 4, 2, 4, '2026-02-01 00:00:00', '2026-02-01 12:00:00', 40.0),
+       (5, 5, 5, 15, 5, '2026-02-01 00:00:00', '2026-02-01 14:00:00', 50.0),
+       (6, 6, 6, 5, 6, '2026-02-01 00:00:00', '2026-02-01 16:00:00', 60.0);
+
+-- ============================================

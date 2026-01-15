@@ -12,7 +12,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @WebServlet("/trajets")
 public class TrajetServlet extends HttpServlet {
@@ -33,7 +35,47 @@ public class TrajetServlet extends HttpServlet {
             req.setAttribute("trajet", trajet);
         }
 
-        List<Trajet> trajets = trajetService.getAllTrajets();
+        // Build filters map from request parameters
+        Map<String, Object> filters = new HashMap<>();
+
+        String idLigne = req.getParameter("idLigne");
+        if (idLigne != null && !idLigne.isEmpty()) {
+            filters.put("ligne.id", Long.valueOf(idLigne));
+        }
+
+        String idChauffeur = req.getParameter("idChauffeur");
+        if (idChauffeur != null && !idChauffeur.isEmpty()) {
+            filters.put("chauffeur.id", Long.valueOf(idChauffeur));
+        }
+
+        String idVehicule = req.getParameter("idVehicule");
+        if (idVehicule != null && !idVehicule.isEmpty()) {
+            filters.put("vehicule.id", Long.valueOf(idVehicule));
+        }
+
+        String idTrajetStatut = req.getParameter("idTrajetStatut");
+        if (idTrajetStatut != null && !idTrajetStatut.isEmpty()) {
+            filters.put("trajetStatut.id", Long.valueOf(idTrajetStatut));
+        }
+
+        String startDate = req.getParameter("startDate");
+        if (startDate != null && !startDate.isEmpty()) {
+            filters.put("datetimeDepart>=", LocalDateTime.parse(startDate + "T00:00:00"));
+        }
+
+        String endDate = req.getParameter("endDate");
+        if (endDate != null && !endDate.isEmpty()) {
+            filters.put("datetimeDepart<=", LocalDateTime.parse(endDate + "T23:59:59"));
+        }
+
+        // Get filtered or all trajets
+        List<Trajet> trajets;
+        if (!filters.isEmpty()) {
+            trajets = trajetService.searchTrajetsWithFilters(filters);
+        } else {
+            trajets = trajetService.getAllTrajets();
+        }
+
         List<Ligne> lignes = ligneService.getAllLignes();
         List<Chauffeur> chauffeurs = chauffeurService.getAllChauffeurs();
         List<Vehicule> vehicules = vehiculeService.getAllVehicules();
@@ -59,6 +101,8 @@ public class TrajetServlet extends HttpServlet {
                 ? LocalDateTime.parse(req.getParameter("datetimeArrivee")) : null;
         Long idTrajetStatut = Long.valueOf(req.getParameter("idTrajetStatut"));
         BigDecimal fraisUnitaire = new BigDecimal(req.getParameter("fraisUnitaire"));
+        Integer nombrePassager = req.getParameter("nombrePassager") != null && !req.getParameter("nombrePassager").isEmpty()
+                ? Integer.valueOf(req.getParameter("nombrePassager")) : 0;
 
         Trajet trajet = new Trajet();
         if (idStr != null && !idStr.isEmpty()) {
@@ -85,6 +129,7 @@ public class TrajetServlet extends HttpServlet {
         trajet.setTrajetStatut(statut);
 
         trajet.setFraisUnitaire(fraisUnitaire);
+        trajet.setNombrePassager(nombrePassager);
 
         if (trajet.getId() == null) {
             trajetService.createTrajet(trajet);

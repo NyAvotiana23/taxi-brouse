@@ -16,7 +16,9 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @WebServlet("/vehicules")
 public class VehiculeServlet extends HttpServlet {
@@ -39,8 +41,66 @@ public class VehiculeServlet extends HttpServlet {
             return;
         }
 
-        // Load all vehicles for the list
-        List<Vehicule> vehicules = vehiculeService.getAllVehicules();
+        // Collect filters
+        Map<String, Object> filters = new HashMap<>();
+
+        String marque = req.getParameter("filter_marque");
+        if (marque != null && !marque.isEmpty()) {
+            filters.put("marque", marque);
+        }
+
+        String modele = req.getParameter("filter_modele");
+        if (modele != null && !modele.isEmpty()) {
+            filters.put("modele", modele);
+        }
+
+        String immatriculation = req.getParameter("filter_immatriculation");
+        if (immatriculation != null && !immatriculation.isEmpty()) {
+            filters.put("immatriculation", immatriculation);
+        }
+
+        String maximumPassagerStr = req.getParameter("filter_maximumPassager");
+        if (maximumPassagerStr != null && !maximumPassagerStr.isEmpty()) {
+            try {
+                Integer max = Integer.parseInt(maximumPassagerStr);
+                filters.put("maximumPassager", max);
+            } catch (NumberFormatException e) {
+                // Ignore invalid number
+            }
+        }
+
+        String capaciteCarburantStr = req.getParameter("filter_capaciteCarburant");
+        if (capaciteCarburantStr != null && !capaciteCarburantStr.isEmpty()) {
+            try {
+                BigDecimal cap = new BigDecimal(capaciteCarburantStr);
+                filters.put("capaciteCarburant", cap);
+            } catch (NumberFormatException e) {
+                // Ignore invalid number
+            }
+        }
+
+        String depenseCarburant100kmStr = req.getParameter("filter_depenseCarburant100km");
+        if (depenseCarburant100kmStr != null && !depenseCarburant100kmStr.isEmpty()) {
+            try {
+                BigDecimal dep = new BigDecimal(depenseCarburant100kmStr);
+                filters.put("depenseCarburant100km", dep);
+            } catch (NumberFormatException e) {
+                // Ignore invalid number
+            }
+        }
+
+        String vehiculeTypeLibelle = req.getParameter("filter_vehiculeType");
+        if (vehiculeTypeLibelle != null && !vehiculeTypeLibelle.isEmpty()) {
+            filters.put("vehiculeType.libelle", vehiculeTypeLibelle);
+        }
+
+        String carburantTypeLibelle = req.getParameter("filter_carburantType");
+        if (carburantTypeLibelle != null && !carburantTypeLibelle.isEmpty()) {
+            filters.put("carburantType.libelle", carburantTypeLibelle);
+        }
+
+        // Load vehicles with filters
+        List<Vehicule> vehicules = filters.isEmpty() ? vehiculeService.getAllVehicules() : vehiculeService.searchVehiculesWithFilters(filters);
         req.setAttribute("vehicules", vehicules);
 
         req.getRequestDispatcher("/vehicules.jsp").forward(req, resp);

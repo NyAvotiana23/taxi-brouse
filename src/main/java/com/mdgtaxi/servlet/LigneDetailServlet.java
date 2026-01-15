@@ -1,6 +1,7 @@
 package com.mdgtaxi.servlet;
 
 import com.mdgtaxi.entity.Ligne;
+import com.mdgtaxi.entity.LigneDetail;
 import com.mdgtaxi.entity.Trajet;
 import com.mdgtaxi.service.LigneService;
 import com.mdgtaxi.service.TrajetService;
@@ -24,9 +25,12 @@ public class LigneDetailServlet extends HttpServlet {
         Long id = Long.valueOf(req.getParameter("id"));
         Ligne ligne = ligneService.getLigneById(id);
         List<Trajet> trajets = trajetService.getTrajetsByLigneId(id);
+        List<LigneDetail> ligneDetails = ligneService.getLigneDetailList(id);
 
         req.setAttribute("ligne", ligne);
         req.setAttribute("trajets", trajets);
+        req.setAttribute("ligneDetails", ligneDetails);
+
 
         req.getRequestDispatcher("/ligne-detail.jsp").forward(req, resp);
     }

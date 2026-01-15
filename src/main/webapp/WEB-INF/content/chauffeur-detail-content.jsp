@@ -7,6 +7,7 @@
 <%@ page import="java.time.format.DateTimeFormatter" %>
 <%@ page import="java.time.Period" %>
 <%@ page import="java.time.LocalDate" %>
+<%@ page import="com.mdgtaxi.util.CalcUtil" %>
 <%
   VmChauffeurDetail detail = (VmChauffeurDetail) request.getAttribute("detail");
   VmChauffeurActivite activite = (VmChauffeurActivite) request.getAttribute("activite");
@@ -55,7 +56,8 @@
             <div class="col-md-6">
               <div class="info-group mb-3">
                 <label class="text-muted small">Nom Complet</label>
-                <h5 class="mb-0"><%= detail.getNomComplet() %></h5>
+                <h5 class="mb-0"><%= detail.
+                        getNom() %></h5>
               </div>
             </div>
             <div class="col-md-6">
@@ -84,8 +86,8 @@
               <div class="info-group mb-3">
                 <label class="text-muted small">Âge</label>
                 <p class="mb-0">
-                  <% if (detail.getAge() != null) { %>
-                  <strong><%= detail.getAge() %></strong> ans
+                  <% if (detail.getDateNaissance() != null) { %>
+                  <strong><%= CalcUtil.calulerAge(detail.getDateNaissance()) %></strong> ans
                   <% } else { %>
                   <span class="text-muted">N/A</span>
                   <% } %>

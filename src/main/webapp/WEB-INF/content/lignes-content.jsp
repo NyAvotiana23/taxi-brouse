@@ -69,6 +69,56 @@
         </div>
 
         <div class="col-md-8">
+            <!-- Multi-Filter Form -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Filtrer les Lignes</h6>
+                </div>
+                <div class="card-body">
+                    <form action="<%= request.getContextPath() %>/lignes" method="get">
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="filterVilleDepart" class="form-label">Ville Départ</label>
+                                <select class="form-control" id="filterVilleDepart" name="idVilleDepart">
+                                    <option value="">Toutes</option>
+                                    <% if (villes != null) {
+                                        for (Ville v : villes) { %>
+                                    <option value="<%= v.getId() %>"><%= v.getNom() %></option>
+                                    <% }
+                                    } %>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="filterVilleArrivee" class="form-label">Ville Arrivée</label>
+                                <select class="form-control" id="filterVilleArrivee" name="idVilleArrivee">
+                                    <option value="">Toutes</option>
+                                    <% if (villes != null) {
+                                        for (Ville v : villes) { %>
+                                    <option value="<%= v.getId() %>"><%= v.getNom() %></option>
+                                    <% }
+                                    } %>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="filterDistanceKm" class="form-label">Distance Exacte (km)</label>
+                                <input type="number" step="0.01" class="form-control" id="filterDistanceKm" name="distanceKm" placeholder="Exacte...">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="filterMinDistance" class="form-label">Distance Min (km)</label>
+                                <input type="number" step="0.01" class="form-control" id="filterMinDistance" name="minDistance" placeholder="Min...">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="filterMaxDistance" class="form-label">Distance Max (km)</label>
+                                <input type="number" step="0.01" class="form-control" id="filterMaxDistance" name="maxDistance" placeholder="Max...">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Filtrer</button>
+                        <a href="<%= request.getContextPath() %>/lignes" class="btn btn-secondary">Réinitialiser</a>
+                    </form>
+                </div>
+            </div>
+
+            <!-- List Table -->
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
                     <h6 class="m-0 font-weight-bold text-primary">Liste des Lignes</h6>
@@ -78,6 +128,7 @@
                         <table class="table table-bordered" width="100%" cellspacing="0">
                             <thead>
                             <tr>
+                                <th>ID</th>
                                 <th>Départ</th>
                                 <th>Arrivée</th>
                                 <th>Distance</th>
@@ -85,19 +136,24 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <% if (lignes != null) {
+                            <% if (lignes != null && !lignes.isEmpty()) {
                                 for (Ligne l : lignes) { %>
                             <tr>
+                                <td><%= l.getId() %></td>
                                 <td><%= l.getVilleDepart().getNom() %></td>
                                 <td><%= l.getVilleArrivee().getNom() %></td>
                                 <td><%= l.getDistanceKm() %> km</td>
                                 <td>
-                                    <a href="<%= request.getContextPath() %>/lignes/detail?id=<%= l.getId() %>" class="btn btn-sm btn-success">Détails</a>
+                                    <a href="<%= request.getContextPath() %>/lignes/detail?id=<%= l.getId() %>" class="btn btn-sm btn-primary">Détails</a>
                                     <a href="<%= request.getContextPath() %>/lignes?action=edit&id=<%= l.getId() %>" class="btn btn-sm btn-info">Modifier</a>
                                 </td>
                             </tr>
                             <% }
-                            } %>
+                            } else { %>
+                            <tr>
+                                <td colspan="5" class="text-center">Aucune ligne trouvée.</td>
+                            </tr>
+                            <% } %>
                             </tbody>
                         </table>
                     </div>

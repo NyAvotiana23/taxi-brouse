@@ -153,6 +153,14 @@
                                     <% } %>
                                 </select>
                             </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="filterStartDate" class="form-label">Départ Après</label>
+                                <input type="date" class="form-control" id="filterStartDate" name="startDate">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="filterEndDate" class="form-label">Départ Avant</label>
+                                <input type="date" class="form-control" id="filterEndDate" name="endDate">
+                            </div>
                         </div>
                         <button type="submit" class="btn btn-primary">Filtrer</button>
                         <a href="<%= request.getContextPath() %>/trajets" class="btn btn-secondary">Réinitialiser</a>

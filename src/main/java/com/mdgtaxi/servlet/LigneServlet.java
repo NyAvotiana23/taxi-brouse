@@ -12,7 +12,9 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @WebServlet("/lignes")
 public class LigneServlet extends HttpServlet {
@@ -30,7 +32,42 @@ public class LigneServlet extends HttpServlet {
             req.setAttribute("ligne", ligne);
         }
 
-        List<Ligne> lignes = ligneService.getAllLignes();
+        // Build filters map from request parameters
+        Map<String, Object> filters = new HashMap<>();
+
+        String idVilleDepart = req.getParameter("idVilleDepart");
+        if (idVilleDepart != null && !idVilleDepart.isEmpty()) {
+            filters.put("villeDepart.id", Long.valueOf(idVilleDepart));
+        }
+
+        String idVilleArrivee = req.getParameter("idVilleArrivee");
+        if (idVilleArrivee != null && !idVilleArrivee.isEmpty()) {
+            filters.put("villeArrivee.id", Long.valueOf(idVilleArrivee));
+        }
+
+        String distanceKm = req.getParameter("distanceKm");
+        if (distanceKm != null && !distanceKm.isEmpty()) {
+            filters.put("distanceKm", new BigDecimal(distanceKm));
+        }
+
+        String minDistance = req.getParameter("minDistance");
+        if (minDistance != null && !minDistance.isEmpty()) {
+            filters.put("distanceKm>=", new BigDecimal(minDistance));
+        }
+
+        String maxDistance = req.getParameter("maxDistance");
+        if (maxDistance != null && !maxDistance.isEmpty()) {
+            filters.put("distanceKm<=", new BigDecimal(maxDistance));
+        }
+
+        // Get filtered or all lignes
+        List<Ligne> lignes;
+        if (!filters.isEmpty()) {
+            lignes = ligneService.searchLignesWithFilters(filters);
+        } else {
+            lignes = ligneService.getAllLignes();
+        }
+
         List<Ville> villes = villeService.getAllVilles();
 
         req.setAttribute("lignes", lignes);

@@ -10,7 +10,6 @@ import com.mdgtaxi.util.HibernateUtil;
 import com.mdgtaxi.view.VmVehiculeCoutEntretien;
 import com.mdgtaxi.view.VmVehiculeDetail;
 import com.mdgtaxi.view.VmVehiculeHistoriqueStatut;
-import com.mdgtaxi.view.VmVehiculeStatutActuel;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -120,14 +119,7 @@ public class VehiculeService {
         }
     }
 
-    public VmVehiculeStatutActuel getCurrentStatut(Long idVehicule) {
-        EntityManager em = emf.createEntityManager();
-        try {
-            return em.find(VmVehiculeStatutActuel.class, idVehicule);
-        } finally {
-            em.close();
-        }
-    }
+
 
     public List<VmVehiculeHistoriqueStatut> getHistoriqueStatut(Long idVehicule) {
         EntityManager em = emf.createEntityManager();

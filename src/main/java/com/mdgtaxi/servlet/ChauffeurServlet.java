@@ -12,7 +12,10 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @WebServlet("/chauffeures")
 public class ChauffeurServlet extends HttpServlet {
@@ -34,8 +37,36 @@ public class ChauffeurServlet extends HttpServlet {
             return;
         }
 
-        // Load all chauffeurs
-        List<Chauffeur> chauffeurs = chauffeurService.getAllChauffeurs();
+        // Collect filters
+        Map<String, Object> filters = new HashMap<>();
+
+        String nom = req.getParameter("filter_nom");
+        if (nom != null && !nom.isEmpty()) {
+            filters.put("nom", nom);
+        }
+
+        String prenom = req.getParameter("filter_prenom");
+        if (prenom != null && !prenom.isEmpty()) {
+            filters.put("prenom", prenom);
+        }
+
+        String numeroPermis = req.getParameter("filter_numeroPermis");
+        if (numeroPermis != null && !numeroPermis.isEmpty()) {
+            filters.put("numeroPermis", numeroPermis);
+        }
+
+        String dateNaissanceStr = req.getParameter("filter_dateNaissance");
+        if (dateNaissanceStr != null && !dateNaissanceStr.isEmpty()) {
+            try {
+                LocalDate date = LocalDate.parse(dateNaissanceStr);
+                filters.put("dateNaissance", date);
+            } catch (DateTimeParseException e) {
+                // Ignore invalid date
+            }
+        }
+
+        // Load chauffeurs with filters
+        List<Chauffeur> chauffeurs = filters.isEmpty() ? chauffeurService.getAllChauffeurs() : chauffeurService.searchChauffeursWithFilters(filters);
         req.setAttribute("chauffeurs", chauffeurs);
 
         req.getRequestDispatcher("/chauffeures.jsp").forward(req, resp);

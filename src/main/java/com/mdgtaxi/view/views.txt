@@ -290,16 +290,22 @@ import java.time.LocalDateTime;
         c.id AS id_chauffeur,
         c.nom,
         c.prenom,
-        c.nom || ' ' || c.prenom AS nom_complet,
         c.date_naissance,
-        EXTRACT(YEAR FROM AGE(c.date_naissance)) AS age,
         c.numero_permis,
         csa.libelle_statut,
         csa.date_mouvement AS date_dernier_statut
     FROM Chauffeur c
-             LEFT JOIN VM_Chauffeur_Statut_Actuel csa ON c.id = csa.id_chauffeur
+             LEFT JOIN (
+                 SELECT DISTINCT ON (cms.id_chauffeur)
+                     cms.id_chauffeur,
+                     cs.libelle AS libelle_statut,
+                     cms.date_mouvement
+                 FROM Chauffeur_Mouvement_Statut cms
+                          INNER JOIN Chauffeur_Statut cs ON cms.id_nouveau_statut = cs.id
+                 ORDER BY cms.id_chauffeur, cms.date_mouvement DESC
+             ) csa ON c.id = csa.id_chauffeur
 """)
-@Synchronize({"Chauffeur", "VM_Chauffeur_Statut_Actuel"})
+@Synchronize({"Chauffeur", "Chauffeur_Mouvement_Statut", "Chauffeur_Statut"})
 public class VmChauffeurDetail implements Serializable {
     @Id
     @Column(name = "id_chauffeur")
@@ -311,14 +317,8 @@ public class VmChauffeurDetail implements Serializable {
     @Column(name = "prenom")
     private String prenom;
 
-    @Column(name = "nom_complet")
-    private String nomComplet;
-
     @Column(name = "date_naissance")
     private LocalDate dateNaissance;
-
-    @Column(name = "age")
-    private Integer age;
 
     @Column(name = "numero_permis")
     private String numeroPermis;
@@ -376,41 +376,6 @@ public class VmChauffeurHistoriqueStatut implements Serializable {
 
     @Column(name = "observation")
     private String observation;
-}
-package com.mdgtaxi.view;
-
-import lombok.Data;
-import org.hibernate.annotations.Immutable;
-import org.hibernate.annotations.Subselect;
-import org.hibernate.annotations.Synchronize;
-
-import javax.persistence.*;
-import java.io.Serializable;
-import java.time.LocalDateTime;
-
-@Data
-@Entity
-@Immutable
-@Subselect("""
-    SELECT DISTINCT ON (cms.id_chauffeur)
-        cms.id_chauffeur,
-        cs.libelle AS libelle_statut,
-        cms.date_mouvement
-    FROM Chauffeur_Mouvement_Statut cms
-             INNER JOIN Chauffeur_Statut cs ON cms.id_nouveau_statut = cs.id
-    ORDER BY cms.id_chauffeur, cms.date_mouvement DESC
-""")
-@Synchronize({"Chauffeur_Mouvement_Statut", "Chauffeur_Statut"})
-public class VmChauffeurStatutActuel implements Serializable {
-    @Id
-    @Column(name = "id_chauffeur")
-    private Long idChauffeur;
-
-    @Column(name = "libelle_statut")
-    private String libelleStatut;
-
-    @Column(name = "date_mouvement")
-    private LocalDateTime dateMouvement;
 }
 package com.mdgtaxi.view;
 
@@ -900,9 +865,17 @@ import java.time.LocalDateTime;
     FROM Vehicule v
              INNER JOIN Vehicule_Type vt ON v.id_type = vt.id
              INNER JOIN Carburant_Type ct ON v.id_type_carburant = ct.id
-             LEFT JOIN VM_Vehicule_Statut_Actuel vsa ON v.id = vsa.id_vehicule
+             LEFT JOIN (
+                 SELECT DISTINCT ON (vms.id_vehicule)
+                     vms.id_vehicule,
+                     vs.libelle AS libelle_statut,
+                     vms.date_mouvement
+                 FROM Vehicule_Mouvement_Statut vms
+                          INNER JOIN Vehicule_Statut vs ON vms.id_nouveau_statut = vs.id
+                 ORDER BY vms.id_vehicule, vms.date_mouvement DESC
+             ) vsa ON v.id = vsa.id_vehicule
 """)
-@Synchronize({"Vehicule", "Vehicule_Type", "Carburant_Type", "VM_Vehicule_Statut_Actuel"})
+@Synchronize({"Vehicule", "Vehicule_Type", "Carburant_Type", "Vehicule_Mouvement_Statut", "Vehicule_Statut"})
 public class VmVehiculeDetail implements Serializable {
     @Id
     @Column(name = "id_vehicule")
@@ -985,41 +958,6 @@ public class VmVehiculeHistoriqueStatut implements Serializable {
 
     @Column(name = "observation")
     private String observation;
-}
-package com.mdgtaxi.view;
-
-import lombok.Data;
-import org.hibernate.annotations.Immutable;
-import org.hibernate.annotations.Subselect;
-import org.hibernate.annotations.Synchronize;
-
-import javax.persistence.*;
-import java.io.Serializable;
-import java.time.LocalDateTime;
-
-@Data
-@Entity
-@Immutable
-@Subselect("""
-    SELECT DISTINCT ON (vms.id_vehicule)
-        vms.id_vehicule,
-        vs.libelle AS libelle_statut,
-        vms.date_mouvement
-    FROM Vehicule_Mouvement_Statut vms
-             INNER JOIN Vehicule_Statut vs ON vms.id_nouveau_statut = vs.id
-    ORDER BY vms.id_vehicule, vms.date_mouvement DESC
-""")
-@Synchronize({"Vehicule_Mouvement_Statut", "Vehicule_Statut"})
-public class VmVehiculeStatutActuel implements Serializable {
-    @Id
-    @Column(name = "id_vehicule")
-    private Long idVehicule;
-
-    @Column(name = "libelle_statut")
-    private String libelleStatut;
-
-    @Column(name = "date_mouvement")
-    private LocalDateTime dateMouvement;
 }
 package com.mdgtaxi.view;
 
