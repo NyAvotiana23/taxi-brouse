@@ -1,6 +1,10 @@
 package com.mdgtaxi.service;
 
 import com.mdgtaxi.entity.Trajet;
+import com.mdgtaxi.entity.TrajetReservation;
+import com.mdgtaxi.entity.TrajetReservationDetails;
+import com.mdgtaxi.entity.TrajetReservationPaiement;
+import com.mdgtaxi.entity.VehiculeTarifTypePlace;
 import com.mdgtaxi.util.HibernateUtil;
 
 import javax.persistence.EntityManager;
@@ -71,25 +75,94 @@ public class TrajetService {
         }
     }
 
-    public double getPlaceRestante (Long idTrajet) {
-
+    public double getPlaceRestante(Long idTrajet) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            Trajet trajet = em.find(Trajet.class, idTrajet);
+            if (trajet == null) {
+                return 0.0;
+            }
+            double totalPlaces = trajet.getVehicule().getMaximumPassager();
+            String jpql = "SELECT SUM(trd.nombrePlaces) FROM TrajetReservation tr JOIN tr.trajetReservationDetails trd WHERE tr.trajet.id = :idTrajet";
+            TypedQuery<Double> query = em.createQuery(jpql, Double.class);
+            query.setParameter("idTrajet", idTrajet);
+            Double taken = query.getSingleResult();
+            double takenPlaces = taken != null ? taken : 0.0;
+            return totalPlaces - takenPlaces;
+        } finally {
+            em.close();
+        }
     }
 
+    public double getPlaceRestante(Long idTrajet, Long idTypePlace) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            Trajet trajet = em.find(Trajet.class, idTrajet);
+            if (trajet == null) {
+                return 0.0;
+            }
+            String totalJpql = "SELECT vttp.nombrePlace FROM VehiculeTarifTypePlace vttp WHERE vttp.vehicule.id = :idVehicule AND vttp.typePlace.id = :idTypePlace";
+            TypedQuery<Double> totalQuery = em.createQuery(totalJpql, Double.class);
+            totalQuery.setParameter("idVehicule", trajet.getVehicule().getId());
+            totalQuery.setParameter("idTypePlace", idTypePlace);
+            Double total = totalQuery.getSingleResult();
+            double totalForType = total != null ? total : 0.0;
 
-    public double getPlaceRestante (Long idTrajet, Long idTypePlace) {
+            String takenJpql = "SELECT SUM(trd.nombrePlaces) FROM TrajetReservation tr JOIN tr.trajetReservationDetails trd WHERE tr.trajet.id = :idTrajet AND trd.typePlace.id = :idTypePlace";
+            TypedQuery<Double> takenQuery = em.createQuery(takenJpql, Double.class);
+            takenQuery.setParameter("idTrajet", idTrajet);
+            takenQuery.setParameter("idTypePlace", idTypePlace);
+            Double taken = takenQuery.getSingleResult();
+            double takenForType = taken != null ? taken : 0.0;
 
+            return totalForType - takenForType;
+        } finally {
+            em.close();
+        }
     }
 
-    public double getPlacePrise (Long idTrajet, Long idTypePlace) {
-
+    public double getPlacePrise(Long idTrajet, Long idTypePlace) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            String jpql = "SELECT SUM(trd.nombrePlaces) FROM TrajetReservation tr JOIN tr.trajetReservationDetails trd WHERE tr.trajet.id = :idTrajet AND trd.typePlace.id = :idTypePlace";
+            TypedQuery<Double> query = em.createQuery(jpql, Double.class);
+            query.setParameter("idTrajet", idTrajet);
+            query.setParameter("idTypePlace", idTypePlace);
+            Double taken = query.getSingleResult();
+            return taken != null ? taken : 0.0;
+        } finally {
+            em.close();
+        }
     }
 
-    public double getPrevisionChiffreAffaire (Long idTrajet) {
-
+    public double getPrevisionChiffreAffaire(Long idTrajet) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            String jpql = "SELECT SUM(trd.nombrePlaces * vttp.tarifUnitaire) " +
+                    "FROM TrajetReservation tr " +
+                    "JOIN tr.trajetReservationDetails trd " +
+                    "JOIN VehiculeTarifTypePlace vttp ON vttp.vehicule.id = tr.trajet.vehicule.id AND vttp.typePlace.id = trd.typePlace.id " +
+                    "WHERE tr.trajet.id = :idTrajet";
+            TypedQuery<Double> query = em.createQuery(jpql, Double.class);
+            query.setParameter("idTrajet", idTrajet);
+            Double prevision = query.getSingleResult();
+            return prevision != null ? prevision : 0.0;
+        } finally {
+            em.close();
+        }
     }
 
-    public double getTotalPaiementRecu (Long idTrajet) {
-
+    public double getTotalPaiementRecu(Long idTrajet) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            String jpql = "SELECT SUM(p.montant.doubleValue) FROM TrajetReservationPaiement p WHERE p.trajetReservation.trajet.id = :idTrajet";
+            TypedQuery<Double> query = em.createQuery(jpql, Double.class);
+            query.setParameter("idTrajet", idTrajet);
+            Double total = query.getSingleResult();
+            return total != null ? total : 0.0;
+        } finally {
+            em.close();
+        }
     }
 
     public List<Trajet> searchTrajetsWithFilters(Map<String, Object> filters) {

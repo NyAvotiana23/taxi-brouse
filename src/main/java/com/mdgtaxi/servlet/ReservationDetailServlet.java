@@ -1,7 +1,5 @@
-// Update to servlets.txt (ReservationDetailServlet class, using correct entity names)
 package com.mdgtaxi.servlet;
 
-import com.mdgtaxi.dto.MouvementStatusDto;
 import com.mdgtaxi.dto.StatusObjectDto;
 import com.mdgtaxi.dto.TypeObjectDTO;
 import com.mdgtaxi.entity.*;
@@ -21,10 +19,10 @@ import java.util.List;
 public class ReservationDetailServlet extends HttpServlet {
 
     private final ReservationService reservationService = new ReservationService();
-    private final ClientService clientService = new ClientService(); // Assume exists
-    private final TrajetService trajetService = new TrajetService(); // Assume exists
+    private final ClientService clientService = new ClientService();
+    private final TrajetService trajetService = new TrajetService();
     private final StatusService statusService = new StatusService();
-    private final TypeObjectService typeObjectService = new TypeObjectService(); // Assume exists for ModePaiement, but adjust if needed
+    private final TypeObjectService typeObjectService = new TypeObjectService();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -64,7 +62,7 @@ public class ReservationDetailServlet extends HttpServlet {
         } catch (Exception e) {
             req.setAttribute("error", "Erreur: " + e.getMessage());
             loadReservationDetails(req, id);
-            req.getRequestDispatcher("/reservation-detail-content.jsp").forward(req, resp);
+            req.getRequestDispatcher("/reservation-detail.jsp").forward(req, resp);
         }
     }
 
@@ -72,35 +70,54 @@ public class ReservationDetailServlet extends HttpServlet {
         TrajetReservation reservation = reservationService.getReservationById(id);
         req.setAttribute("reservation", reservation);
 
+        // Load reservation details (types de places)
+        List<TrajetReservationDetails> reservationDetails = reservationService.getReservationDetailsByReservationId(id);
+        req.setAttribute("reservationDetails", reservationDetails);
+
+        // Load payments
         List<TrajetReservationPaiement> payments = reservationService.getPaymentsByReservation(id);
         req.setAttribute("payments", payments);
 
+        // Load status history
         List<TrajetReservationMouvementStatut> statusHistory = reservationService.getStatusHistoryByReservation(id);
         req.setAttribute("statusHistory", statusHistory);
 
-        List<Client> clients = clientService.getAllClients(); // For form if needed
+        // Calculate amounts
+        BigDecimal montantTotal = reservationService.getMontantTotalReservation(id);
+        BigDecimal montantPaye = reservationService.getTotalPaiementRecu(id);
+        BigDecimal soldeRestant = reservationService.getSoldeRestant(id);
+
+        req.setAttribute("montantTotal", montantTotal);
+        req.setAttribute("montantPaye", montantPaye);
+        req.setAttribute("soldeRestant", soldeRestant);
+
+        // Load reference data
+        List<Client> clients = clientService.getAllClients();
         req.setAttribute("clients", clients);
 
-        List<Trajet> trajets = trajetService.getAllTrajets(); // For form if needed
+        List<Trajet> trajets = trajetService.getAllTrajets();
         req.setAttribute("trajets", trajets);
 
         List<StatusObjectDto> reservationStatuts = statusService.findAllStatuses("Trajet_Reservation");
         req.setAttribute("reservationStatuts", reservationStatuts);
 
-        // Assuming ModePaiement is a TypeObject, or adjust service accordingly
         List<TypeObjectDTO> modePaiements = typeObjectService.findAllTypeObject("Mode_Paiement");
         req.setAttribute("modePaiements", modePaiements);
+
+        List<TypeObjectDTO> typePlaces = typeObjectService.findAllTypeObject("Type_Place");
+        req.setAttribute("typePlaces", typePlaces);
     }
 
     private void handleChangeStatut(HttpServletRequest req, Long reservationId) {
         Long idStatut = Long.valueOf(req.getParameter("idStatut"));
         String observation = req.getParameter("observation");
-        LocalDateTime dateChangement = LocalDateTime.now(); // Or parse from param
+        LocalDateTime dateChangement = LocalDateTime.now();
 
         TrajetReservationMouvementStatut mouvement = new TrajetReservationMouvementStatut();
         TrajetReservation reservation = new TrajetReservation();
         reservation.setId(reservationId);
         mouvement.setTrajetReservation(reservation);
+
         ReservationStatut statut = new ReservationStatut();
         statut.setId(idStatut);
         mouvement.setNouveauStatut(statut);
@@ -113,22 +130,26 @@ public class ReservationDetailServlet extends HttpServlet {
     private void handleAddPayment(HttpServletRequest req, Long reservationId) {
         BigDecimal montant = new BigDecimal(req.getParameter("montant"));
         Long idModePaiement = Long.valueOf(req.getParameter("idModePaiement"));
-        Long idClient = Long.valueOf(req.getParameter("idClient")); // Assuming from form, or use reservation's client
-        Long idCaisse = req.getParameter("idCaisse") != null ? Long.valueOf(req.getParameter("idCaisse")) : null;
-        LocalDateTime datePaiement = LocalDateTime.now(); // Or parse
+        Long idClient = Long.valueOf(req.getParameter("idClient"));
+        String idCaisseStr = req.getParameter("idCaisse");
+        Long idCaisse = (idCaisseStr != null && !idCaisseStr.isEmpty()) ? Long.valueOf(idCaisseStr) : null;
+        LocalDateTime datePaiement = LocalDateTime.now();
 
         TrajetReservationPaiement paiement = new TrajetReservationPaiement();
         Client client = new Client();
         client.setId(idClient);
         paiement.setClient(client);
+
         TrajetReservation reservation = new TrajetReservation();
         reservation.setId(reservationId);
         paiement.setTrajetReservation(reservation);
+
         if (idCaisse != null) {
             Caisse caisse = new Caisse();
             caisse.setId(idCaisse);
             paiement.setCaisse(caisse);
         }
+
         paiement.setMontant(montant);
         ModePaiement mode = new ModePaiement();
         mode.setId(idModePaiement);

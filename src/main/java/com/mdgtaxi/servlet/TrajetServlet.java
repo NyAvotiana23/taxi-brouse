@@ -128,7 +128,6 @@ public class TrajetServlet extends HttpServlet {
         statut.setId(idTrajetStatut);
         trajet.setTrajetStatut(statut);
 
-        trajet.setFraisUnitaire(fraisUnitaire);
         trajet.setNombrePassager(nombrePassager);
 
         if (trajet.getId() == null) {

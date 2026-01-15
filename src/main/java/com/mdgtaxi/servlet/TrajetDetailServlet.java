@@ -39,8 +39,8 @@ public class TrajetDetailServlet extends HttpServlet {
 
 
         List<TrajetReservation> reservations = reservationService.getReservationsByTrajetId(id);
-        int placesPrises = reservationService.getPlacesPrisesForTrajet(id);
-        int placesRestantes = trajet.getVehicule().getMaximumPassager() - placesPrises;
+        double placesPrises = reservationService.getPlacesPrisesForTrajet(id);
+        double placesRestantes = trajet.getVehicule().getMaximumPassager() - placesPrises;
         List<Client> clients = clientService.getAllClients();  // If needed for form, etc.
         List<TypeObjectDTO> reservationStatuts = typeObjectService.findAllTypeObject("Reservation_Statut");
 

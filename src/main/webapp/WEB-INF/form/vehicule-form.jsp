@@ -1,3 +1,4 @@
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.mdgtaxi.entity.Vehicule" %>
 <%@ page import="com.mdgtaxi.dto.TypeObjectDTO" %>
 <%@ page import="java.util.List" %>
@@ -5,6 +6,10 @@
     Vehicule vehicule = (Vehicule) request.getAttribute("vehicule");
     List<TypeObjectDTO> vehiculeTypes = (List<TypeObjectDTO>) request.getAttribute("vehiculeTypes");
     List<TypeObjectDTO> carburantTypes = (List<TypeObjectDTO>) request.getAttribute("carburantTypes");
+    Double premiumPlaces = (Double) request.getAttribute("premiumPlaces");
+    Double premiumTarif = (Double) request.getAttribute("premiumTarif");
+    Double standardPlaces = (Double) request.getAttribute("standardPlaces");
+    Double standardTarif = (Double) request.getAttribute("standardTarif");
     String error = (String) request.getAttribute("error");
 %>
 
@@ -145,6 +150,61 @@
                                min="0"
                                value="<%= vehicule != null && vehicule.getDepenseCarburant100km() != null ?
                                           vehicule.getDepenseCarburant100km() : "" %>">
+                    </div>
+                </div>
+            </div>
+
+            <!-- New section for seat types -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="m-0 font-weight-bold text-primary">Configuration des Types de Places</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="premiumPlaces" class="form-label">Nombre de Places Premium</label>
+                                <input type="number"
+                                       step="1"
+                                       class="form-control"
+                                       id="premiumPlaces"
+                                       name="premiumPlaces"
+                                       min="0"
+                                       value="<%= premiumPlaces != null ? premiumPlaces : "0" %>">
+                            </div>
+                            <div class="mb-3">
+                                <label for="premiumTarif" class="form-label">Tarif Unitaire Premium (Ar)</label>
+                                <input type="number"
+                                       step="0.01"
+                                       class="form-control"
+                                       id="premiumTarif"
+                                       name="premiumTarif"
+                                       min="0"
+                                       value="<%= premiumTarif != null ? premiumTarif : "140000.0" %>">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="standardPlaces" class="form-label">Nombre de Places Standard</label>
+                                <input type="number"
+                                       step="1"
+                                       class="form-control"
+                                       id="standardPlaces"
+                                       name="standardPlaces"
+                                       min="0"
+                                       value="<%= standardPlaces != null ? standardPlaces : "0" %>">
+                            </div>
+                            <div class="mb-3">
+                                <label for="standardTarif" class="form-label">Tarif Unitaire Standard (Ar)</label>
+                                <input type="number"
+                                       step="0.01"
+                                       class="form-control"
+                                       id="standardTarif"
+                                       name="standardTarif"
+                                       min="0"
+                                       value="<%= standardTarif != null ? standardTarif : "80000.0" %>">
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

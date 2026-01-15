@@ -5,6 +5,7 @@ import com.mdgtaxi.entity.Vehicule;
 import com.mdgtaxi.entity.VehiculeEntretien;
 import com.mdgtaxi.entity.VehiculeMouvementStatut;
 import com.mdgtaxi.entity.VehiculeStatut;
+import com.mdgtaxi.entity.VehiculeTarifTypePlace;
 import com.mdgtaxi.entity.VehiculeType;
 import com.mdgtaxi.util.HibernateUtil;
 import com.mdgtaxi.view.VmVehiculeCoutEntretien;
@@ -174,12 +175,31 @@ public class VehiculeService {
         }
     }
 
-    public double getTotalMaxChiffreAffairePossible (Long idVoiture) {
-
+    public double getTotalMaxChiffreAffairePossible(Long idVoiture) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            String jpql = "SELECT SUM(vttp.nombrePlace * vttp.tarifUnitaire) FROM VehiculeTarifTypePlace vttp WHERE vttp.vehicule.id = :idVoiture";
+            TypedQuery<Double> query = em.createQuery(jpql, Double.class);
+            query.setParameter("idVoiture", idVoiture);
+            Double total = query.getSingleResult();
+            return total != null ? total : 0.0;
+        } finally {
+            em.close();
+        }
     }
 
-    public double getTotalMaxChiffreAffairePossible (Long idVoiture, Long idTypePlace) {
-
+    public double getTotalMaxChiffreAffairePossible(Long idVoiture, Long idTypePlace) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            String jpql = "SELECT vttp.nombrePlace * vttp.tarifUnitaire FROM VehiculeTarifTypePlace vttp WHERE vttp.vehicule.id = :idVoiture AND vttp.typePlace.id = :idTypePlace";
+            TypedQuery<Double> query = em.createQuery(jpql, Double.class);
+            query.setParameter("idVoiture", idVoiture);
+            query.setParameter("idTypePlace", idTypePlace);
+            Double total = query.getSingleResult();
+            return total != null ? total : 0.0;
+        } finally {
+            em.close();
+        }
     }
 
     public VehiculeMouvementStatut changeStatut(VehiculeMouvementStatut mouvement) {
@@ -256,6 +276,56 @@ public class VehiculeService {
 
             TypedQuery<Vehicule> query = em.createQuery(cq);
             return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    // New methods for VehiculeTarifTypePlace
+
+    public List<VehiculeTarifTypePlace> getTarifTypePlacesByVehicule(Long idVehicule) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<VehiculeTarifTypePlace> query = em.createQuery(
+                    "SELECT vttp FROM VehiculeTarifTypePlace vttp WHERE vttp.vehicule.id = :idVehicule",
+                    VehiculeTarifTypePlace.class);
+            query.setParameter("idVehicule", idVehicule);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    public VehiculeTarifTypePlace getTarifTypePlaceByVehiculeAndType(Long idVehicule, Long idTypePlace) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<VehiculeTarifTypePlace> query = em.createQuery(
+                    "SELECT vttp FROM VehiculeTarifTypePlace vttp WHERE vttp.vehicule.id = :idVehicule AND vttp.typePlace.id = :idTypePlace",
+                    VehiculeTarifTypePlace.class);
+            query.setParameter("idVehicule", idVehicule);
+            query.setParameter("idTypePlace", idTypePlace);
+            List<VehiculeTarifTypePlace> results = query.getResultList();
+            return results.isEmpty() ? null : results.get(0);
+        } finally {
+            em.close();
+        }
+    }
+
+    public VehiculeTarifTypePlace createOrUpdateTarifTypePlace(VehiculeTarifTypePlace vttp) {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            if (vttp.getId() != null) {
+                vttp = em.merge(vttp);
+            } else {
+                em.persist(vttp);
+            }
+            tx.commit();
+            return vttp;
+        } catch (Exception e) {
+            if (tx.isActive()) tx.rollback();
+            throw e;
         } finally {
             em.close();
         }

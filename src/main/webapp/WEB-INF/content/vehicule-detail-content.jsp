@@ -2,6 +2,7 @@
 <%@ page import="com.mdgtaxi.view.VmVehiculeDetail" %>
 <%@ page import="com.mdgtaxi.view.VmVehiculeCoutEntretien" %>
 <%@ page import="com.mdgtaxi.entity.VehiculeEntretien" %>
+<%@ page import="com.mdgtaxi.entity.VehiculeTarifTypePlace" %>
 <%@ page import="com.mdgtaxi.dto.MouvementStatusDto" %>
 <%@ page import="com.mdgtaxi.dto.StatusObjectDto" %>
 <%@ page import="java.util.List" %>
@@ -13,6 +14,8 @@
   MouvementStatusDto currentStatus = (MouvementStatusDto) request.getAttribute("currentStatus");
   List<MouvementStatusDto> statusHistory = (List<MouvementStatusDto>) request.getAttribute("statusHistory");
   List<StatusObjectDto> availableStatuts = (List<StatusObjectDto>) request.getAttribute("availableStatuts");
+  List<VehiculeTarifTypePlace> tarifPlaces = (List<VehiculeTarifTypePlace>) request.getAttribute("tarifPlaces");
+  Double maxCA = (Double) request.getAttribute("maxCA");
   String error = (String) request.getAttribute("error");
 
   DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
@@ -119,138 +122,131 @@
           </div>
 
           <% if (detail.getCapaciteCarburant() != null) { %>
-          <div class="row">
-            <div class="col-md-12">
-              <div class="info-group mb-3">
-                <label class="text-muted small">Capacité Réservoir</label>
-                <p class="mb-0">
-                  <i class="fas fa-gas-pump text-warning"></i>
-                  <strong><%= detail.getCapaciteCarburant() %></strong> Litres
-                </p>
-              </div>
-            </div>
+          <div class="info-group mb-3">
+            <label class="text-muted small">Capacité Carburant</label>
+            <p class="mb-0">
+              <i class="fas fa-gas-pump text-warning"></i>
+              <strong><%= detail.getCapaciteCarburant() %></strong> L
+            </p>
           </div>
           <% } %>
         </div>
       </div>
-    </div>
 
-    <!-- Current Status & Stats Card -->
-    <div class="col-xl-4 col-lg-5">
+      <!-- New Tarif and Places Section -->
       <div class="card shadow mb-4">
         <div class="card-header py-3">
-          <h6 class="m-0 font-weight-bold text-primary">Statut Actuel</h6>
-        </div>
-        <div class="card-body text-center">
-          <% if (currentStatus != null) { %>
-          <div class="mb-3">
-            <%= currentStatus.getSpanHtmlNouveauStatut() %>
-          </div>
-          <small class="text-muted">
-            Depuis le <%= currentStatus.getDateMouvement().format(dateFormatter) %>
-          </small>
-          <% if (currentStatus.getObservation() != null && !currentStatus.getObservation().isEmpty()) { %>
-          <p class="mt-3 text-muted">
-            <em>"<%= currentStatus.getObservation() %>"</em>
-          </p>
-          <% } %>
-          <% } else { %>
-          <span class="badge badge-secondary">Aucun statut</span>
-          <% } %>
-        </div>
-      </div>
-
-      <!-- Maintenance Cost Card -->
-      <div class="card shadow mb-4">
-        <div class="card-header py-3">
-          <h6 class="m-0 font-weight-bold text-primary">Coût d'Entretien</h6>
-        </div>
-        <div class="card-body text-center">
-          <h3 class="text-success">
-            <%= cout != null && cout.getTotalDepenseEntretien() != null ?
-                    cout.getTotalDepenseEntretien() : 0 %> Ar
-          </h3>
-          <small class="text-muted">Coût total cumulé</small>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Change Status Section -->
-  <div class="row">
-    <div class="col-lg-6">
-      <div class="card shadow mb-4">
-        <div class="card-header py-3 bg-warning">
-          <h6 class="m-0 font-weight-bold text-white">
-            <i class="fas fa-exchange-alt"></i> Changer le Statut
+          <h6 class="m-0 font-weight-bold text-primary">
+            <i class="fas fa-chair"></i> Configuration des Places et Tarifs
           </h6>
         </div>
         <div class="card-body">
-          <form action="<%= request.getContextPath() %>/vehicules/detail" method="POST">
-            <input type="hidden" name="id" value="<%= detail.getIdVehicule() %>">
+          <% if (tarifPlaces != null && !tarifPlaces.isEmpty()) { %>
+          <div class="table-responsive">
+            <table class="table table-bordered">
+              <thead>
+              <tr>
+                <th>Type de Place</th>
+                <th>Nombre de Places</th>
+                <th>Tarif Unitaire (Ar)</th>
+                <th>CA Potentiel (Ar)</th>
+              </tr>
+              </thead>
+              <tbody>
+              <% for (VehiculeTarifTypePlace vttp : tarifPlaces) { %>
+              <tr>
+                <td><%= vttp.getTypePlace().getNomTypePlace() %></td>
+                <td><%= vttp.getNombrePlace() %></td>
+                <td><%= vttp.getTarifUnitaire() %></td>
+                <td><%= vttp.getNombrePlace() * vttp.getTarifUnitaire() %></td>
+              </tr>
+              <% } %>
+              </tbody>
+              <tfoot>
+              <tr>
+                <th colspan="3" class="text-right">Chiffre d'Affaires Potentiel Maximum (si complet)</th>
+                <th><%= maxCA != null ? maxCA : "0.0" %> Ar</th>
+              </tr>
+              </tfoot>
+            </table>
+          </div>
+          <% } else { %>
+          <p class="text-muted text-center">
+            <i class="fas fa-info-circle"></i> Aucune configuration de places définie
+          </p>
+          <% } %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status Change and Maintenance Forms -->
+    <div class="col-xl-4 col-lg-5">
+      <!-- Change Status Card -->
+      <div class="card shadow mb-4">
+        <div class="card-header py-3">
+          <h6 class="m-0 font-weight-bold text-primary">
+            <i class="fas fa-sync-alt"></i> Changer Statut
+          </h6>
+        </div>
+        <div class="card-body">
+          <% if (currentStatus != null) { %>
+          <div class="mb-3 text-center">
+            <h6>Statut Actuel</h6>
+            <%= currentStatus.getSpanHtmlNouveauStatut() %>
+            <small class="text-muted d-block mt-1">
+              Depuis le <%= currentStatus.getDateMouvement().format(dateFormatter) %>
+            </small>
+          </div>
+          <% } %>
+
+          <form action="<%= request.getContextPath() %>/vehicules" method="post">
             <input type="hidden" name="action" value="changeStatut">
+            <input type="hidden" name="id" value="<%= detail.getIdVehicule() %>">
 
             <div class="mb-3">
-              <label for="idStatut" class="form-label">Nouveau Statut <span class="text-danger">*</span></label>
+              <label for="idStatut" class="form-label">Nouveau Statut</label>
               <select class="form-control" id="idStatut" name="idStatut" required>
                 <option value="">-- Choisir un statut --</option>
                 <% if (availableStatuts != null) {
                   for (StatusObjectDto statut : availableStatuts) { %>
-                <option value="<%= statut.getId() %>">
-                  <%= statut.getLibelle() %> (Score: <%= statut.getScore() %>)
-                </option>
+                <option value="<%= statut.getId() %>"><%= statut.getLibelle() %></option>
                 <% }
                 } %>
               </select>
             </div>
 
             <div class="mb-3">
-              <label for="dateChangement" class="form-label">Date du Changement</label>
-              <input type="datetime-local"
-                     class="form-control"
-                     id="dateChangement"
-                     name="dateChangement">
-              <small class="form-text text-muted">Laisser vide pour la date actuelle</small>
+              <label for="observation" class="form-label">Observation</label>
+              <textarea class="form-control" id="observation" name="observation" rows="2"></textarea>
             </div>
 
             <div class="mb-3">
-              <label for="observation" class="form-label">Observation</label>
-              <textarea class="form-control"
-                        id="observation"
-                        name="observation"
-                        rows="3"
-                        placeholder="Raison du changement de statut..."></textarea>
+              <label for="dateChangement" class="form-label">Date du Changement</label>
+              <input type="datetime-local" class="form-control" id="dateChangement" name="dateChangement">
             </div>
 
-            <button type="submit" class="btn btn-warning btn-block">
-              <i class="fas fa-check"></i> Mettre à jour le statut
+            <button type="submit" class="btn btn-primary btn-block">
+              <i class="fas fa-sync-alt"></i> Changer le statut
             </button>
           </form>
         </div>
       </div>
-    </div>
 
-    <!-- Add Maintenance Section -->
-    <div class="col-lg-6">
+      <!-- Add Maintenance Card -->
       <div class="card shadow mb-4">
-        <div class="card-header py-3 bg-info">
-          <h6 class="m-0 font-weight-bold text-white">
+        <div class="card-header py-3">
+          <h6 class="m-0 font-weight-bold text-primary">
             <i class="fas fa-tools"></i> Ajouter un Entretien
           </h6>
         </div>
         <div class="card-body">
-          <form action="<%= request.getContextPath() %>/vehicules/detail" method="POST">
-            <input type="hidden" name="id" value="<%= detail.getIdVehicule() %>">
+          <form action="<%= request.getContextPath() %>/vehicules" method="post">
             <input type="hidden" name="action" value="addEntretien">
+            <input type="hidden" name="id" value="<%= detail.getIdVehicule() %>">
 
             <div class="mb-3">
               <label for="motif" class="form-label">Motif <span class="text-danger">*</span></label>
-              <input type="text"
-                     class="form-control"
-                     id="motif"
-                     name="motif"
-                     placeholder="Ex: Vidange, Révision..."
-                     required>
+              <input type="text" class="form-control" id="motif" name="motif" required>
             </div>
 
             <div class="mb-3">

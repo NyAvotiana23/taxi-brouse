@@ -2,8 +2,10 @@ package com.mdgtaxi.service;
 
 import com.mdgtaxi.entity.Trajet;
 import com.mdgtaxi.entity.TrajetReservation;
+import com.mdgtaxi.entity.TrajetReservationDetails;
 import com.mdgtaxi.entity.TrajetReservationMouvementStatut;
 import com.mdgtaxi.entity.TrajetReservationPaiement;
+import com.mdgtaxi.entity.VehiculeTarifTypePlace;
 import com.mdgtaxi.util.HibernateUtil;
 
 import javax.persistence.EntityManager;
@@ -14,6 +16,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -39,17 +42,11 @@ public class ReservationService {
                 if (value == null) continue;
 
                 switch (key) {
-                    case "numeroSiege":
-                        predicates.add(cb.equal(root.get("numeroSiege"), value));
-                        break;
                     case "nomPassager":
                         predicates.add(cb.equal(root.get("nomPassager"), value));
                         break;
                     case "dateReservation":
                         predicates.add(cb.equal(root.get("dateReservation"), value));
-                        break;
-                    case "nombrePlaceReservation":
-                        predicates.add(cb.equal(root.get("nombrePlaceReservation"), value));
                         break;
                     case "client.id":
                         predicates.add(cb.equal(root.get("client").get("id"), value));
@@ -60,9 +57,7 @@ public class ReservationService {
                     case "reservationStatut.id":
                         predicates.add(cb.equal(root.get("reservationStatut").get("id"), value));
                         break;
-                    // Add more fields as needed
                     default:
-                        // Ignore unknown filters
                         break;
                 }
             }
@@ -78,7 +73,6 @@ public class ReservationService {
         }
     }
 
-
     public TrajetReservation createReservation(TrajetReservation reservation) {
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
@@ -87,6 +81,23 @@ public class ReservationService {
             em.persist(reservation);
             tx.commit();
             return reservation;
+        } catch (Exception e) {
+            if (tx.isActive())
+                tx.rollback();
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
+
+    public TrajetReservationDetails createReservationDetail(TrajetReservationDetails detail) {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            em.persist(detail);
+            tx.commit();
+            return detail;
         } catch (Exception e) {
             if (tx.isActive())
                 tx.rollback();
@@ -108,7 +119,7 @@ public class ReservationService {
     public List<TrajetReservation> getAllReservations() {
         EntityManager em = emf.createEntityManager();
         try {
-            TypedQuery<TrajetReservation> query = em.createQuery("SELECT r FROM TrajetReservation r",
+            TypedQuery<TrajetReservation> query = em.createQuery("SELECT r FROM TrajetReservation r ORDER BY r.dateReservation DESC",
                     TrajetReservation.class);
             return query.getResultList();
         } finally {
@@ -120,9 +131,22 @@ public class ReservationService {
         EntityManager em = emf.createEntityManager();
         try {
             TypedQuery<TrajetReservation> query = em.createQuery(
-                    "SELECT r FROM TrajetReservation r WHERE r.trajet.id = :trajetId",
+                    "SELECT r FROM TrajetReservation r WHERE r.trajet.id = :trajetId ORDER BY r.dateReservation DESC",
                     TrajetReservation.class);
             query.setParameter("trajetId", trajetId);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    public List<TrajetReservationDetails> getReservationDetailsByReservationId(Long reservationId) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<TrajetReservationDetails> query = em.createQuery(
+                    "SELECT rd FROM TrajetReservationDetails rd WHERE rd.trajetReservation.id = :reservationId",
+                    TrajetReservationDetails.class);
+            query.setParameter("reservationId", reservationId);
             return query.getResultList();
         } finally {
             em.close();
@@ -167,9 +191,6 @@ public class ReservationService {
 
     /**
      * Obtient les statistiques de réservations par statut
-     *
-     * @return Map avec le libellé du statut comme clé et le nombre de réservations
-     * comme valeur
      */
     public Map<String, Long> getReservationStatsByStatus() {
         EntityManager em = emf.createEntityManager();
@@ -189,20 +210,38 @@ public class ReservationService {
     }
 
     /**
-     * Calcule le nombre total de places réservées pour un trajet
-     *
-     * @param trajetId ID du trajet
-     * @return Nombre total de places réservées
+     * Calcule le nombre total de places réservées pour un trajet (toutes types confondus)
      */
-    public int getPlacesPrisesForTrajet(Long trajetId) {
+    public double getPlacesPrisesForTrajet(Long trajetId) {
         EntityManager em = emf.createEntityManager();
         try {
-            String jpql = "SELECT COALESCE(SUM(r.nombrePlaceReservation), 0) FROM TrajetReservation r " +
+            String jpql = "SELECT COALESCE(SUM(rd.nombrePlaces), 0) FROM TrajetReservation r " +
+                    "JOIN r.trajetReservationDetails rd " +
                     "WHERE r.trajet.id = :trajetId AND r.reservationStatut.libelle != 'Annulée'";
-            TypedQuery<Long> query = em.createQuery(jpql, Long.class);
+            TypedQuery<Double> query = em.createQuery(jpql, Double.class);
             query.setParameter("trajetId", trajetId);
-            Long result = query.getSingleResult();
-            return result != null ? result.intValue() : 0;
+            Double result = query.getSingleResult();
+            return result != null ? result : 0.0;
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * Calcule le nombre de places réservées pour un trajet par type de place
+     */
+    public double getPlacesPrisesForTrajet(Long trajetId, Long idTypePlace) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            String jpql = "SELECT COALESCE(SUM(rd.nombrePlaces), 0) FROM TrajetReservation r " +
+                    "JOIN r.trajetReservationDetails rd " +
+                    "WHERE r.trajet.id = :trajetId AND rd.typePlace.id = :idTypePlace " +
+                    "AND r.reservationStatut.libelle != 'Annulée'";
+            TypedQuery<Double> query = em.createQuery(jpql, Double.class);
+            query.setParameter("trajetId", trajetId);
+            query.setParameter("idTypePlace", idTypePlace);
+            Double result = query.getSingleResult();
+            return result != null ? result : 0.0;
         } finally {
             em.close();
         }
@@ -210,68 +249,102 @@ public class ReservationService {
 
     /**
      * Calcule le nombre de places restantes pour un trajet
-     *
-     * @param trajetId ID du trajet
-     * @return Nombre de places restantes
      */
-    public int getPlacesRestantesForTrajet(Long trajetId) {
+    public double getPlacesRestantesForTrajet(Long trajetId) {
         EntityManager em = emf.createEntityManager();
         try {
             Trajet trajet = em.find(Trajet.class, trajetId);
             if (trajet == null) {
-                return 0;
+                return 0.0;
             }
 
-            int capaciteMax = trajet.getVehicule().getMaximumPassager();
-            int placesPrises = getPlacesPrisesForTrajet(trajetId);
+            // Total des places disponibles sur le véhicule
+            String jpql = "SELECT COALESCE(SUM(vttp.nombrePlace), 0) FROM VehiculeTarifTypePlace vttp " +
+                    "WHERE vttp.vehicule.id = :idVehicule";
+            TypedQuery<Double> query = em.createQuery(jpql, Double.class);
+            query.setParameter("idVehicule", trajet.getVehicule().getId());
+            Double capaciteMax = query.getSingleResult();
 
-            return capaciteMax - placesPrises;
+            double placesPrises = getPlacesPrisesForTrajet(trajetId);
+            return (capaciteMax != null ? capaciteMax : 0.0) - placesPrises;
         } finally {
             em.close();
         }
     }
 
     /**
-     * Calcule le total de places prises pour tous les trajets
-     *
-     * @return Nombre total de places réservées
+     * Calcule le nombre de places restantes pour un type de place spécifique
      */
-    public int getTotalPlacesPrises() {
+    public double getPlacesRestantesForTrajet(Long trajetId, Long idTypePlace) {
         EntityManager em = emf.createEntityManager();
         try {
-            String jpql = "SELECT COALESCE(SUM(r.nombrePlaceReservation), 0) FROM TrajetReservation r " +
-                    "WHERE r.reservationStatut.libelle != 'Annulée'";
-            TypedQuery<Long> query = em.createQuery(jpql, Long.class);
-            Long result = query.getSingleResult();
-            return result != null ? result.intValue() : 0;
+            Trajet trajet = em.find(Trajet.class, trajetId);
+            if (trajet == null) {
+                return 0.0;
+            }
+
+            // Places disponibles pour ce type
+            String jpql = "SELECT vttp.nombrePlace FROM VehiculeTarifTypePlace vttp " +
+                    "WHERE vttp.vehicule.id = :idVehicule AND vttp.typePlace.id = :idTypePlace";
+            TypedQuery<Double> query = em.createQuery(jpql, Double.class);
+            query.setParameter("idVehicule", trajet.getVehicule().getId());
+            query.setParameter("idTypePlace", idTypePlace);
+            Double capacite = query.getSingleResult();
+
+            double placesPrises = getPlacesPrisesForTrajet(trajetId, idTypePlace);
+            return (capacite != null ? capacite : 0.0) - placesPrises;
         } finally {
             em.close();
         }
     }
 
     /**
-     * Calcule le total de places restantes pour tous les trajets
-     *
-     * @return Nombre total de places restantes
+     * Calcule le total prévu pour une réservation basé sur les types de places
      */
-    public int getTotalPlacesRestantes() {
+    public BigDecimal getMontantTotalReservation(Long reservationId) {
         EntityManager em = emf.createEntityManager();
         try {
-            String jpql = "SELECT t FROM Trajet t";
-            TypedQuery<Trajet> query = em.createQuery(jpql, Trajet.class);
-            List<Trajet> trajets = query.getResultList();
-
-            int totalCapacite = 0;
-            for (Trajet trajet : trajets) {
-                totalCapacite += trajet.getVehicule().getMaximumPassager();
-            }
-
-            int totalPlacesPrises = getTotalPlacesPrises();
-            return totalCapacite - totalPlacesPrises;
+            String jpql = "SELECT COALESCE(SUM(rd.nombrePlaces * vttp.tarifUnitaire), 0) " +
+                    "FROM TrajetReservationDetails rd " +
+                    "JOIN rd.trajetReservation r " +
+                    "JOIN VehiculeTarifTypePlace vttp ON vttp.vehicule.id = r.trajet.vehicule.id " +
+                    "AND vttp.typePlace.id = rd.typePlace.id " +
+                    "WHERE rd.trajetReservation.id = :reservationId";
+            TypedQuery<Double> query = em.createQuery(jpql, Double.class);
+            query.setParameter("reservationId", reservationId);
+            Double result = query.getSingleResult();
+            return BigDecimal.valueOf(result != null ? result : 0.0);
         } finally {
             em.close();
         }
     }
+
+    /**
+     * Calcule le total des paiements reçus pour une réservation
+     */
+    public BigDecimal getTotalPaiementRecu(Long idReservation) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            String jpql = "SELECT COALESCE(SUM(p.montant), 0) FROM TrajetReservationPaiement p " +
+                    "WHERE p.trajetReservation.id = :idReservation";
+            TypedQuery<BigDecimal> query = em.createQuery(jpql, BigDecimal.class);
+            query.setParameter("idReservation", idReservation);
+            BigDecimal result = query.getSingleResult();
+            return result != null ? result : BigDecimal.ZERO;
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * Calcule le solde restant à payer
+     */
+    public BigDecimal getSoldeRestant(Long reservationId) {
+        BigDecimal total = getMontantTotalReservation(reservationId);
+        BigDecimal paye = getTotalPaiementRecu(reservationId);
+        return total.subtract(paye);
+    }
+
     public List<TrajetReservationPaiement> getPaymentsByReservation(Long reservationId) {
         EntityManager em = emf.createEntityManager();
         try {
@@ -283,10 +356,6 @@ public class ReservationService {
         } finally {
             em.close();
         }
-    }
-
-    public double getTotalPaiementRecu (Long idReservation ) {
-
     }
 
     public TrajetReservationPaiement createPayment(TrajetReservationPaiement paiement) {
@@ -329,6 +398,51 @@ public class ReservationService {
         } catch (Exception e) {
             if (tx.isActive()) tx.rollback();
             throw e;
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * Calcule le total de toutes les places prises (tous trajets, toutes réservations)
+     */
+    public double getTotalPlacesPrises() {
+        EntityManager em = emf.createEntityManager();
+        try {
+            String jpql = "SELECT COALESCE(SUM(rd.nombrePlaces), 0) FROM TrajetReservation r " +
+                    "JOIN r.trajetReservationDetails rd " +
+                    "WHERE r.reservationStatut.libelle != 'Annulée'";
+            TypedQuery<Double> query = em.createQuery(jpql, Double.class);
+            Double result = query.getSingleResult();
+            return result != null ? result : 0.0;
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * Calcule le total de toutes les places restantes (estimation globale)
+     */
+    public double getTotalPlacesRestantes() {
+        EntityManager em = emf.createEntityManager();
+        try {
+            // Total capacité de tous les trajets
+            String jpqlCapacite = "SELECT t FROM Trajet t";
+            TypedQuery<Trajet> queryTrajets = em.createQuery(jpqlCapacite, Trajet.class);
+            List<Trajet> trajets = queryTrajets.getResultList();
+
+            double totalCapacite = 0.0;
+            for (Trajet trajet : trajets) {
+                String jpql = "SELECT COALESCE(SUM(vttp.nombrePlace), 0) FROM VehiculeTarifTypePlace vttp " +
+                        "WHERE vttp.vehicule.id = :idVehicule";
+                TypedQuery<Double> query = em.createQuery(jpql, Double.class);
+                query.setParameter("idVehicule", trajet.getVehicule().getId());
+                Double cap = query.getSingleResult();
+                totalCapacite += (cap != null ? cap : 0.0);
+            }
+
+            double totalPlacesPrises = getTotalPlacesPrises();
+            return totalCapacite - totalPlacesPrises;
         } finally {
             em.close();
         }

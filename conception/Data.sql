@@ -261,12 +261,12 @@ VALUES ('En cours', 10, '<span class="badge bg-info">En cours</span>'),
        ('Terminé', 20, '<span class="badge bg-success">Terminé</span>'),
        ('Annulé', 0, '<span class="badge bg-danger">Annulé</span>');
 
--- Trajet
+-- Trajet (Adapted: Removed frais_unitaire as per entity definition)
 INSERT INTO Trajet (id_ligne, id_chauffeur, id_vehicule, nombre_passager, id_trajet_statut, datetime_depart,
-                    datetime_arrivee, frais_unitaire)
-VALUES (1, 1, 1, 5, 1, '2026-01-01 00:00:00', '2026-01-01 10:00:00', 10.0),
-       (2, 2, 2, 20, 1, '2026-01-01 00:00:00', '2026-01-01 12:00:00', 20.0),
-       (3, 3, 3, 2, 1, '2026-01-01 00:00:00', '2026-01-01 14:00:00', 30.0);
+                    datetime_arrivee)
+VALUES (1, 1, 1, 5, 1, '2026-01-01 00:00:00', '2026-01-01 10:00:00'),
+       (2, 2, 2, 20, 1, '2026-01-01 00:00:00', '2026-01-01 12:00:00'),
+       (3, 3, 3, 2, 1, '2026-01-01 00:00:00', '2026-01-01 14:00:00');
 
 -- Trajet_Mouvement_Statut
 INSERT INTO Trajet_Mouvement_Statut (id_trajet, date_mouvement, id_nouveau_statut, observation)
@@ -300,12 +300,12 @@ VALUES ('Prévu', 5, '<span class="badge bg-warning">Prévu</span>'),
        ('En retard', 15, '<span class="badge bg-danger">En retard</span>'),
        ('Avancé', 25, '<span class="badge bg-primary">Avancé</span>');
 
--- Additional Trajet
+-- Additional Trajet (Adapted: Removed frais_unitaire)
 INSERT INTO Trajet (id_ligne, id_chauffeur, id_vehicule, nombre_passager, id_trajet_statut, datetime_depart,
-                    datetime_arrivee, frais_unitaire)
-VALUES (4, 4, 4, 2, 4, '2026-02-01 00:00:00', '2026-02-01 12:00:00', 40.0),
-       (5, 5, 5, 15, 5, '2026-02-01 00:00:00', '2026-02-01 14:00:00', 50.0),
-       (6, 6, 6, 5, 6, '2026-02-01 00:00:00', '2026-02-01 16:00:00', 60.0);
+                    datetime_arrivee)
+VALUES (4, 4, 4, 2, 4, '2026-02-01 00:00:00', '2026-02-01 12:00:00'),
+       (5, 5, 5, 15, 5, '2026-02-01 00:00:00', '2026-02-01 14:00:00'),
+       (6, 6, 6, 5, 6, '2026-02-01 00:00:00', '2026-02-01 16:00:00');
 
 -- Additional Trajet_Mouvement_Statut
 INSERT INTO Trajet_Mouvement_Statut (id_trajet, date_mouvement, id_nouveau_statut, observation)
@@ -397,12 +397,12 @@ VALUES ('Confirmée', 10, '<span class="badge bg-success">Confirmée</span>'),
        ('Annulée', 0, '<span class="badge bg-danger">Annulée</span>'),
        ('En attente', 5, '<span class="badge bg-warning">En attente</span>');
 
--- Trajet_Reservation
-INSERT INTO Trajet_Reservation (id_client, id_trajet, id_reservation_statut, numero_siege, nom_passager,
-                                date_reservation, nombre_place_reservation)
-VALUES (1, 1, 1, 'A1', 'Passager1', '2026-01-01 00:00:00', 1),
-       (2, 2, 1, 'A2', 'Passager2', '2026-01-01 00:00:00', 1),
-       (3, 3, 1, 'A3', 'Passager3', '2026-01-01 00:00:00', 1);
+-- Trajet_Reservation (Adapted: Removed numero_siege and nombre_place_reservation as per entity definition)
+INSERT INTO Trajet_Reservation (id_client, id_trajet, id_reservation_statut, nom_passager,
+                                date_reservation)
+VALUES (1, 1, 1, 'Passager1', '2026-01-01 00:00:00'),
+       (2, 2, 1, 'Passager2', '2026-01-01 00:00:00'),
+       (3, 3, 1, 'Passager3', '2026-01-01 00:00:00');
 
 -- Trajet_Reservation_Mouvement_Statut
 INSERT INTO Trajet_Reservation_Mouvement_Statut (id_trajet_reservation, date_mouvement, id_nouveau_statut, observation)
@@ -423,12 +423,12 @@ VALUES ('Payée', 15, '<span class="badge bg-primary">Payée</span>'),
        ('Remboursée', 2, '<span class="badge bg-info">Remboursée</span>'),
        ('Expirée', 0, '<span class="badge bg-secondary">Expirée</span>');
 
--- Additional Trajet_Reservation
-INSERT INTO Trajet_Reservation (id_client, id_trajet, id_reservation_statut, numero_siege, nom_passager,
-                                date_reservation, nombre_place_reservation)
-VALUES (4, 4, 4, 'B1', 'Passager4', '2026-02-01 00:00:00', 2),
-       (5, 5, 5, 'B2', 'Passager5', '2026-02-01 00:00:00', 3),
-       (6, 6, 6, 'B3', 'Passager6', '2026-02-01 00:00:00', 1);
+-- Additional Trajet_Reservation (Adapted: Removed numero_siege and nombre_place_reservation)
+INSERT INTO Trajet_Reservation (id_client, id_trajet, id_reservation_statut, nom_passager,
+                                date_reservation)
+VALUES (4, 4, 4, 'Passager4', '2026-02-01 00:00:00'),
+       (5, 5, 5, 'Passager5', '2026-02-01 00:00:00'),
+       (6, 6, 6, 'Passager6', '2026-02-01 00:00:00');
 
 -- Additional Trajet_Reservation_Mouvement_Statut
 INSERT INTO Trajet_Reservation_Mouvement_Statut (id_trajet_reservation, date_mouvement, id_nouveau_statut, observation)
@@ -460,7 +460,7 @@ VALUES (1, NULL, 'Trajet', 10.0, 1, '2026-01-01 00:00:00', 'Prévision pour traj
        (2, NULL, 'Trajet', 20.0, 1, '2026-01-01 00:00:00', 'Prévision pour trajet 2'),
        (3, NULL, 'Trajet', 30.0, 1, '2026-01-01 00:00:00', 'Prévision pour trajet 3');
 
--- Prevision_Trajet
+-- Prevision_Trajet (Adapted: Kept frais_unitaire as per entity definition)
 INSERT INTO Prevision_Trajet (id_ligne, id_chauffeur, id_vehicule, nombre_passager, id_trajet_statut, datetime_depart,
                               datetime_arrivee, frais_unitaire)
 VALUES (1, 1, 1, 5, 1, '2026-01-01 00:00:00', '2026-01-01 10:00:00', 10.0),
@@ -486,5 +486,57 @@ INSERT INTO Prevision_Trajet (id_ligne, id_chauffeur, id_vehicule, nombre_passag
 VALUES (4, 4, 4, 2, 4, '2026-02-01 00:00:00', '2026-02-01 12:00:00', 40.0),
        (5, 5, 5, 15, 5, '2026-02-01 00:00:00', '2026-02-01 14:00:00', 50.0),
        (6, 6, 6, 5, 6, '2026-02-01 00:00:00', '2026-02-01 16:00:00', 60.0);
+
+-- ============================================
+-- TYPE_PLACE (New: Added as per request)
+-- ============================================
+
+-- Type_Place
+INSERT INTO Type_Place (nom_type_place, description)
+VALUES ('Premium', 'Siège premium avec confort accru et espace supplémentaire'),
+       ('Standard', 'Siège standard pour un voyage économique');
+
+-- Additional Type_Place (Examples)
+INSERT INTO Type_Place (nom_type_place, description)
+VALUES ('VIP', 'Siège VIP avec services exclusifs'),
+       ('Économique', 'Siège basique pour budgets limités');
+
+-- ============================================
+-- VEHICULE_TARIF_TYPE_PLACE (New: Added as per request, with tariffs 140000 for Premium, 80000 for Standard)
+-- ============================================
+
+-- Vehicule_Tarif_Type_Place (Associating to vehicles 1-6, with sample nombre_place)
+INSERT INTO Vehicule_Tarif_Type_Place (id_vehicule, id_type_place, tarif_unitaire, nombre_place)
+VALUES (1, 1, 140000.0, 2.0),  -- Premium for Vehicle 1
+       (1, 2, 80000.0, 3.0),   -- Standard for Vehicle 1
+       (2, 1, 140000.0, 5.0),
+       (2, 2, 80000.0, 15.0),
+       (3, 1, 140000.0, 1.0),
+       (3, 2, 80000.0, 1.0),
+       (4, 1, 140000.0, 1.0),
+       (4, 2, 80000.0, 1.0),
+       (5, 1, 140000.0, 3.0),
+       (5, 2, 80000.0, 12.0),
+       (6, 1, 140000.0, 2.0),
+       (6, 2, 80000.0, 3.0);
+
+-- ============================================
+-- TRAJET_RESERVATION_DETAILS (New: Added as per request)
+-- ============================================
+
+-- Trajet_Reservation_Details (Associating to reservations 1-6, with sample nombre_places)
+INSERT INTO Trajet_Reservation_Details (id_trajet_reservation, id_type_place, nombre_places)
+VALUES (1, 1, 1.0),  -- Premium for Reservation 1
+       (1, 2, 0.0),  -- No Standard
+       (2, 1, 2.0),
+       (2, 2, 3.0),
+       (3, 1, 0.0),
+       (3, 2, 1.0),
+       (4, 1, 1.0),
+       (4, 2, 1.0),
+       (5, 1, 3.0),
+       (5, 2, 2.0),
+       (6, 1, 0.0),
+       (6, 2, 1.0);
 
 -- ============================================
