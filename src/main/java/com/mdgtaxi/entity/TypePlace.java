@@ -7,14 +7,14 @@ import javax.persistence.*;
 
 @Data
 @Entity
-@Table(name = "Place")
-public class Place {
+@Table(name = "Type_Place")
+public class TypePlace {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "libelle", nullable = false, unique = true)
-    private String nom;
+    @Column(name = "nom_type_place", nullable = false, unique = true)
+    private String nomTypePlace;
 
     @Column(name = "description", nullable = false, unique = true)
     private String description;

@@ -71,6 +71,22 @@ public class TrajetService {
         }
     }
 
+    public double getPlaceRestante () {
+
+    }
+
+    public double getPlacePrise () {
+
+    }
+
+    public double getPrevisionChiffreAffaire () {
+
+    }
+
+    public double getTotalPaiementRecu () {
+
+    }
+
     public List<Trajet> searchTrajetsWithFilters(Map<String, Object> filters) {
         EntityManager em = emf.createEntityManager();
         try {

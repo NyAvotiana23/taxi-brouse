@@ -285,6 +285,10 @@ public class ReservationService {
         }
     }
 
+    public double getTotalPaiementRecu (Long ) {
+
+    }
+
     public TrajetReservationPaiement createPayment(TrajetReservationPaiement paiement) {
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
