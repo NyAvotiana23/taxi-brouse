@@ -140,6 +140,23 @@ package com.mdgtaxi.entity;
 import lombok.Data;
 
 import javax.persistence.*;
+
+@Data
+@Entity
+@Table(name = "Categorie_Personne")
+public class CategoriePersonne {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "libelle", nullable = false, unique = true)
+    private String libelle;
+}
+package com.mdgtaxi.entity;
+
+import lombok.Data;
+
+import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDate;
 
@@ -545,6 +562,32 @@ package com.mdgtaxi.entity;
 import lombok.Data;
 
 import javax.persistence.*;
+
+@Data
+@Entity
+@Table(name = "Trajet_Tarif_Type_Place_Categorie_Remise")
+public class TarifTypePlaceCategorieRemise {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+
+    @ManyToOne
+    @JoinColumn(name = "id_type_place", nullable = false)
+    private TypePlace typePlace;
+
+    @ManyToOne
+    @JoinColumn(name = "id_categorie_personne", nullable = false)
+    private CategoriePersonne categoriePersonne;
+
+    @Column(name = "tarif_unitaire_avec_remise", nullable = false)
+    private double tarifUnitaireAvecRemise;
+}
+package com.mdgtaxi.entity;
+
+import lombok.Data;
+
+import javax.persistence.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -808,11 +851,21 @@ public class TrajetReservationDetails {
     private TrajetReservation trajetReservation;
 
     @ManyToOne
+    @JoinColumn(name = "id_categorie_personne", nullable = false)
+    private CategoriePersonne categoriePersonne;
+
+
+    @ManyToOne
     @JoinColumn(name = "id_type_place", nullable = false)
     private TypePlace typePlace;
 
+
     @Column(name = "nombre_places", nullable = false)
     private double nombrePlaces;
+
+    @Column(name = "tarif_nitaire")
+    private double tarifUnitaire = 0;
+
 
 }
 package com.mdgtaxi.entity;

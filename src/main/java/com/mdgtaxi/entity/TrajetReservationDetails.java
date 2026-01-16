@@ -17,10 +17,20 @@ public class TrajetReservationDetails {
     private TrajetReservation trajetReservation;
 
     @ManyToOne
+    @JoinColumn(name = "id_categorie_personne", nullable = false)
+    private CategoriePersonne categoriePersonne;
+
+
+    @ManyToOne
     @JoinColumn(name = "id_type_place", nullable = false)
     private TypePlace typePlace;
 
+
     @Column(name = "nombre_places", nullable = false)
     private double nombrePlaces;
+
+    @Column(name = "tarif_nitaire")
+    private double tarifUnitaire = 0;
+
 
 }

@@ -1130,12 +1130,7 @@ public class MouvementStatusService {
 }
 package com.mdgtaxi.service;
 
-import com.mdgtaxi.entity.Trajet;
-import com.mdgtaxi.entity.TrajetReservation;
-import com.mdgtaxi.entity.TrajetReservationDetails;
-import com.mdgtaxi.entity.TrajetReservationMouvementStatut;
-import com.mdgtaxi.entity.TrajetReservationPaiement;
-import com.mdgtaxi.entity.VehiculeTarifTypePlace;
+import com.mdgtaxi.entity.*;
 import com.mdgtaxi.util.HibernateUtil;
 
 import javax.persistence.EntityManager;
@@ -1153,6 +1148,10 @@ import java.util.List;
 import java.util.Map;
 
 public class ReservationService {
+
+    private final VehiculeService vehiculeService = new VehiculeService();
+    private final TrajetService trajetService = new TrajetService();
+
 
     private final EntityManagerFactory emf = HibernateUtil.getEntityManagerFactory();
 
@@ -1337,6 +1336,48 @@ public class ReservationService {
         } finally {
             em.close();
         }
+    }
+
+    public TarifTypePlaceCategorieRemise getTarifRemise(Long idTypePlace, Long idCategoriePersonne) {
+
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<TarifTypePlaceCategorieRemise> query = em.createQuery(
+                    "SELECT p FROM TarifTypePlaceCategorieRemise p WHERE p.typePlace.id = :idTypePlace AND  p.categoriePersonne.id = :idCategoriePersonne",
+                    TarifTypePlaceCategorieRemise.class);
+
+
+            query.setParameter("idTypePlace", idTypePlace);
+            query.setParameter("idCategoriePersonne", idCategoriePersonne);
+
+
+            List<TarifTypePlaceCategorieRemise> remise = query.getResultList();
+            if (!remise.isEmpty()) {
+                return remise.get(0);
+            }
+            return null;
+        } finally {
+            em.close();
+        }
+    }
+
+    public double getTarifAvecRemise(Long idTrajet, Long idTypePlace, Long idCategoriePersonne) throws Exception {
+        TarifTypePlaceCategorieRemise remise = getTarifRemise(idTypePlace, idCategoriePersonne);
+
+        if (remise != null) {
+            return remise.getTarifUnitaireAvecRemise();
+        }
+
+        Trajet t = trajetService.getTrajetById(idTrajet);
+
+        VehiculeTarifTypePlace vehiculeTarifTypePlace = vehiculeService.getTarifTypePlaceByVehiculeAndType(t.getVehicule().getId(), idTypePlace);
+
+        if (vehiculeTarifTypePlace == null) {
+            throw new Exception("La voiture avec l'id : " + t.getVehicule().getId() + " Ne contient pas la place : " + idTypePlace);
+        }
+
+        return vehiculeTarifTypePlace.getTarifUnitaire();
+
     }
 
     /**
@@ -2537,7 +2578,13 @@ public class VehiculeService {
     public VehiculeTarifTypePlace createOrUpdateTarifTypePlace(VehiculeTarifTypePlace vttp) throws Exception {
 
         Vehicule v = getVehiculeById(vttp.getVehicule().getId());
+
         double plcPrise = getTotalTypePlaceSet(v.getId());
+        if(vttp.getId() != null){
+            VehiculeTarifTypePlace vttOld = getTarifTypePlaceById(vttp.getId());
+
+            plcPrise -= vttOld.getNombrePlace();
+        }
 
         if (plcPrise + vttp.getNombrePlace() > v.getMaximumPassager()) {
             throw new Exception("Nombre de place erreur : total prise " + plcPrise + " Ajoute : " + vttp.getNombrePlace() + " Capacite : " + v.getMaximumPassager() );
