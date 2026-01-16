@@ -6,24 +6,15 @@
 <%@ page import="java.util.Map" %>
 <%
     Trajet trajet = (Trajet) request.getAttribute("trajet");
-    List<VehiculeTarifTypePlace> tarifPlaces = (List<VehiculeTarifTypePlace>) request.getAttribute("tarifPlaces");
-    Map<Long, Double> soldPerType = (Map<Long, Double>) request.getAttribute("soldPerType");
 
-    double totalPlacesPrises = 0.0;
-    double totalPlacesRestantes = 0.0;
-    double totalCA = 0.0;
 
-    if (tarifPlaces != null && soldPerType != null) {
-        for (VehiculeTarifTypePlace tp : tarifPlaces) {
-            double sold = soldPerType.getOrDefault(tp.getTypePlace().getId(), 0.0);
-            double remaining = tp.getNombrePlace() - sold;
-            double subtotal = sold * tp.getTarifUnitaire();
+    double totalCAPrevisionnel = (double) request.getAttribute("caPrevisionnel");
+    double placePrise = (double) request.getAttribute("placesPrises");
+    double placesRestantes = (double) request.getAttribute("placesRestantes");
 
-            totalPlacesPrises += sold;
-            totalPlacesRestantes += remaining;
-            totalCA += subtotal;
-        }
-    }
+
+
+
 
     List<TrajetReservation> reservations = (List<TrajetReservation>) request.getAttribute("reservations");
     List<Client> clients = (List<Client>) request.getAttribute("clients");
@@ -83,7 +74,7 @@
                             <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
                                 Places Prises
                             </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800"><%= String.format("%.1f", totalPlacesPrises) %>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800"><%= String.format("%.1f", placePrise) %>
                             </div>
                         </div>
                         <div class="col-auto">
@@ -101,7 +92,7 @@
                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
                                 Places Restantes
                             </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800"><%= String.format("%.1f", totalPlacesRestantes) %>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800"><%= String.format("%.1f", placesRestantes) %>
                             </div>
                         </div>
                         <div class="col-auto">
@@ -117,9 +108,9 @@
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                                Chiffre d'Affaires
+                                Chiffre d'Affaires Previsionnel
                             </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800"><%= String.format("%.2f", totalCA) %> Ar
+                            <div class="h5 mb-0 font-weight-bold text-gray-800"><%= String.format("%.2f", totalCAPrevisionnel) %> Ar
                             </div>
                         </div>
                         <div class="col-auto">
@@ -141,6 +132,8 @@
                 <div class="card-body">
                     <form action="<%= request.getContextPath() %>/trajets/detail?id=<%= trajet.getId() %>" method="post">
                         <input type="hidden" name="action" value="addReservation">
+                        <input type="hidden" name="trajetId" value="<%=  trajet.getId() %>">
+
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="idClient" class="form-label">Client</label>
@@ -162,8 +155,8 @@
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="numeroSiege" class="form-label">Numéro Siège</label>
-                                <input type="text" class="form-control" id="numeroSiege" name="numeroSiege">
+                                <label for="datereservation" class="form-label">Date de reservation</label>
+                                <input type="datetime-local" class="form-control" id="datereservation" name="datereservation">
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="idReservationStatut" class="form-label">Statut</label>
@@ -204,8 +197,6 @@
                             <tr>
                                 <th>Client</th>
                                 <th>Passager</th>
-                                <th>Siège</th>
-                                <th>Places</th>
                                 <th>Statut</th>
                                 <th>Detail</th>
                             </tr>
@@ -217,10 +208,7 @@
                                 </td>
                                 <td><%= r.getNomPassager() %>
                                 </td>
-                                <td><%= r.getNumeroSiege() != null ? r.getNumeroSiege() : "-" %>
-                                </td>
-                                <td><%= String.format("%.1f", r.getNombrePlaceReservation()) %> <!-- Assume this is updated via details sum in servlet -->
-                                </td>
+
                                 <td>
                                     <span class="badge bg-info">
                                         <%= r.getReservationStatut().getLibelle() %>

@@ -408,6 +408,8 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 @WebServlet("/reservations/detail")
 public class ReservationDetailServlet extends HttpServlet {
@@ -417,6 +419,7 @@ public class ReservationDetailServlet extends HttpServlet {
     private final TrajetService trajetService = new TrajetService();
     private final StatusService statusService = new StatusService();
     private final TypeObjectService typeObjectService = new TypeObjectService();
+    private final VehiculeService vehiculeService = new VehiculeService();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -428,8 +431,18 @@ public class ReservationDetailServlet extends HttpServlet {
         }
 
         Long id = Long.parseLong(idParam);
-        loadReservationDetails(req, id);
+        String action = req.getParameter("action");
 
+        // Handle edit detail
+        if ("editDetail".equals(action)) {
+            String detailIdStr = req.getParameter("detailId");
+            if (detailIdStr != null && !detailIdStr.isEmpty()) {
+                TrajetReservationDetails detail = reservationService.getReservationDetailById(Long.valueOf(detailIdStr));
+                req.setAttribute("editingDetail", detail);
+            }
+        }
+
+        loadReservationDetails(req, id);
         req.getRequestDispatcher("/reservation-detail.jsp").forward(req, resp);
     }
 
@@ -446,14 +459,29 @@ public class ReservationDetailServlet extends HttpServlet {
         Long id = Long.parseLong(idParam);
 
         try {
-            if ("changeStatut".equals(action)) {
-                handleChangeStatut(req, id);
-            } else if ("addPayment".equals(action)) {
-                handleAddPayment(req, id);
+            switch (action != null ? action : "") {
+                case "changeStatut":
+                    handleChangeStatut(req, id);
+                    break;
+                case "addPayment":
+                    handleAddPayment(req, id);
+                    break;
+                case "addDetail":
+                    handleAddDetail(req, id);
+                    break;
+                case "updateDetail":
+                    handleUpdateDetail(req, id);
+                    break;
+                case "deleteDetail":
+                    handleDeleteDetail(req, id);
+                    break;
+                default:
+                    break;
             }
 
             resp.sendRedirect(req.getContextPath() + "/reservations/detail?id=" + id);
         } catch (Exception e) {
+            e.printStackTrace();
             req.setAttribute("error", "Erreur: " + e.getMessage());
             loadReservationDetails(req, id);
             req.getRequestDispatcher("/reservation-detail.jsp").forward(req, resp);
@@ -498,8 +526,19 @@ public class ReservationDetailServlet extends HttpServlet {
         List<TypeObjectDTO> modePaiements = typeObjectService.findAllTypeObject("Mode_Paiement");
         req.setAttribute("modePaiements", modePaiements);
 
-        List<TypeObjectDTO> typePlaces = typeObjectService.findAllTypeObject("Type_Place");
-        req.setAttribute("typePlaces", typePlaces);
+        // Load available type places for this vehicle
+        List<VehiculeTarifTypePlace> tarifPlaces = vehiculeService.getTarifTypePlacesByVehicule(
+                reservation.getTrajet().getVehicule().getId()
+        );
+        req.setAttribute("tarifPlaces", tarifPlaces);
+
+        // Calculate sold per type for availability
+        Map<Long, Double> soldPerType = trajetService.getSoldPlacesPerType(reservation.getTrajet().getId());
+        req.setAttribute("soldPerType", soldPerType);
+
+        // Load categories for remise
+        List<TypeObjectDTO> categories = typeObjectService.findAllTypeObject("Categorie_Personne");
+        req.setAttribute("categories", categories);
     }
 
     private void handleChangeStatut(HttpServletRequest req, Long reservationId) {
@@ -552,9 +591,86 @@ public class ReservationDetailServlet extends HttpServlet {
 
         reservationService.createPayment(paiement);
     }
+
+    private void handleAddDetail(HttpServletRequest req, Long reservationId) throws Exception {
+        Long idTypePlace = Long.valueOf(req.getParameter("idTypePlace"));
+        Long idCategoriePersonne = Long.valueOf(req.getParameter("idCategoriePersonne"));
+        double nombrePlaces = Double.parseDouble(req.getParameter("nombrePlaces"));
+
+        TrajetReservation reservation = reservationService.getReservationById(reservationId);
+
+        // Get tarif with remise
+        double tarifUnitaire = reservationService.getTarifAvecRemise(
+                reservation.getTrajet().getId(),
+                idTypePlace,
+                idCategoriePersonne
+        );
+
+        TrajetReservationDetails detail = new TrajetReservationDetails();
+        detail.setTrajetReservation(reservation);
+
+        TypePlace typePlace = new TypePlace();
+        typePlace.setId(idTypePlace);
+        detail.setTypePlace(typePlace);
+
+        CategoriePersonne categorie = new CategoriePersonne();
+        categorie.setId(idCategoriePersonne);
+        detail.setCategoriePersonne(categorie);
+
+        detail.setNombrePlaces(nombrePlaces);
+        detail.setTarifUnitaire(tarifUnitaire);
+
+        reservationService.createReservationDetail(detail);
+    }
+
+    private void handleUpdateDetail(HttpServletRequest req, Long reservationId) throws Exception {
+        Long detailId = Long.valueOf(req.getParameter("detailId"));
+        Long idTypePlace = Long.valueOf(req.getParameter("idTypePlace"));
+        Long idCategoriePersonne = Long.valueOf(req.getParameter("idCategoriePersonne"));
+        double nombrePlaces = Double.parseDouble(req.getParameter("nombrePlaces"));
+
+        TrajetReservation reservation = reservationService.getReservationById(reservationId);
+        TrajetReservationDetails detail = reservationService.getReservationDetailById(detailId);
+
+        if (detail == null || !detail.getTrajetReservation().getId().equals(reservationId)) {
+            throw new IllegalArgumentException("Invalid detail ID");
+        }
+
+        // Get tarif with remise
+        double tarifUnitaire = reservationService.getTarifAvecRemise(
+                reservation.getTrajet().getId(),
+                idTypePlace,
+                idCategoriePersonne
+        );
+
+        TypePlace typePlace = new TypePlace();
+        typePlace.setId(idTypePlace);
+        detail.setTypePlace(typePlace);
+
+        CategoriePersonne categorie = new CategoriePersonne();
+        categorie.setId(idCategoriePersonne);
+        detail.setCategoriePersonne(categorie);
+
+        detail.setNombrePlaces(nombrePlaces);
+        detail.setTarifUnitaire(tarifUnitaire);
+
+        reservationService.updateReservationDetail(detail);
+    }
+
+    private void handleDeleteDetail(HttpServletRequest req, Long reservationId) {
+        Long detailId = Long.valueOf(req.getParameter("detailId"));
+        TrajetReservationDetails detail = reservationService.getReservationDetailById(detailId);
+
+        if (detail == null || !detail.getTrajetReservation().getId().equals(reservationId)) {
+            throw new IllegalArgumentException("Invalid detail ID");
+        }
+
+        reservationService.deleteReservationDetail(detailId);
+    }
 }
 package com.mdgtaxi.servlet;
 
+import com.mdgtaxi.dto.StatusObjectDto;
 import com.mdgtaxi.dto.TypeObjectDTO;
 import com.mdgtaxi.entity.*;
 import com.mdgtaxi.service.*;
@@ -566,6 +682,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -575,7 +692,6 @@ public class ReservationServlet extends HttpServlet {
     private final ReservationService reservationService = new ReservationService();
     private final TrajetService trajetService = new TrajetService();
     private final ClientService clientService = new ClientService();
-    private final TypeObjectService typeObjectService = new TypeObjectService();
     private final StatusService statusService = new StatusService();
 
     @Override
@@ -583,20 +699,21 @@ public class ReservationServlet extends HttpServlet {
         String action = req.getParameter("action");
 
         if ("edit".equals(action)) {
-            Long id = Long.valueOf(req.getParameter("id"));
-            TrajetReservation reservation = reservationService.getReservationById(id);
-            req.setAttribute("reservation", reservation);
-
-            // Load reservation details
-            List<TrajetReservationDetails> details = reservationService.getReservationDetailsByReservationId(id);
-            req.setAttribute("reservationDetails", details);
+            String idStr = req.getParameter("id");
+            if (idStr != null && !idStr.isEmpty()) {
+                Long id = Long.valueOf(idStr);
+                TrajetReservation reservation = reservationService.getReservationById(id);
+                req.setAttribute("reservation", reservation);
+            }
         }
 
+        // Load data
         List<TrajetReservation> reservations = reservationService.getAllReservations();
         List<Trajet> trajets = trajetService.getAllTrajets();
         List<Client> clients = clientService.getAllClients();
-        List<TypeObjectDTO> typePlaces = typeObjectService.findAllTypeObject("Type_Place");
+        List<StatusObjectDto> reservationStatuts = statusService.findAllStatuses("Trajet_Reservation");
 
+        // Statistics
         Map<String, Long> statsByStatus = reservationService.getReservationStatsByStatus();
         Double totalPlacesPrises = reservationService.getTotalPlacesPrises();
         Double totalPlacesRestantes = reservationService.getTotalPlacesRestantes();
@@ -604,7 +721,7 @@ public class ReservationServlet extends HttpServlet {
         req.setAttribute("reservations", reservations);
         req.setAttribute("trajets", trajets);
         req.setAttribute("clients", clients);
-        req.setAttribute("typePlaces", typePlaces);
+        req.setAttribute("reservationStatuts", reservationStatuts);
         req.setAttribute("statsByStatus", statsByStatus);
         req.setAttribute("totalPlacesPrises", totalPlacesPrises);
         req.setAttribute("totalPlacesRestantes", totalPlacesRestantes);
@@ -621,10 +738,12 @@ public class ReservationServlet extends HttpServlet {
             String nomPassager = req.getParameter("nomPassager");
             Long idReservationStatut = Long.valueOf(req.getParameter("idReservationStatut"));
 
-            // Create or update reservation
-            TrajetReservation reservation = new TrajetReservation();
+            // Create or update reservation (no details here)
+            TrajetReservation reservation;
             if (idStr != null && !idStr.isEmpty()) {
                 reservation = reservationService.getReservationById(Long.valueOf(idStr));
+            } else {
+                reservation = new TrajetReservation();
             }
 
             Trajet trajet = new Trajet();
@@ -647,32 +766,6 @@ public class ReservationServlet extends HttpServlet {
                 reservation = reservationService.createReservation(reservation);
             } else {
                 reservation = reservationService.updateReservation(reservation);
-            }
-
-            // Process reservation details (types de places)
-            String[] typePlaceIds = req.getParameterValues("typePlaceId[]");
-            String[] nombrePlaces = req.getParameterValues("nombrePlaces[]");
-
-            if (typePlaceIds != null && nombrePlaces != null) {
-                for (int i = 0; i < typePlaceIds.length; i++) {
-                    if (typePlaceIds[i] != null && !typePlaceIds[i].isEmpty()
-                            && nombrePlaces[i] != null && !nombrePlaces[i].isEmpty()) {
-
-                        double nbPlaces = Double.parseDouble(nombrePlaces[i]);
-                        if (nbPlaces > 0) {
-                            TrajetReservationDetails detail = new TrajetReservationDetails();
-                            detail.setTrajetReservation(reservation);
-
-                            TypePlace typePlace = new TypePlace();
-                            typePlace.setId(Long.valueOf(typePlaceIds[i]));
-                            detail.setTypePlace(typePlace);
-
-                            detail.setNombrePlaces(nbPlaces);
-
-                            reservationService.createReservationDetail(detail);
-                        }
-                    }
-                }
             }
 
             resp.sendRedirect(req.getContextPath() + "/reservations");
@@ -750,10 +843,7 @@ public class TrajetAVenirServlet extends HttpServlet {
 package com.mdgtaxi.servlet;
 
 import com.mdgtaxi.dto.TypeObjectDTO;
-import com.mdgtaxi.entity.Client;
-import com.mdgtaxi.entity.LigneDetail;
-import com.mdgtaxi.entity.Trajet;
-import com.mdgtaxi.entity.TrajetReservation;
+import com.mdgtaxi.entity.*;
 import com.mdgtaxi.service.*;
 import com.mdgtaxi.util.ExceptionUtil;
 import jakarta.servlet.ServletException;
@@ -763,6 +853,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @WebServlet("/trajets/detail")
@@ -776,12 +867,42 @@ public class TrajetDetailServlet extends HttpServlet {
 
 
     @Override
+
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        Long idClient = Long.valueOf(req.getParameter("idClient"));
+        Long trajetId = Long.valueOf(req.getParameter("trajetId"));
+        String nomPassager = req.getParameter("nomPassager");
+        String datestr = req.getParameter("datereservation");
+        LocalDateTime date = LocalDateTime.parse(datestr);
+        Long idReservationStatut = Long.valueOf(req.getParameter("idReservationStatut"));
+
+        Trajet trajet = new Trajet();
+        trajet.setId(trajetId);
+
+        ReservationStatut reservationStatut = new ReservationStatut();
+        reservationStatut.setId(idReservationStatut);
+
+        Client c =  new Client();
+        c.setId(idClient);
+
+        TrajetReservation trajetReservation = new TrajetReservation();
+        trajetReservation.setTrajet(trajet);
+        trajetReservation.setDateReservation(date);
+        trajetReservation.setReservationStatut(reservationStatut);
+        trajetReservation.setNomPassager(nomPassager);
+        trajetReservation.setClient(c);
+
+        trajetReservation = reservationService.createReservation(trajetReservation);
+
+        resp.sendRedirect(req.getContextPath() + "/reservations/detail?id=" + trajetReservation.getId());
+
+    }
+
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Long id = Long.valueOf(req.getParameter("id"));
         Trajet trajet = trajetService.getTrajetById(id);
 
         ExceptionUtil.throwExceptionOnObjectNull(trajet);
-
 
 
         List<LigneDetail> ligneDetails = ligneService.getLigneDetailList(trajet.getLigne().getId());
@@ -790,6 +911,9 @@ public class TrajetDetailServlet extends HttpServlet {
         List<TrajetReservation> reservations = reservationService.getReservationsByTrajetId(id);
         double placesPrises = reservationService.getPlacesPrisesForTrajet(id);
         double placesRestantes = trajet.getVehicule().getMaximumPassager() - placesPrises;
+
+        double caPrevisionnel = reservationService.getCAprevisionnel(id);
+
         List<Client> clients = clientService.getAllClients();  // If needed for form, etc.
         List<TypeObjectDTO> reservationStatuts = typeObjectService.findAllTypeObject("Reservation_Statut");
 
@@ -800,6 +924,8 @@ public class TrajetDetailServlet extends HttpServlet {
         req.setAttribute("clients", clients);
         req.setAttribute("reservationStatuts", reservationStatuts);
         req.setAttribute("ligneDetails", ligneDetails);
+        req.setAttribute("caPrevisionnel", caPrevisionnel);
+
 
 
         req.getRequestDispatcher("/trajet-detail.jsp").forward(req, resp);

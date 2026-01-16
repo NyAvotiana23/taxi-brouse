@@ -22,5 +22,9 @@
     <a class="nav-link" href="<%= request.getContextPath() %>/reservations">
       <i class="bi bi-calendar-check-fill"></i> Réservations
     </a>
+    <a class="nav-link" href="<%= request.getContextPath() %>/tarif-remises">
+      <i class="bi bi-calendar-check-fill"></i> Configuration tarif remise
+    </a>
+
   </nav>
 </div>

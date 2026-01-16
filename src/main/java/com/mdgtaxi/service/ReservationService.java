@@ -2,6 +2,7 @@ package com.mdgtaxi.service;
 
 import com.mdgtaxi.entity.*;
 import com.mdgtaxi.util.HibernateUtil;
+import com.mdgtaxi.util.TableUtil;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -25,6 +26,22 @@ public class ReservationService {
 
     private final EntityManagerFactory emf = HibernateUtil.getEntityManagerFactory();
 
+
+
+    public double getCAprevisionnel (Long idTrajet) {
+        double val = 0;
+
+        List<TrajetReservation> reservations = getReservationsByTrajetId(idTrajet);
+
+        for (TrajetReservation t : reservations) {
+            List<TrajetReservationDetails> trajetReservationDetails = getReservationDetailsByReservationId(t.getId());
+            for (TrajetReservationDetails d : trajetReservationDetails) {
+                val += d.getTarifUnitaire() * d.getNombrePlaces();
+            }
+
+        }
+        return val;
+    }
     public List<TrajetReservation> searchReservationsWithFilters(Map<String, Object> filters) {
         EntityManager em = emf.createEntityManager();
         try {
@@ -340,16 +357,13 @@ public class ReservationService {
     }
 
     /**
-     * Calcule le total prévu pour une réservation basé sur les types de places
+     * Calcule le montant total réel de la réservation basé sur les détails avec leurs tarifs
      */
     public BigDecimal getMontantTotalReservation(Long reservationId) {
         EntityManager em = emf.createEntityManager();
         try {
-            String jpql = "SELECT COALESCE(SUM(rd.nombrePlaces * vttp.tarifUnitaire), 0) " +
+            String jpql = "SELECT COALESCE(SUM(rd.nombrePlaces * rd.tarifUnitaire), 0) " +
                     "FROM TrajetReservationDetails rd " +
-                    "JOIN rd.trajetReservation r " +
-                    "JOIN VehiculeTarifTypePlace vttp ON vttp.vehicule.id = r.trajet.vehicule.id " +
-                    "AND vttp.typePlace.id = rd.typePlace.id " +
                     "WHERE rd.trajetReservation.id = :reservationId";
             TypedQuery<Double> query = em.createQuery(jpql, Double.class);
             query.setParameter("reservationId", reservationId);
@@ -484,6 +498,52 @@ public class ReservationService {
 
             double totalPlacesPrises = getTotalPlacesPrises();
             return totalCapacite - totalPlacesPrises;
+        } finally {
+            em.close();
+        }
+    }
+    // Add these methods to your existing ReservationService class
+
+    public TrajetReservationDetails getReservationDetailById(Long id) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            return em.find(TrajetReservationDetails.class, id);
+        } finally {
+            em.close();
+        }
+    }
+
+    public TrajetReservationDetails updateReservationDetail(TrajetReservationDetails detail) {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            TrajetReservationDetails updated = em.merge(detail);
+            tx.commit();
+            return updated;
+        } catch (Exception e) {
+            if (tx.isActive())
+                tx.rollback();
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
+
+    public void deleteReservationDetail(Long id) {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            TrajetReservationDetails detail = em.find(TrajetReservationDetails.class, id);
+            if (detail != null) {
+                em.remove(detail);
+            }
+            tx.commit();
+        } catch (Exception e) {
+            if (tx.isActive())
+                tx.rollback();
+            throw e;
         } finally {
             em.close();
         }

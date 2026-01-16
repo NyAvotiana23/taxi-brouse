@@ -1,10 +1,7 @@
 package com.mdgtaxi.servlet;
 
 import com.mdgtaxi.dto.TypeObjectDTO;
-import com.mdgtaxi.entity.Client;
-import com.mdgtaxi.entity.LigneDetail;
-import com.mdgtaxi.entity.Trajet;
-import com.mdgtaxi.entity.TrajetReservation;
+import com.mdgtaxi.entity.*;
 import com.mdgtaxi.service.*;
 import com.mdgtaxi.util.ExceptionUtil;
 import jakarta.servlet.ServletException;
@@ -14,6 +11,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @WebServlet("/trajets/detail")
@@ -27,12 +25,42 @@ public class TrajetDetailServlet extends HttpServlet {
 
 
     @Override
+
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        Long idClient = Long.valueOf(req.getParameter("idClient"));
+        Long trajetId = Long.valueOf(req.getParameter("trajetId"));
+        String nomPassager = req.getParameter("nomPassager");
+        String datestr = req.getParameter("datereservation");
+        LocalDateTime date = LocalDateTime.parse(datestr);
+        Long idReservationStatut = Long.valueOf(req.getParameter("idReservationStatut"));
+
+        Trajet trajet = new Trajet();
+        trajet.setId(trajetId);
+
+        ReservationStatut reservationStatut = new ReservationStatut();
+        reservationStatut.setId(idReservationStatut);
+
+        Client c =  new Client();
+        c.setId(idClient);
+
+        TrajetReservation trajetReservation = new TrajetReservation();
+        trajetReservation.setTrajet(trajet);
+        trajetReservation.setDateReservation(date);
+        trajetReservation.setReservationStatut(reservationStatut);
+        trajetReservation.setNomPassager(nomPassager);
+        trajetReservation.setClient(c);
+
+        trajetReservation = reservationService.createReservation(trajetReservation);
+
+        resp.sendRedirect(req.getContextPath() + "/reservations/detail?id=" + trajetReservation.getId());
+
+    }
+
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Long id = Long.valueOf(req.getParameter("id"));
         Trajet trajet = trajetService.getTrajetById(id);
 
         ExceptionUtil.throwExceptionOnObjectNull(trajet);
-
 
 
         List<LigneDetail> ligneDetails = ligneService.getLigneDetailList(trajet.getLigne().getId());
@@ -41,6 +69,9 @@ public class TrajetDetailServlet extends HttpServlet {
         List<TrajetReservation> reservations = reservationService.getReservationsByTrajetId(id);
         double placesPrises = reservationService.getPlacesPrisesForTrajet(id);
         double placesRestantes = trajet.getVehicule().getMaximumPassager() - placesPrises;
+
+        double caPrevisionnel = reservationService.getCAprevisionnel(id);
+
         List<Client> clients = clientService.getAllClients();  // If needed for form, etc.
         List<TypeObjectDTO> reservationStatuts = typeObjectService.findAllTypeObject("Reservation_Statut");
 
@@ -51,6 +82,8 @@ public class TrajetDetailServlet extends HttpServlet {
         req.setAttribute("clients", clients);
         req.setAttribute("reservationStatuts", reservationStatuts);
         req.setAttribute("ligneDetails", ligneDetails);
+        req.setAttribute("caPrevisionnel", caPrevisionnel);
+
 
 
         req.getRequestDispatcher("/trajet-detail.jsp").forward(req, resp);

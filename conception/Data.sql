@@ -410,12 +410,12 @@ VALUES (1, '2026-01-01 00:00:00', 1, 'Initial status'),
        (2, '2026-01-01 00:00:00', 1, 'Initial status'),
        (3, '2026-01-01 00:00:00', 1, 'Initial status');
 
--- Trajet_Reservation_Paiement
-INSERT INTO Trajet_Reservation_Paiement (id_client, id_trajet_reservation, id_caisse, montant, id_mode_paiement,
-                                         date_paiement)
-VALUES (1, 1, NULL, 10.0, 1, '2026-01-01 00:00:00'),
-       (2, 2, NULL, 20.0, 2, '2026-01-01 00:00:00'),
-       (3, 3, NULL, 30.0, 3, '2026-01-01 00:00:00');
+-- -- Trajet_Reservation_Paiement
+-- INSERT INTO Trajet_Reservation_Paiement (id_client, id_trajet_reservation, id_caisse, montant, id_mode_paiement,
+--                                          date_paiement)
+-- VALUES (1, 1, NULL, 10.0, 1, '2026-01-01 00:00:00'),
+--        (2, 2, NULL, 20.0, 2, '2026-01-01 00:00:00'),
+--        (3, 3, NULL, 30.0, 3, '2026-01-01 00:00:00');
 
 -- Additional Reservation_Statut
 INSERT INTO Reservation_Statut (libelle, score, span_html)
@@ -436,12 +436,12 @@ VALUES (4, '2026-02-01 00:00:00', 4, 'Paid'),
        (5, '2026-02-01 00:00:00', 5, 'Refunded'),
        (6, '2026-02-01 00:00:00', 6, 'Expired');
 
--- Additional Trajet_Reservation_Paiement
-INSERT INTO Trajet_Reservation_Paiement (id_client, id_trajet_reservation, id_caisse, montant, id_mode_paiement,
-                                         date_paiement)
-VALUES (4, 4, NULL, 40.0, 4, '2026-02-01 00:00:00'),
-       (5, 5, NULL, 50.0, 5, '2026-02-01 00:00:00'),
-       (6, 6, NULL, 60.0, 6, '2026-02-01 00:00:00');
+-- -- Additional Trajet_Reservation_Paiement
+-- INSERT INTO Trajet_Reservation_Paiement (id_client, id_trajet_reservation, id_caisse, montant, id_mode_paiement,
+--                                          date_paiement)
+-- VALUES (4, 4, NULL, 40.0, 4, '2026-02-01 00:00:00'),
+--        (5, 5, NULL, 50.0, 5, '2026-02-01 00:00:00'),
+--        (6, 6, NULL, 60.0, 6, '2026-02-01 00:00:00');
 
 -- ============================================
 -- FINANCE (Financial Tracking)
@@ -543,3 +543,14 @@ VALUES (1, 1, 1.0), -- Premium for Reservation 1
        (6, 2, 1.0);
 
 -- ============================================
+
+-- Donnees CategoriePersonne
+
+INSERT INTO Categorie_Personne (libelle)
+VALUES ('Adulte'),
+       ('Enfant');
+
+--Donnees
+
+INSERT INTO Trajet_Tarif_Type_Place_Categorie_Remise (id_type_place, id_categorie_personne, tarif_unitaire_avec_remise)
+VALUES (4, 2, 50000);

@@ -1,5 +1,6 @@
 package com.mdgtaxi.servlet;
 
+import com.mdgtaxi.dto.StatusObjectDto;
 import com.mdgtaxi.dto.TypeObjectDTO;
 import com.mdgtaxi.entity.*;
 import com.mdgtaxi.service.*;
@@ -11,6 +12,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -20,7 +22,6 @@ public class ReservationServlet extends HttpServlet {
     private final ReservationService reservationService = new ReservationService();
     private final TrajetService trajetService = new TrajetService();
     private final ClientService clientService = new ClientService();
-    private final TypeObjectService typeObjectService = new TypeObjectService();
     private final StatusService statusService = new StatusService();
 
     @Override
@@ -28,20 +29,21 @@ public class ReservationServlet extends HttpServlet {
         String action = req.getParameter("action");
 
         if ("edit".equals(action)) {
-            Long id = Long.valueOf(req.getParameter("id"));
-            TrajetReservation reservation = reservationService.getReservationById(id);
-            req.setAttribute("reservation", reservation);
-
-            // Load reservation details
-            List<TrajetReservationDetails> details = reservationService.getReservationDetailsByReservationId(id);
-            req.setAttribute("reservationDetails", details);
+            String idStr = req.getParameter("id");
+            if (idStr != null && !idStr.isEmpty()) {
+                Long id = Long.valueOf(idStr);
+                TrajetReservation reservation = reservationService.getReservationById(id);
+                req.setAttribute("reservation", reservation);
+            }
         }
 
+        // Load data
         List<TrajetReservation> reservations = reservationService.getAllReservations();
         List<Trajet> trajets = trajetService.getAllTrajets();
         List<Client> clients = clientService.getAllClients();
-        List<TypeObjectDTO> typePlaces = typeObjectService.findAllTypeObject("Type_Place");
+        List<StatusObjectDto> reservationStatuts = statusService.findAllStatuses("Trajet_Reservation");
 
+        // Statistics
         Map<String, Long> statsByStatus = reservationService.getReservationStatsByStatus();
         Double totalPlacesPrises = reservationService.getTotalPlacesPrises();
         Double totalPlacesRestantes = reservationService.getTotalPlacesRestantes();
@@ -49,7 +51,7 @@ public class ReservationServlet extends HttpServlet {
         req.setAttribute("reservations", reservations);
         req.setAttribute("trajets", trajets);
         req.setAttribute("clients", clients);
-        req.setAttribute("typePlaces", typePlaces);
+        req.setAttribute("reservationStatuts", reservationStatuts);
         req.setAttribute("statsByStatus", statsByStatus);
         req.setAttribute("totalPlacesPrises", totalPlacesPrises);
         req.setAttribute("totalPlacesRestantes", totalPlacesRestantes);
@@ -66,10 +68,12 @@ public class ReservationServlet extends HttpServlet {
             String nomPassager = req.getParameter("nomPassager");
             Long idReservationStatut = Long.valueOf(req.getParameter("idReservationStatut"));
 
-            // Create or update reservation
-            TrajetReservation reservation = new TrajetReservation();
+            // Create or update reservation (no details here)
+            TrajetReservation reservation;
             if (idStr != null && !idStr.isEmpty()) {
                 reservation = reservationService.getReservationById(Long.valueOf(idStr));
+            } else {
+                reservation = new TrajetReservation();
             }
 
             Trajet trajet = new Trajet();
@@ -92,32 +96,6 @@ public class ReservationServlet extends HttpServlet {
                 reservation = reservationService.createReservation(reservation);
             } else {
                 reservation = reservationService.updateReservation(reservation);
-            }
-
-            // Process reservation details (types de places)
-            String[] typePlaceIds = req.getParameterValues("typePlaceId[]");
-            String[] nombrePlaces = req.getParameterValues("nombrePlaces[]");
-
-            if (typePlaceIds != null && nombrePlaces != null) {
-                for (int i = 0; i < typePlaceIds.length; i++) {
-                    if (typePlaceIds[i] != null && !typePlaceIds[i].isEmpty()
-                            && nombrePlaces[i] != null && !nombrePlaces[i].isEmpty()) {
-
-                        double nbPlaces = Double.parseDouble(nombrePlaces[i]);
-                        if (nbPlaces > 0) {
-                            TrajetReservationDetails detail = new TrajetReservationDetails();
-                            detail.setTrajetReservation(reservation);
-
-                            TypePlace typePlace = new TypePlace();
-                            typePlace.setId(Long.valueOf(typePlaceIds[i]));
-                            detail.setTypePlace(typePlace);
-
-                            detail.setNombrePlaces(nbPlaces);
-
-                            reservationService.createReservationDetail(detail);
-                        }
-                    }
-                }
             }
 
             resp.sendRedirect(req.getContextPath() + "/reservations");
