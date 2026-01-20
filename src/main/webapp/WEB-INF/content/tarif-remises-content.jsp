@@ -9,6 +9,10 @@
     List<TypePlace> typePlaces = (List<TypePlace>) request.getAttribute("typePlaces");
     List<TypeObjectDTO> categories = (List<TypeObjectDTO>) request.getAttribute("categories");
     String error = (String) request.getAttribute("error");
+    String success = (String) request.getAttribute("success");
+
+    List<RemisePourcentage> remisePourcentages = (List<RemisePourcentage>) request.getAttribute("remisePourcentages");
+    RemisePourcentage remisePourcentage = (RemisePourcentage) request.getAttribute("remisePourcentage");
 %>
 
 <div class="container-fluid">
@@ -27,6 +31,16 @@
     </div>
     <% } %>
 
+    <% if (success != null) { %>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle"></i> <%= success %>
+        <button type="button" class="close" data-dismiss="alert">
+            <span>&times;</span>
+        </button>
+    </div>
+    <% } %>
+
+    <!-- Tarif Remise Section -->
     <div class="row">
         <!-- Form Column -->
         <div class="col-md-4">
@@ -211,11 +225,9 @@
                             <tr>
                                 <td><%= tr.getId() %>
                                 </td>
-                                <td>
-                                    <%= tr.getTypePlace().getNomTypePlace() %>
+                                <td><%= tr.getTypePlace().getNomTypePlace() %>
                                 </td>
-                                <td>
-                                    <%= tr.getCategoriePersonne().getLibelle() %>
+                                <td><%= tr.getCategoriePersonne().getLibelle() %>
                                 </td>
                                 <td class="text-right">
                                     <strong class="text-success">
@@ -243,16 +255,182 @@
                             <tr>
                                 <td colspan="5" class="text-center text-muted">
                                     <i class="bi bi-inbox"></i> Aucun tarif avec remise trouvé.
-                                    <% if (request.getParameter("filter_idTypePlace") != null ||
-                                            request.getParameter("filter_idCategorie") != null ||
-                                            request.getParameter("filter_minTarif") != null ||
-                                            request.getParameter("filter_maxTarif") != null) { %>
-                                    <br>
-                                    <a href="<%= request.getContextPath() %>/tarif-remises"
-                                       class="btn btn-sm btn-secondary mt-2">
-                                        Afficher tous les tarifs
+                                </td>
+                            </tr>
+                            <% } %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Remise Pourcentage Section -->
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 bg-warning text-dark">
+                    <h6 class="m-0 font-weight-bold">
+                        <i class="bi bi-<%= remisePourcentage != null ? "pencil" : "plus" %>-circle"></i>
+                        <% if (remisePourcentage != null) { %>
+                        Modifier Remise en %
+                        <% } else { %>
+                        Nouvelle Remise en %
+                        <% } %>
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <form action="<%= request.getContextPath() %>/tarif-remises-pourcent" method="post">
+                        <input type="hidden" name="id"
+                               value="<%= remisePourcentage != null ? remisePourcentage.getId() : "" %>">
+
+                        <div class="mb-3">
+                            <label for="idCategorieApplication" class="form-label">Catégorie d'Application *</label>
+                            <select class="form-control" id="idCategorieApplication" name="idCategorieApplication"
+                                    required>
+                                <option value="">Choisir...</option>
+                                <% if (categories != null) {
+                                    for (TypeObjectDTO cat : categories) { %>
+                                <option value="<%= cat.getId() %>"
+                                        <%= (remisePourcentage != null && remisePourcentage.getCategorieApplication() != null && remisePourcentage.getCategorieApplication().getId().equals(cat.getId())) ? "selected" : "" %>>
+                                    <%= cat.getLibelle() %>
+                                </option>
+                                <% }
+                                } %>
+                            </select>
+                            <small class="form-text text-muted">
+                                Catégorie qui bénéficiera de la remise
+                            </small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="idCategorieParRapport" class="form-label">Catégorie de Référence *</label>
+                            <select class="form-control" id="idCategorieParRapport" name="idCategorieParRapport"
+                                    required>
+                                <option value="">Choisir...</option>
+                                <% if (categories != null) {
+                                    for (TypeObjectDTO cat : categories) { %>
+                                <option value="<%= cat.getId() %>"
+                                        <%= (remisePourcentage != null && remisePourcentage.getCategorieParRapport() != null && remisePourcentage.getCategorieParRapport().getId().equals(cat.getId())) ? "selected" : "" %>>
+                                    <%= cat.getLibelle() %>
+                                </option>
+                                <% }
+                                } %>
+                            </select>
+                            <small class="form-text text-muted">
+                                Catégorie dont les tarifs servent de base
+                            </small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="remisePourcent" class="form-label">Pourcentage de Remise *</label>
+                            <div class="input-group">
+                                <input type="number" step="0.01" class="form-control"
+                                       id="remisePourcent" name="remisePourcent"
+                                       value="<%= remisePourcentage != null ? String.format("%.2f", remisePourcentage.getRemisePourcent()) : "" %>"
+                                       required>
+                                <span class="input-group-text">%</span>
+                            </div>
+                            <small class="form-text text-muted">
+                                <i class="bi bi-info-circle"></i> Négatif pour réduction, positif pour majoration<br>
+                                Ex: -20 pour 20% de réduction, +50 pour 50% de majoration
+                            </small>
+                        </div>
+
+                        <div class="alert alert-warning" role="alert">
+                            <small>
+                                <i class="bi bi-exclamation-triangle"></i>
+                                <strong>Attention:</strong> Les deux catégories doivent être différentes. Le pourcentage
+                                sera appliqué sur tous les tarifs existants de la catégorie de référence.
+                            </small>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-warning">
+                                <i class="bi bi-save"></i> Enregistrer
+                            </button>
+                            <% if (remisePourcentage != null) { %>
+                            <a href="<%= request.getContextPath() %>/tarif-remises" class="btn btn-secondary">
+                                <i class="bi bi-x-circle"></i> Annuler
+                            </a>
+                            <% } %>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 bg-warning text-dark">
+                    <h6 class="m-0 font-weight-bold">
+                        <i class="bi bi-list-ul"></i> Liste des Remises en Pourcentage
+                        <span class="badge badge-light ml-2">
+                            <%= remisePourcentages != null ? remisePourcentages.size() : 0 %>
+                        </span>
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover" width="100%" cellspacing="0">
+                            <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Catégorie Application</th>
+                                <th>Catégorie Référence</th>
+                                <th>Pourcentage</th>
+                                <th class="text-center">Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <% if (remisePourcentages != null && !remisePourcentages.isEmpty()) {
+                                for (RemisePourcentage rp : remisePourcentages) { %>
+                            <tr>
+                                <td><%= rp.getId() %>
+                                </td>
+                                <td>
+
+                                    <%= rp.getCategorieApplication().getLibelle() %>
+                                </td>
+                                <td>
+                                    <%= rp.getCategorieParRapport().getLibelle() %>
+                                </td>
+                                <td class="text-right">
+                                    <strong class="<%= rp.getRemisePourcent() < 0 ? "text-success" : "text-danger" %>">
+                                        <%= String.format("%+.2f", rp.getRemisePourcent()) %> %
+                                    </strong>
+                                </td>
+                                <td class="text-center">
+                                    <form action="<%= request.getContextPath() %>/tarif-remises-pourcent" method="post"
+                                          style="display: inline;"
+                                          onsubmit="return confirm('Êtes-vous sûr de vouloir appliquer cette remise en pourcentage? Cela créera de nouveaux tarifs basés sur la catégorie de référence.');">
+                                        <input type="hidden" name="action" value="appliquer">
+                                        <input type="hidden" name="id" value="<%= rp.getId() %>">
+                                        <button type="submit" class="btn btn-sm btn-success" title="Appliquer">
+                                            <i class="bi bi-check-circle"></i> Appliquer
+                                        </button>
+                                    </form>
+                                    <a href="<%= request.getContextPath() %>/tarif-remises-pourcent?action=edit&id=<%= rp.getId() %>"
+                                       class="btn btn-sm btn-warning" title="Modifier">
+                                        <i class="bi bi-pencil"></i>
                                     </a>
-                                    <% } %>
+                                    <form action="<%= request.getContextPath() %>/tarif-remises-pourcent" method="post"
+                                          style="display: inline;"
+                                          onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette remise en pourcentage?');">
+                                        <input type="hidden" name="action" value="delete">
+                                        <input type="hidden" name="id" value="<%= rp.getId() %>">
+                                        <button type="submit" class="btn btn-sm btn-danger" title="Supprimer">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            <% }
+                            } else { %>
+                            <tr>
+                                <td colspan="5" class="text-center text-muted">
+                                    <i class="bi bi-inbox"></i> Aucune remise en pourcentage trouvée.
                                 </td>
                             </tr>
                             <% } %>
@@ -260,25 +438,31 @@
                         </table>
                     </div>
 
-                    <% if (tarifRemises != null && !tarifRemises.isEmpty()) { %>
+                    <% if (remisePourcentages != null && !remisePourcentages.isEmpty()) { %>
                     <div class="mt-3">
                         <div class="alert alert-light border" role="alert">
                             <h6 class="alert-heading">
-                                <i class="bi bi-info-circle"></i> Comment ça fonctionne?
+                                <i class="bi bi-info-circle"></i> Comment appliquer une remise en pourcentage?
                             </h6>
                             <hr>
                             <small>
-                                <ul class="mb-0">
-                                    <li>Les tarifs avec remise sont appliqués automatiquement lors de la création d'une
-                                        réservation
+                                <ol class="mb-0">
+                                    <li>Créez une règle de remise en spécifiant la catégorie d'application et la
+                                        catégorie de référence
                                     </li>
-                                    <li>Si aucune remise n'existe pour une combinaison Type de Place / Catégorie, le
-                                        tarif normal du véhicule est utilisé
+                                    <li>Définissez le pourcentage (négatif pour réduction, positif pour majoration)</li>
+                                    <li>Cliquez sur "Appliquer" pour créer automatiquement tous les tarifs avec remise
                                     </li>
-                                    <li>Les remises peuvent être définies pour encourager certaines catégories de
-                                        passagers (enfants, étudiants, seniors, etc.)
+                                    <li>Tous les tarifs existants de la catégorie de référence seront copiés et ajustés
+                                        selon le pourcentage
                                     </li>
-                                </ul>
+                                </ol>
+                                <div class="mt-2">
+                                    <strong>Exemple:</strong> Si "Enfant" est la catégorie d'application avec -50% par
+                                    rapport à "Adulte",
+                                    tous les tarifs Adulte seront copiés avec 50% de réduction pour créer les tarifs
+                                    Enfant.
+                                </div>
                             </small>
                         </div>
                     </div>
@@ -296,5 +480,14 @@
 
     .d-flex.gap-2 > *:last-child {
         margin-right: 0;
+    }
+
+    .badge {
+        font-size: 0.875rem;
+        padding: 0.35em 0.65em;
+    }
+
+    .input-group-text {
+        background-color: #f8f9fa;
     }
 </style>

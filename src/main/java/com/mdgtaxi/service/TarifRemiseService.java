@@ -1,5 +1,6 @@
 package com.mdgtaxi.service;
 
+import com.mdgtaxi.entity.RemisePourcentage;
 import com.mdgtaxi.entity.TarifTypePlaceCategorieRemise;
 import com.mdgtaxi.util.HibernateUtil;
 
@@ -66,6 +67,80 @@ public class TarifRemiseService {
             em.close();
         }
     }
+
+    public List<TarifTypePlaceCategorieRemise> getAllTarifRemises(Long idCategorie) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<TarifTypePlaceCategorieRemise> query = em.createQuery(
+                    "SELECT t FROM TarifTypePlaceCategorieRemise t WHERE t.categoriePersonne.id = :idCategorie ORDER BY t.id DESC",
+                    TarifTypePlaceCategorieRemise.class
+            );
+            query.setParameter("idCategorie", idCategorie);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+
+    public RemisePourcentage getRemisePourcentById(Long id) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            return em.find(RemisePourcentage.class, id);
+        } finally {
+            em.close();
+        }
+    }
+
+    public boolean hastTarif (Long idCategorie, Long idTypePlace) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<TarifTypePlaceCategorieRemise> query = em.createQuery(
+                    "SELECT t FROM TarifTypePlaceCategorieRemise t WHERE t.categoriePersonne.id = :idCategorie ORDER BY t.id DESC",
+                    TarifTypePlaceCategorieRemise.class
+            );
+            query.setParameter("idCategorie", idCategorie);
+            if( query.getResultList().isEmpty()) {
+
+            };
+        } finally {
+            em.close();
+        }
+        return false;
+    }
+
+    public void appliquerRemisePourcent(Long idRemise) throws Exception {
+        RemisePourcentage val = getRemisePourcentById(idRemise);
+
+        List<TarifTypePlaceCategorieRemise> tarifTypePlaceCategorieRemises = getAllTarifRemises(val.getCategorieParRapport().getId());
+
+        for (TarifTypePlaceCategorieRemise t : tarifTypePlaceCategorieRemises) {
+            t.setId(null);
+
+            t.setCategoriePersonne(val.getCategorieApplication());
+            double nouveautarif = t.getTarifUnitaireAvecRemise() * (1 + (val.getRemisePourcent()) / 100);
+            t.setTarifUnitaireAvecRemise(nouveautarif);
+
+            createTarifRemise(t);
+        }
+    }
+
+    /**
+     * Get all tarif pourcentages remises
+     */
+    public List<RemisePourcentage> getAllTarifPourcentagesRemises() {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<RemisePourcentage> query = em.createQuery(
+                    "SELECT t FROM RemisePourcentage t ORDER BY t.id DESC",
+                    RemisePourcentage.class
+            );
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
 
     /**
      * Update tarif remise

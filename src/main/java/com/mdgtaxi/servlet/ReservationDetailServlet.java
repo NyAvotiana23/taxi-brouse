@@ -201,9 +201,28 @@ public class ReservationDetailServlet extends HttpServlet {
     private void handleAddDetail(HttpServletRequest req, Long reservationId) throws Exception {
         Long idTypePlace = Long.valueOf(req.getParameter("idTypePlace"));
         Long idCategoriePersonne = Long.valueOf(req.getParameter("idCategoriePersonne"));
+
+
         double nombrePlaces = Double.parseDouble(req.getParameter("nombrePlaces"));
 
         TrajetReservation reservation = reservationService.getReservationById(reservationId);
+        VehiculeTarifTypePlace tp = vehiculeService.getTarifTypePlaceById(idTypePlace);
+
+
+
+//        Map<Long, Double> soldPerType = trajetService.getSoldPlacesPerType(reservation.getTrajet().getId());
+//
+//        System.out.println( " \n " + soldPerType);
+//        double soldTypePlace = soldPerType.getOrDefault(idTypePlace, 0.0);;
+//
+//        double remaining = tp.getNombrePlace() - soldTypePlace;
+//        System.out.println("Solde restante : " + remaining + " Id type place : " + idTypePlace + " \n");
+//
+//
+//        if (nombrePlaces > remaining) {
+//            throw new Exception("Erreur nombre de place exeder par rapport à celle restante : reste " + remaining + " Prise : " + nombrePlaces);
+//        }
+
 
         // Get tarif with remise
         double tarifUnitaire = reservationService.getTarifAvecRemise(

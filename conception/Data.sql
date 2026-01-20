@@ -47,6 +47,33 @@ VALUES (1, 0.9, 1.0, '2026-01-01 00:00:00'),
        (2, 0.8, 0.9, '2026-01-01 00:00:00'),
        (3, 3500.0, 4000.0, '2026-01-01 00:00:00');
 
+
+-- ============================================
+
+-- Donnees CategoriePersonne
+
+INSERT INTO Categorie_Personne (libelle)
+VALUES ('Adulte'),
+       ('Enfant'),
+       ('Senior');
+
+--Donnees
+
+-- ============================================
+-- TYPE_PLACE (New: Added as per request)
+-- ============================================
+
+-- Type_Place
+INSERT INTO Type_Place (nom_type_place, description)
+VALUES ('Premium', 'Siege premium avec confort accru et espace supplementaire'),
+       ('Standard', 'Siege standard pour un voyage economique');
+
+-- Additional Type_Place (Examples)
+INSERT INTO Type_Place (nom_type_place, description)
+VALUES ('VIP', 'Siege VIP avec services exclusifs'),
+       ('Economique', 'Siege basique pour budgets limites');
+
+
 -- Additional Devise
 INSERT INTO Devise (libelle, dernier_taux)
 VALUES ('GBP', 0.75),
@@ -487,19 +514,7 @@ VALUES (4, 4, 4, 2, 4, '2026-02-01 00:00:00', '2026-02-01 12:00:00', 40.0),
        (5, 5, 5, 15, 5, '2026-02-01 00:00:00', '2026-02-01 14:00:00', 50.0),
        (6, 6, 6, 5, 6, '2026-02-01 00:00:00', '2026-02-01 16:00:00', 60.0);
 
--- ============================================
--- TYPE_PLACE (New: Added as per request)
--- ============================================
 
--- Type_Place
-INSERT INTO Type_Place (nom_type_place, description)
-VALUES ('Premium', 'Siege premium avec confort accru et espace supplementaire'),
-       ('Standard', 'Siege standard pour un voyage economique');
-
--- Additional Type_Place (Examples)
-INSERT INTO Type_Place (nom_type_place, description)
-VALUES ('VIP', 'Siege VIP avec services exclusifs'),
-       ('Economique', 'Siege basique pour budgets limites');
 
 -- ============================================
 -- VEHICULE_TARIF_TYPE_PLACE (New: Added as per request, with tariffs 140000 for Premium, 80000 for Standard)
@@ -508,22 +523,19 @@ VALUES ('VIP', 'Siege VIP avec services exclusifs'),
 -- Note: If there is a unique constraint on tarif_unitaire causing errors, remove it from the schema as it prevents multiple entries with the same tariff.
 -- Assuming the constraint is removed, the following will work.
 
--- Vehicule_Tarif_Type_Place (Associating to vehicles 1-6, with sample nombre_place)
-INSERT INTO Vehicule_Tarif_Type_Place (id_vehicule, id_type_place, tarif_unitaire, nombre_place)
-VALUES (1, 1, 140000.0, 2.0), -- Premium for Vehicle 1
-       (1, 2, 80000.0, 3.0),  -- Standard for Vehicle 1
-       (2, 1, 140000.0, 5.0),
-       (2, 2, 80000.0, 15.0),
-       (3, 1, 140000.0, 1.0),
-       (3, 2, 80000.0, 1.0),
-       (4, 1, 140000.0, 1.0),
-       (4, 2, 80000.0, 1.0),
-       (5, 1, 140000.0, 3.0),
-       (5, 2, 80000.0, 12.0),
-       (6, 1, 140000.0, 2.0),
-       (6, 2, 80000.0, 3.0);
 
--- ============================================
+
+INSERT INTO Vehicule_Tarif_Type_Place (id_vehicule, id_type_place, tarif_unitaire, nombre_place)
+VALUES (1, 3, 65000.0, 20.0);
+
+INSERT INTO Vehicule_Tarif_Type_Place (id_vehicule, id_type_place, tarif_unitaire, nombre_place)
+VALUES (1, 1, 50000.0, 20.0);
+
+INSERT INTO Vehicule_Tarif_Type_Place (id_vehicule, id_type_place, tarif_unitaire, nombre_place)
+VALUES (1, 4, 40000.0, 20.0);
+
+
+
 -- TRAJET_RESERVATION_DETAILS (New: Added as per request)
 -- ============================================
 
@@ -548,9 +560,48 @@ VALUES (1, 1, 1.0), -- Premium for Reservation 1
 
 INSERT INTO Categorie_Personne (libelle)
 VALUES ('Adulte'),
-       ('Enfant');
+       ('Enfant'),
+       ('Senior');
 
 --Donnees
 
+-- ============================================
+-- TYPE_PLACE (New: Added as per request)
+-- ============================================
+
+-- Type_Place
+INSERT INTO Type_Place (nom_type_place, description)
+VALUES ('Premium', 'Siege premium avec confort accru et espace supplementaire'),
+       ('Standard', 'Siege standard pour un voyage economique');
+
+-- Additional Type_Place (Examples)
+INSERT INTO Type_Place (nom_type_place, description)
+VALUES ('VIP', 'Siege VIP avec services exclusifs'),
+       ('Economique', 'Siege basique pour budgets limites');
+
+
+
 INSERT INTO Trajet_Tarif_Type_Place_Categorie_Remise (id_type_place, id_categorie_personne, tarif_unitaire_avec_remise)
-VALUES (4, 2, 50000);
+VALUES (3, 2, 65000); -- VIP
+
+INSERT INTO Trajet_Tarif_Type_Place_Categorie_Remise (id_type_place, id_categorie_personne, tarif_unitaire_avec_remise)
+VALUES (1, 2, 50000); -- Prenium
+
+INSERT INTO Trajet_Tarif_Type_Place_Categorie_Remise (id_type_place, id_categorie_personne, tarif_unitaire_avec_remise)
+VALUES (4, 2, 40000); -- Economique
+
+
+
+
+INSERT INTO Trajet_Tarif_Type_Place_Categorie_Remise (id_type_place, id_categorie_personne, tarif_unitaire_avec_remise)
+VALUES (3, 1, 70000); -- VIP
+
+INSERT INTO Trajet_Tarif_Type_Place_Categorie_Remise (id_type_place, id_categorie_personne, tarif_unitaire_avec_remise)
+VALUES (1, 1, 60000); -- Prenium
+
+INSERT INTO Trajet_Tarif_Type_Place_Categorie_Remise (id_type_place, id_categorie_personne, tarif_unitaire_avec_remise)
+VALUES (4, 1, 50000); -- Economique
+
+
+INSERT INTO Remise_Pourcentage (categorie_application, categorie_par_rapport, remisePourcent)
+VALUES (3, 2, -20);

@@ -4,7 +4,22 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c1c861f5-aebe-49fb-9999-4ef53b312464" name="Changes" comment="" />
+    <list default="true" id="c1c861f5-aebe-49fb-9999-4ef53b312464" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/conception/Request.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/RemisePourcentage.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/servlet/TarifRemisePourcentServlet.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/conception/Data.sql" beforeDir="false" afterPath="$PROJECT_DIR$/conception/Data.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/entities.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/entities.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/service/TarifRemiseService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/service/TarifRemiseService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/service/services.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/service/services.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/servlet/ReservationDetailServlet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/servlet/ReservationDetailServlet.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/servlet/TarifRemiseServlet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/servlet/TarifRemiseServlet.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/servlet/servlets.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/servlet/servlets.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/META-INF/persistence.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/META-INF/persistence.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/tarif-remises-content.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/tarif-remises-content.jsp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/webapp/jsps.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/jsps.txt" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -147,6 +162,8 @@
       <workItem from="1768463147211" duration="266000" />
       <workItem from="1768463570075" duration="33000" />
       <workItem from="1768472187908" duration="14320000" />
+      <workItem from="1768539628930" duration="15395000" />
+      <workItem from="1768837887771" duration="62000" />
     </task>
     <servers />
   </component>

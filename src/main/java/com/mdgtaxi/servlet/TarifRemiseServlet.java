@@ -2,6 +2,7 @@ package com.mdgtaxi.servlet;
 
 import com.mdgtaxi.dto.TypeObjectDTO;
 import com.mdgtaxi.entity.CategoriePersonne;
+import com.mdgtaxi.entity.RemisePourcentage;
 import com.mdgtaxi.entity.TarifTypePlaceCategorieRemise;
 import com.mdgtaxi.entity.TypePlace;
 import com.mdgtaxi.service.TarifRemiseService;
@@ -29,6 +30,21 @@ public class TarifRemiseServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String action = req.getParameter("action");
 
+        String editRemisePourcentId = (String) req.getSession().getAttribute("editRemisePourcentId");
+        if (editRemisePourcentId != null) {
+            RemisePourcentage editRemisePourcentage = tarifRemiseService.getRemisePourcentById(Long.valueOf(editRemisePourcentId));
+            req.setAttribute("remisePourcentage", editRemisePourcentage);
+            req.getSession().removeAttribute("editRemisePourcentId");
+        }
+
+// Check for success/error messages from session
+        String success = (String) req.getSession().getAttribute("success");
+        if (success != null) {
+            req.setAttribute("success", success);
+            req.getSession().removeAttribute("success");
+        }
+
+
         // Load reference data
         loadReferenceData(req);
 
@@ -44,7 +60,10 @@ public class TarifRemiseServlet extends HttpServlet {
                 ? tarifRemiseService.getAllTarifRemises()
                 : tarifRemiseService.searchTarifRemisesWithFilters(filters);
 
+        List<RemisePourcentage> remisePourcentages = tarifRemiseService.getAllTarifPourcentagesRemises();
+        req.setAttribute("remisePourcentages", remisePourcentages);
         req.setAttribute("tarifRemises", tarifRemises);
+
 
         req.getRequestDispatcher("/tarif-remises.jsp").forward(req, resp);
     }
