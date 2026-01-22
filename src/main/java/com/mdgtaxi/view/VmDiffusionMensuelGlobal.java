@@ -14,14 +14,14 @@ import java.math.BigDecimal;
 @Immutable
 @Subselect("""
     SELECT
-        ROW_NUMBER() OVER (ORDER BY YEAR(t.datetime_depart), MONTH(t.datetime_depart)) AS id,
-        MONTH(t.datetime_depart) AS mois,
-        YEAR(t.datetime_depart) AS annee,
+        ROW_NUMBER() OVER (ORDER BY EXTRACT(YEAR FROM t.datetime_depart), EXTRACT(MONTH FROM t.datetime_depart)) AS id,
+        EXTRACT(MONTH FROM t.datetime_depart)::integer AS mois,
+        EXTRACT(YEAR  FROM t.datetime_depart)::integer AS annee,
         SUM(CAST(d.montant_unite AS DECIMAL(10,2))) AS montant_total,
-        SUM(CAST(d.nombre AS INTEGER)) AS nombre_total
+        SUM(CAST(d.nombre AS INTEGER))          AS nombre_total
     FROM Diffusion d
     INNER JOIN Trajet t ON d.id_trajet = t.id
-    GROUP BY YEAR(t.datetime_depart), MONTH(t.datetime_depart)
+    GROUP BY EXTRACT(YEAR FROM t.datetime_depart), EXTRACT(MONTH FROM t.datetime_depart)
 """)
 @Synchronize({"Diffusion", "Trajet"})
 public class VmDiffusionMensuelGlobal implements Serializable {

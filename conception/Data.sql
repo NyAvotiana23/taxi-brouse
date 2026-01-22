@@ -595,3 +595,42 @@ VALUES (4, 1, 1, 50000); -- Economique
 
 INSERT INTO Trajet_Remise_Pourcentage (id_trajet, categorie_application, categorie_par_rapport, remisePourcent)
 VALUES (1, 3, 2, -20);
+
+
+-- ============================================
+-- UNITE (Unités de mesure / configuration)
+-- ============================================
+INSERT INTO Unite (libelle)
+VALUES ('Ariary'),
+       ('Diffusion'),
+       ('Mois'),
+       ('Pourcentage');
+
+-- ============================================
+-- SOCIETE (Sociétés / annonceurs)
+-- ============================================
+INSERT INTO Societe (nom, description)
+VALUES ('VaniAla', 'Entreprise de télécommunications - publicité taxi'),
+       ('Lewis', 'Marque de boissons énergisantes - campagnes publicitaires');
+
+-- ============================================
+-- CONFIGURATION (exemples de paramètres utiles)
+-- ============================================
+-- Coût unitaire de diffusion publicitaire (en Ariary)
+INSERT INTO Configuration (libelle, valeur, id_unite, code)
+VALUES ('Cout diffusion publicitaire taxi', '100000', 1, 'COUT_DIFFUSION_TAXI');
+
+-- Exemple de configuration supplémentaire (optionnel)
+INSERT INTO Configuration (libelle, valeur, id_unite, code)
+VALUES ('Taux TVA publicité', '20', 4, 'TAUX_TVA_PUBLICITE');
+
+-- ============================================
+-- PUBLICITE (Campagnes publicitaires décembre)
+-- ============================================
+-- Vaniala : 20 diffusions × 100000 = 2 000 000 Ariary
+INSERT INTO Publicite (id_societe, description, duree)
+VALUES (1, 'Campagne publicitaire décembre - 20 diffusions', 'Decembre 2025');
+
+-- Lewis : 10 diffusions × 100000 = 1 000 000 Ariary
+INSERT INTO Publicite (id_societe, description, duree)
+VALUES (2, 'Campagne publicitaire décembre - 10 diffusions', 'Decembre 2025');
