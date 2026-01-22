@@ -6,11 +6,15 @@ import javax.persistence.*;
 
 @Data
 @Entity
-@Table(name = "Remise_Pourcentage")
-public class RemisePourcentage {
+@Table(name = "Trajet_Remise_Pourcentage")
+public class TrajetRemisePourcentage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "id_trajet", nullable = false)
+    private Trajet trajet;
 
     @ManyToOne
     @JoinColumn(name = "categorie_application", nullable = false)

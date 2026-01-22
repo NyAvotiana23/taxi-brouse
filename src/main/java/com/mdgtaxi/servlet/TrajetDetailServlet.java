@@ -56,25 +56,49 @@ public class TrajetDetailServlet extends HttpServlet {
 
     }
 
+    @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Long id = Long.valueOf(req.getParameter("id"));
-        Trajet trajet = trajetService.getTrajetById(id);
+        String action = req.getParameter("action");
 
+        Trajet trajet = trajetService.getTrajetById(id);
         ExceptionUtil.throwExceptionOnObjectNull(trajet);
 
-
+        // Existing code...
         List<LigneDetail> ligneDetails = ligneService.getLigneDetailList(trajet.getLigne().getId());
-
-
         List<TrajetReservation> reservations = reservationService.getReservationsByTrajetId(id);
         double placesPrises = reservationService.getPlacesPrisesForTrajet(id);
         double placesRestantes = trajet.getVehicule().getMaximumPassager() - placesPrises;
-
         double caPrevisionnel = reservationService.getCAprevisionnel(id);
-
-        List<Client> clients = clientService.getAllClients();  // If needed for form, etc.
+        List<Client> clients = clientService.getAllClients();
         List<TypeObjectDTO> reservationStatuts = typeObjectService.findAllTypeObject("Reservation_Statut");
 
+        // NEW: Load tarif remises for this trajet
+        TarifRemiseService tarifRemiseService = new TarifRemiseService();
+        List<TrajetTarifTypePlaceCategorieRemise> tarifRemises = tarifRemiseService.getTarifRemisesByTrajet(id);
+        List<TrajetRemisePourcentage> remisePourcentages = tarifRemiseService.getRemisePourcentagesByTrajet(id);
+
+        // NEW: Load reference data for remise forms
+        VehiculeService vehiculeService = new VehiculeService();
+        List<VehiculeTarifTypePlace> vehiculeTarifs = vehiculeService.getTarifTypePlacesByVehicule(trajet.getVehicule().getId());
+        List<TypeObjectDTO> categories = typeObjectService.findAllTypeObject("Categorie_Personne");
+
+        // NEW: Handle edit actions
+        if ("editTarifRemise".equals(action)) {
+            String remiseIdStr = req.getParameter("remiseId");
+            if (remiseIdStr != null && !remiseIdStr.isEmpty()) {
+                TrajetTarifTypePlaceCategorieRemise editRemise = tarifRemiseService.getTarifRemiseById(Long.valueOf(remiseIdStr));
+                req.setAttribute("editTarifRemise", editRemise);
+            }
+        } else if ("editRemisePourcent".equals(action)) {
+            String pourcentIdStr = req.getParameter("pourcentId");
+            if (pourcentIdStr != null && !pourcentIdStr.isEmpty()) {
+                TrajetRemisePourcentage editPourcent = tarifRemiseService.getRemisePourcentById(Long.valueOf(pourcentIdStr));
+                req.setAttribute("editRemisePourcent", editPourcent);
+            }
+        }
+
+        // Set all attributes
         req.setAttribute("trajet", trajet);
         req.setAttribute("placesPrises", placesPrises);
         req.setAttribute("placesRestantes", placesRestantes);
@@ -84,7 +108,11 @@ public class TrajetDetailServlet extends HttpServlet {
         req.setAttribute("ligneDetails", ligneDetails);
         req.setAttribute("caPrevisionnel", caPrevisionnel);
 
-
+        // NEW attributes
+        req.setAttribute("tarifRemises", tarifRemises);
+        req.setAttribute("remisePourcentages", remisePourcentages);
+        req.setAttribute("vehiculeTarifs", vehiculeTarifs);
+        req.setAttribute("categories", categories);
 
         req.getRequestDispatcher("/trajet-detail.jsp").forward(req, resp);
     }

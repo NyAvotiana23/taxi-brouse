@@ -4,15 +4,15 @@
 <%@ page import="com.mdgtaxi.dto.TypeObjectDTO" %>
 
 <%
-    TarifTypePlaceCategorieRemise tarifRemise = (TarifTypePlaceCategorieRemise) request.getAttribute("tarifRemise");
-    List<TarifTypePlaceCategorieRemise> tarifRemises = (List<TarifTypePlaceCategorieRemise>) request.getAttribute("tarifRemises");
+    TrajetTarifTypePlaceCategorieRemise tarifRemise = (TrajetTarifTypePlaceCategorieRemise) request.getAttribute("tarifRemise");
+    List<TrajetTarifTypePlaceCategorieRemise> tarifRemises = (List<TrajetTarifTypePlaceCategorieRemise>) request.getAttribute("tarifRemises");
     List<TypePlace> typePlaces = (List<TypePlace>) request.getAttribute("typePlaces");
     List<TypeObjectDTO> categories = (List<TypeObjectDTO>) request.getAttribute("categories");
     String error = (String) request.getAttribute("error");
     String success = (String) request.getAttribute("success");
 
-    List<RemisePourcentage> remisePourcentages = (List<RemisePourcentage>) request.getAttribute("remisePourcentages");
-    RemisePourcentage remisePourcentage = (RemisePourcentage) request.getAttribute("remisePourcentage");
+    List<TrajetRemisePourcentage> trajetRemisePourcentages = (List<TrajetRemisePourcentage>) request.getAttribute("trajetRemisePourcentages");
+    TrajetRemisePourcentage trajetRemisePourcentage = (TrajetRemisePourcentage) request.getAttribute("trajetRemisePourcentage");
 %>
 
 <div class="container-fluid">
@@ -221,7 +221,7 @@
                             </thead>
                             <tbody>
                             <% if (tarifRemises != null && !tarifRemises.isEmpty()) {
-                                for (TarifTypePlaceCategorieRemise tr : tarifRemises) { %>
+                                for (TrajetTarifTypePlaceCategorieRemise tr : tarifRemises) { %>
                             <tr>
                                 <td><%= tr.getId() %>
                                 </td>
@@ -272,8 +272,8 @@
             <div class="card shadow mb-4">
                 <div class="card-header py-3 bg-warning text-dark">
                     <h6 class="m-0 font-weight-bold">
-                        <i class="bi bi-<%= remisePourcentage != null ? "pencil" : "plus" %>-circle"></i>
-                        <% if (remisePourcentage != null) { %>
+                        <i class="bi bi-<%= trajetRemisePourcentage != null ? "pencil" : "plus" %>-circle"></i>
+                        <% if (trajetRemisePourcentage != null) { %>
                         Modifier Remise en %
                         <% } else { %>
                         Nouvelle Remise en %
@@ -283,7 +283,7 @@
                 <div class="card-body">
                     <form action="<%= request.getContextPath() %>/tarif-remises-pourcent" method="post">
                         <input type="hidden" name="id"
-                               value="<%= remisePourcentage != null ? remisePourcentage.getId() : "" %>">
+                               value="<%= trajetRemisePourcentage != null ? trajetRemisePourcentage.getId() : "" %>">
 
                         <div class="mb-3">
                             <label for="idCategorieApplication" class="form-label">Catégorie d'Application *</label>
@@ -293,7 +293,7 @@
                                 <% if (categories != null) {
                                     for (TypeObjectDTO cat : categories) { %>
                                 <option value="<%= cat.getId() %>"
-                                        <%= (remisePourcentage != null && remisePourcentage.getCategorieApplication() != null && remisePourcentage.getCategorieApplication().getId().equals(cat.getId())) ? "selected" : "" %>>
+                                        <%= (trajetRemisePourcentage != null && trajetRemisePourcentage.getCategorieApplication() != null && trajetRemisePourcentage.getCategorieApplication().getId().equals(cat.getId())) ? "selected" : "" %>>
                                     <%= cat.getLibelle() %>
                                 </option>
                                 <% }
@@ -312,7 +312,7 @@
                                 <% if (categories != null) {
                                     for (TypeObjectDTO cat : categories) { %>
                                 <option value="<%= cat.getId() %>"
-                                        <%= (remisePourcentage != null && remisePourcentage.getCategorieParRapport() != null && remisePourcentage.getCategorieParRapport().getId().equals(cat.getId())) ? "selected" : "" %>>
+                                        <%= (trajetRemisePourcentage != null && trajetRemisePourcentage.getCategorieParRapport() != null && trajetRemisePourcentage.getCategorieParRapport().getId().equals(cat.getId())) ? "selected" : "" %>>
                                     <%= cat.getLibelle() %>
                                 </option>
                                 <% }
@@ -328,7 +328,7 @@
                             <div class="input-group">
                                 <input type="number" step="0.01" class="form-control"
                                        id="remisePourcent" name="remisePourcent"
-                                       value="<%= remisePourcentage != null ? String.format("%.2f", remisePourcentage.getRemisePourcent()) : "" %>"
+                                       value="<%= trajetRemisePourcentage != null ? String.format("%.2f", trajetRemisePourcentage.getRemisePourcent()) : "" %>"
                                        required>
                                 <span class="input-group-text">%</span>
                             </div>
@@ -350,7 +350,7 @@
                             <button type="submit" class="btn btn-warning">
                                 <i class="bi bi-save"></i> Enregistrer
                             </button>
-                            <% if (remisePourcentage != null) { %>
+                            <% if (trajetRemisePourcentage != null) { %>
                             <a href="<%= request.getContextPath() %>/tarif-remises" class="btn btn-secondary">
                                 <i class="bi bi-x-circle"></i> Annuler
                             </a>
@@ -367,7 +367,7 @@
                     <h6 class="m-0 font-weight-bold">
                         <i class="bi bi-list-ul"></i> Liste des Remises en Pourcentage
                         <span class="badge badge-light ml-2">
-                            <%= remisePourcentages != null ? remisePourcentages.size() : 0 %>
+                            <%= trajetRemisePourcentages != null ? trajetRemisePourcentages.size() : 0 %>
                         </span>
                     </h6>
                 </div>
@@ -384,8 +384,8 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <% if (remisePourcentages != null && !remisePourcentages.isEmpty()) {
-                                for (RemisePourcentage rp : remisePourcentages) { %>
+                            <% if (trajetRemisePourcentages != null && !trajetRemisePourcentages.isEmpty()) {
+                                for (TrajetRemisePourcentage rp : trajetRemisePourcentages) { %>
                             <tr>
                                 <td><%= rp.getId() %>
                                 </td>
@@ -438,7 +438,7 @@
                         </table>
                     </div>
 
-                    <% if (remisePourcentages != null && !remisePourcentages.isEmpty()) { %>
+                    <% if (trajetRemisePourcentages != null && !trajetRemisePourcentages.isEmpty()) { %>
                     <div class="mt-3">
                         <div class="alert alert-light border" role="alert">
                             <h6 class="alert-heading">

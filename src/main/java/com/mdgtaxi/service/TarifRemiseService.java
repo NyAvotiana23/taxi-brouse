@@ -1,7 +1,7 @@
 package com.mdgtaxi.service;
 
-import com.mdgtaxi.entity.RemisePourcentage;
-import com.mdgtaxi.entity.TarifTypePlaceCategorieRemise;
+import com.mdgtaxi.entity.TrajetRemisePourcentage;
+import com.mdgtaxi.entity.TrajetTarifTypePlaceCategorieRemise;
 import com.mdgtaxi.util.HibernateUtil;
 
 import javax.persistence.EntityManager;
@@ -23,7 +23,7 @@ public class TarifRemiseService {
     /**
      * Create a new tarif remise
      */
-    public TarifTypePlaceCategorieRemise createTarifRemise(TarifTypePlaceCategorieRemise tarifRemise) {
+    public TrajetTarifTypePlaceCategorieRemise createTarifRemise(TrajetTarifTypePlaceCategorieRemise tarifRemise) {
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
@@ -43,10 +43,10 @@ public class TarifRemiseService {
     /**
      * Get tarif remise by ID
      */
-    public TarifTypePlaceCategorieRemise getTarifRemiseById(Long id) {
+    public TrajetTarifTypePlaceCategorieRemise getTarifRemiseById(Long id) {
         EntityManager em = emf.createEntityManager();
         try {
-            return em.find(TarifTypePlaceCategorieRemise.class, id);
+            return em.find(TrajetTarifTypePlaceCategorieRemise.class, id);
         } finally {
             em.close();
         }
@@ -55,12 +55,12 @@ public class TarifRemiseService {
     /**
      * Get all tarif remises
      */
-    public List<TarifTypePlaceCategorieRemise> getAllTarifRemises() {
+    public List<TrajetTarifTypePlaceCategorieRemise> getAllTarifRemises() {
         EntityManager em = emf.createEntityManager();
         try {
-            TypedQuery<TarifTypePlaceCategorieRemise> query = em.createQuery(
-                    "SELECT t FROM TarifTypePlaceCategorieRemise t ORDER BY t.id DESC",
-                    TarifTypePlaceCategorieRemise.class
+            TypedQuery<TrajetTarifTypePlaceCategorieRemise> query = em.createQuery(
+                    "SELECT t FROM TrajetTarifTypePlaceCategorieRemise t ORDER BY t.id DESC",
+                    TrajetTarifTypePlaceCategorieRemise.class
             );
             return query.getResultList();
         } finally {
@@ -68,12 +68,93 @@ public class TarifRemiseService {
         }
     }
 
-    public List<TarifTypePlaceCategorieRemise> getAllTarifRemises(Long idCategorie) {
+    public List<TrajetTarifTypePlaceCategorieRemise> getTarifRemisesByTrajet(Long trajetId) {
         EntityManager em = emf.createEntityManager();
         try {
-            TypedQuery<TarifTypePlaceCategorieRemise> query = em.createQuery(
-                    "SELECT t FROM TarifTypePlaceCategorieRemise t WHERE t.categoriePersonne.id = :idCategorie ORDER BY t.id DESC",
-                    TarifTypePlaceCategorieRemise.class
+            TypedQuery<TrajetTarifTypePlaceCategorieRemise> query = em.createQuery(
+                    "SELECT t FROM TrajetTarifTypePlaceCategorieRemise t WHERE t.trajet.id = :trajetId ORDER BY t.id DESC",
+                    TrajetTarifTypePlaceCategorieRemise.class
+            );
+            query.setParameter("trajetId", trajetId);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * Get all remise pourcentages for a specific trajet
+     */
+    public List<TrajetRemisePourcentage> getRemisePourcentagesByTrajet(Long trajetId) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<TrajetRemisePourcentage> query = em.createQuery(
+                    "SELECT t FROM TrajetRemisePourcentage t WHERE t.trajet.id = :trajetId ORDER BY t.id DESC",
+                    TrajetRemisePourcentage.class
+            );
+            query.setParameter("trajetId", trajetId);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * Apply remise pourcentage for a specific trajet
+     */
+    public void appliquerRemisePourcentTrajet(Long idRemise, Long trajetId) throws Exception {
+        TrajetRemisePourcentage val = getRemisePourcentById(idRemise);
+
+        if (!val.getTrajet().getId().equals(trajetId)) {
+            throw new Exception("Cette remise n'appartient pas à ce trajet");
+        }
+
+        List<TrajetTarifTypePlaceCategorieRemise> tarifRemises = getTarifRemisesByTrajetAndCategorie(
+                trajetId,
+                val.getCategorieParRapport().getId()
+        );
+
+        for (TrajetTarifTypePlaceCategorieRemise t : tarifRemises) {
+            TrajetTarifTypePlaceCategorieRemise newRemise = new TrajetTarifTypePlaceCategorieRemise();
+
+            newRemise.setTrajet(t.getTrajet());
+            newRemise.setTypePlace(t.getTypePlace());
+            newRemise.setCategoriePersonne(val.getCategorieApplication());
+
+            double nouveauTarif = t.getTarifUnitaireAvecRemise() * (1 + (val.getRemisePourcent()) / 100);
+            newRemise.setTarifUnitaireAvecRemise(nouveauTarif);
+
+            createTarifRemise(newRemise);
+        }
+    }
+
+    /**
+     * Get tarif remises by trajet and categorie
+     */
+    private List<TrajetTarifTypePlaceCategorieRemise> getTarifRemisesByTrajetAndCategorie(Long trajetId, Long categorieId) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<TrajetTarifTypePlaceCategorieRemise> query = em.createQuery(
+                    "SELECT t FROM TrajetTarifTypePlaceCategorieRemise t " +
+                            "WHERE t.trajet.id = :trajetId AND t.categoriePersonne.id = :categorieId",
+                    TrajetTarifTypePlaceCategorieRemise.class
+            );
+            query.setParameter("trajetId", trajetId);
+            query.setParameter("categorieId", categorieId);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+
+
+    public List<TrajetTarifTypePlaceCategorieRemise> getAllTarifRemises(Long idCategorie) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<TrajetTarifTypePlaceCategorieRemise> query = em.createQuery(
+                    "SELECT t FROM TrajetTarifTypePlaceCategorieRemise t WHERE t.categoriePersonne.id = :idCategorie ORDER BY t.id DESC",
+                    TrajetTarifTypePlaceCategorieRemise.class
             );
             query.setParameter("idCategorie", idCategorie);
             return query.getResultList();
@@ -83,10 +164,10 @@ public class TarifRemiseService {
     }
 
 
-    public RemisePourcentage getRemisePourcentById(Long id) {
+    public TrajetRemisePourcentage getRemisePourcentById(Long id) {
         EntityManager em = emf.createEntityManager();
         try {
-            return em.find(RemisePourcentage.class, id);
+            return em.find(TrajetRemisePourcentage.class, id);
         } finally {
             em.close();
         }
@@ -95,9 +176,9 @@ public class TarifRemiseService {
     public boolean hastTarif (Long idCategorie, Long idTypePlace) {
         EntityManager em = emf.createEntityManager();
         try {
-            TypedQuery<TarifTypePlaceCategorieRemise> query = em.createQuery(
-                    "SELECT t FROM TarifTypePlaceCategorieRemise t WHERE t.categoriePersonne.id = :idCategorie ORDER BY t.id DESC",
-                    TarifTypePlaceCategorieRemise.class
+            TypedQuery<TrajetTarifTypePlaceCategorieRemise> query = em.createQuery(
+                    "SELECT t FROM TrajetTarifTypePlaceCategorieRemise t WHERE t.categoriePersonne.id = :idCategorie ORDER BY t.id DESC",
+                    TrajetTarifTypePlaceCategorieRemise.class
             );
             query.setParameter("idCategorie", idCategorie);
             if( query.getResultList().isEmpty()) {
@@ -110,11 +191,11 @@ public class TarifRemiseService {
     }
 
     public void appliquerRemisePourcent(Long idRemise) throws Exception {
-        RemisePourcentage val = getRemisePourcentById(idRemise);
+        TrajetRemisePourcentage val = getRemisePourcentById(idRemise);
 
-        List<TarifTypePlaceCategorieRemise> tarifTypePlaceCategorieRemises = getAllTarifRemises(val.getCategorieParRapport().getId());
+        List<TrajetTarifTypePlaceCategorieRemise> trajetTarifTypePlaceCategorieRemises = getAllTarifRemises(val.getCategorieParRapport().getId());
 
-        for (TarifTypePlaceCategorieRemise t : tarifTypePlaceCategorieRemises) {
+        for (TrajetTarifTypePlaceCategorieRemise t : trajetTarifTypePlaceCategorieRemises) {
             t.setId(null);
 
             t.setCategoriePersonne(val.getCategorieApplication());
@@ -128,12 +209,12 @@ public class TarifRemiseService {
     /**
      * Get all tarif pourcentages remises
      */
-    public List<RemisePourcentage> getAllTarifPourcentagesRemises() {
+    public List<TrajetRemisePourcentage> getAllTarifPourcentagesRemises() {
         EntityManager em = emf.createEntityManager();
         try {
-            TypedQuery<RemisePourcentage> query = em.createQuery(
-                    "SELECT t FROM RemisePourcentage t ORDER BY t.id DESC",
-                    RemisePourcentage.class
+            TypedQuery<TrajetRemisePourcentage> query = em.createQuery(
+                    "SELECT t FROM TrajetRemisePourcentage t ORDER BY t.id DESC",
+                    TrajetRemisePourcentage.class
             );
             return query.getResultList();
         } finally {
@@ -145,12 +226,12 @@ public class TarifRemiseService {
     /**
      * Update tarif remise
      */
-    public TarifTypePlaceCategorieRemise updateTarifRemise(TarifTypePlaceCategorieRemise tarifRemise) {
+    public TrajetTarifTypePlaceCategorieRemise updateTarifRemise(TrajetTarifTypePlaceCategorieRemise tarifRemise) {
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
-            TarifTypePlaceCategorieRemise updated = em.merge(tarifRemise);
+            TrajetTarifTypePlaceCategorieRemise updated = em.merge(tarifRemise);
             tx.commit();
             return updated;
         } catch (Exception e) {
@@ -170,7 +251,7 @@ public class TarifRemiseService {
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
-            TarifTypePlaceCategorieRemise tarifRemise = em.find(TarifTypePlaceCategorieRemise.class, id);
+            TrajetTarifTypePlaceCategorieRemise tarifRemise = em.find(TrajetTarifTypePlaceCategorieRemise.class, id);
             if (tarifRemise != null) {
                 em.remove(tarifRemise);
             }
@@ -187,12 +268,12 @@ public class TarifRemiseService {
     /**
      * Search tarif remises with filters
      */
-    public List<TarifTypePlaceCategorieRemise> searchTarifRemisesWithFilters(Map<String, Object> filters) {
+    public List<TrajetTarifTypePlaceCategorieRemise> searchTarifRemisesWithFilters(Map<String, Object> filters) {
         EntityManager em = emf.createEntityManager();
         try {
             CriteriaBuilder cb = em.getCriteriaBuilder();
-            CriteriaQuery<TarifTypePlaceCategorieRemise> cq = cb.createQuery(TarifTypePlaceCategorieRemise.class);
-            Root<TarifTypePlaceCategorieRemise> root = cq.from(TarifTypePlaceCategorieRemise.class);
+            CriteriaQuery<TrajetTarifTypePlaceCategorieRemise> cq = cb.createQuery(TrajetTarifTypePlaceCategorieRemise.class);
+            Root<TrajetTarifTypePlaceCategorieRemise> root = cq.from(TrajetTarifTypePlaceCategorieRemise.class);
 
             List<Predicate> predicates = new ArrayList<>();
 
@@ -229,7 +310,7 @@ public class TarifRemiseService {
 
             cq.orderBy(cb.desc(root.get("id")));
 
-            TypedQuery<TarifTypePlaceCategorieRemise> query = em.createQuery(cq);
+            TypedQuery<TrajetTarifTypePlaceCategorieRemise> query = em.createQuery(cq);
             return query.getResultList();
         } finally {
             em.close();
@@ -239,16 +320,16 @@ public class TarifRemiseService {
     /**
      * Get tarif remise by type place and categorie personne
      */
-    public TarifTypePlaceCategorieRemise getTarifRemiseByTypePlaceAndCategorie(Long idTypePlace, Long idCategoriePersonne) {
+    public TrajetTarifTypePlaceCategorieRemise getTarifRemiseByTypePlaceAndCategorie(Long idTypePlace, Long idCategoriePersonne) {
         EntityManager em = emf.createEntityManager();
         try {
-            TypedQuery<TarifTypePlaceCategorieRemise> query = em.createQuery(
-                    "SELECT t FROM TarifTypePlaceCategorieRemise t WHERE t.typePlace.id = :idTypePlace AND t.categoriePersonne.id = :idCategoriePersonne",
-                    TarifTypePlaceCategorieRemise.class
+            TypedQuery<TrajetTarifTypePlaceCategorieRemise> query = em.createQuery(
+                    "SELECT t FROM TrajetTarifTypePlaceCategorieRemise t WHERE t.typePlace.id = :idTypePlace AND t.categoriePersonne.id = :idCategoriePersonne",
+                    TrajetTarifTypePlaceCategorieRemise.class
             );
             query.setParameter("idTypePlace", idTypePlace);
             query.setParameter("idCategoriePersonne", idCategoriePersonne);
-            List<TarifTypePlaceCategorieRemise> results = query.getResultList();
+            List<TrajetTarifTypePlaceCategorieRemise> results = query.getResultList();
             return results.isEmpty() ? null : results.get(0);
         } finally {
             em.close();
@@ -258,12 +339,12 @@ public class TarifRemiseService {
     /**
      * Get all tarif remises by type place
      */
-    public List<TarifTypePlaceCategorieRemise> getTarifRemisesByTypePlace(Long idTypePlace) {
+    public List<TrajetTarifTypePlaceCategorieRemise> getTarifRemisesByTypePlace(Long idTypePlace) {
         EntityManager em = emf.createEntityManager();
         try {
-            TypedQuery<TarifTypePlaceCategorieRemise> query = em.createQuery(
-                    "SELECT t FROM TarifTypePlaceCategorieRemise t WHERE t.typePlace.id = :idTypePlace",
-                    TarifTypePlaceCategorieRemise.class
+            TypedQuery<TrajetTarifTypePlaceCategorieRemise> query = em.createQuery(
+                    "SELECT t FROM TrajetTarifTypePlaceCategorieRemise t WHERE t.typePlace.id = :idTypePlace",
+                    TrajetTarifTypePlaceCategorieRemise.class
             );
             query.setParameter("idTypePlace", idTypePlace);
             return query.getResultList();
@@ -275,12 +356,12 @@ public class TarifRemiseService {
     /**
      * Get all tarif remises by categorie personne
      */
-    public List<TarifTypePlaceCategorieRemise> getTarifRemisesByCategorie(Long idCategoriePersonne) {
+    public List<TrajetTarifTypePlaceCategorieRemise> getTarifRemisesByCategorie(Long idCategoriePersonne) {
         EntityManager em = emf.createEntityManager();
         try {
-            TypedQuery<TarifTypePlaceCategorieRemise> query = em.createQuery(
-                    "SELECT t FROM TarifTypePlaceCategorieRemise t WHERE t.categoriePersonne.id = :idCategoriePersonne",
-                    TarifTypePlaceCategorieRemise.class
+            TypedQuery<TrajetTarifTypePlaceCategorieRemise> query = em.createQuery(
+                    "SELECT t FROM TrajetTarifTypePlaceCategorieRemise t WHERE t.categoriePersonne.id = :idCategoriePersonne",
+                    TrajetTarifTypePlaceCategorieRemise.class
             );
             query.setParameter("idCategoriePersonne", idCategoriePersonne);
             return query.getResultList();
@@ -292,11 +373,11 @@ public class TarifRemiseService {
     /**
      * Check if tarif remise already exists for this combination
      */
-    public boolean existsTarifRemise(Long idTypePlace, Long idCategoriePersonne, Long excludeId) {
+    public boolean existsTarifRemise(Long idTrajet, Long idTypePlace, Long idCategoriePersonne, Long excludeId) {
         EntityManager em = emf.createEntityManager();
         try {
-            String jpql = "SELECT COUNT(t) FROM TarifTypePlaceCategorieRemise t " +
-                    "WHERE t.typePlace.id = :idTypePlace AND t.categoriePersonne.id = :idCategoriePersonne";
+            String jpql = "SELECT COUNT(t) FROM TrajetTarifTypePlaceCategorieRemise t " +
+                    "WHERE t.typePlace.id = :idTypePlace AND t.categoriePersonne.id = :idCategoriePersonne AND t.trajet.id = :idTrajet";
 
             if (excludeId != null) {
                 jpql += " AND t.id != :excludeId";
@@ -305,6 +386,8 @@ public class TarifRemiseService {
             TypedQuery<Long> query = em.createQuery(jpql, Long.class);
             query.setParameter("idTypePlace", idTypePlace);
             query.setParameter("idCategoriePersonne", idCategoriePersonne);
+            query.setParameter("idTrajet", idTrajet);
+
 
             if (excludeId != null) {
                 query.setParameter("excludeId", excludeId);

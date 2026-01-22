@@ -1,8 +1,7 @@
 package com.mdgtaxi.servlet;
 
-import com.mdgtaxi.dto.TypeObjectDTO;
 import com.mdgtaxi.entity.CategoriePersonne;
-import com.mdgtaxi.entity.RemisePourcentage;
+import com.mdgtaxi.entity.TrajetRemisePourcentage;
 import com.mdgtaxi.service.TarifRemiseService;
 import com.mdgtaxi.service.TypeObjectService;
 import jakarta.servlet.ServletException;
@@ -15,7 +14,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import java.io.IOException;
-import java.util.List;
 
 @WebServlet("/tarif-remises-pourcent")
 public class TarifRemisePourcentServlet extends HttpServlet {
@@ -62,18 +60,18 @@ public class TarifRemisePourcentServlet extends HttpServlet {
     }
 
     private void handleSave(HttpServletRequest req) throws Exception {
-        RemisePourcentage remisePourcentage = buildRemisePourcentageFromRequest(req);
+        TrajetRemisePourcentage trajetRemisePourcentage = buildRemisePourcentageFromRequest(req);
 
         // Validate that application and reference categories are different
-        if (remisePourcentage.getCategorieApplication().getId()
-                .equals(remisePourcentage.getCategorieParRapport().getId())) {
+        if (trajetRemisePourcentage.getCategorieApplication().getId()
+                .equals(trajetRemisePourcentage.getCategorieParRapport().getId())) {
             throw new Exception("La catégorie d'application ne peut pas être la même que la catégorie de référence");
         }
 
-        if (remisePourcentage.getId() == null) {
-            createRemisePourcentage(remisePourcentage);
+        if (trajetRemisePourcentage.getId() == null) {
+            createRemisePourcentage(trajetRemisePourcentage);
         } else {
-            updateRemisePourcentage(remisePourcentage);
+            updateRemisePourcentage(trajetRemisePourcentage);
         }
     }
 
@@ -92,41 +90,41 @@ public class TarifRemisePourcentServlet extends HttpServlet {
         }
     }
 
-    private RemisePourcentage buildRemisePourcentageFromRequest(HttpServletRequest req) {
+    private TrajetRemisePourcentage buildRemisePourcentageFromRequest(HttpServletRequest req) {
         String idStr = req.getParameter("id");
-        RemisePourcentage remisePourcentage;
+        TrajetRemisePourcentage trajetRemisePourcentage;
 
         if (idStr != null && !idStr.isEmpty()) {
-            remisePourcentage = tarifRemiseService.getRemisePourcentById(Long.valueOf(idStr));
+            trajetRemisePourcentage = tarifRemiseService.getRemisePourcentById(Long.valueOf(idStr));
         } else {
-            remisePourcentage = new RemisePourcentage();
+            trajetRemisePourcentage = new TrajetRemisePourcentage();
         }
 
         // Set Categorie Application
         CategoriePersonne categorieApplication = new CategoriePersonne();
         categorieApplication.setId(Long.valueOf(req.getParameter("idCategorieApplication")));
-        remisePourcentage.setCategorieApplication(categorieApplication);
+        trajetRemisePourcentage.setCategorieApplication(categorieApplication);
 
         // Set Categorie Par Rapport
         CategoriePersonne categorieParRapport = new CategoriePersonne();
         categorieParRapport.setId(Long.valueOf(req.getParameter("idCategorieParRapport")));
-        remisePourcentage.setCategorieParRapport(categorieParRapport);
+        trajetRemisePourcentage.setCategorieParRapport(categorieParRapport);
 
         // Set Remise Pourcent
         double remisePourcent = Double.parseDouble(req.getParameter("remisePourcent"));
-        remisePourcentage.setRemisePourcent(remisePourcent);
+        trajetRemisePourcentage.setRemisePourcent(remisePourcent);
 
-        return remisePourcentage;
+        return trajetRemisePourcentage;
     }
 
     // CRUD Methods using HibernateUtil pattern
-    private void createRemisePourcentage(RemisePourcentage remisePourcentage) {
+    private void createRemisePourcentage(TrajetRemisePourcentage trajetRemisePourcentage) {
         EntityManagerFactory emf = com.mdgtaxi.util.HibernateUtil.getEntityManagerFactory();
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
-            em.persist(remisePourcentage);
+            em.persist(trajetRemisePourcentage);
             tx.commit();
         } catch (Exception e) {
             if (tx.isActive()) tx.rollback();
@@ -136,13 +134,13 @@ public class TarifRemisePourcentServlet extends HttpServlet {
         }
     }
 
-    private void updateRemisePourcentage(RemisePourcentage remisePourcentage) {
+    private void updateRemisePourcentage(TrajetRemisePourcentage trajetRemisePourcentage) {
         EntityManagerFactory emf = com.mdgtaxi.util.HibernateUtil.getEntityManagerFactory();
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
-            em.merge(remisePourcentage);
+            em.merge(trajetRemisePourcentage);
             tx.commit();
         } catch (Exception e) {
             if (tx.isActive()) tx.rollback();
@@ -158,9 +156,9 @@ public class TarifRemisePourcentServlet extends HttpServlet {
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
-            RemisePourcentage remisePourcentage = em.find(RemisePourcentage.class, id);
-            if (remisePourcentage != null) {
-                em.remove(remisePourcentage);
+            TrajetRemisePourcentage trajetRemisePourcentage = em.find(TrajetRemisePourcentage.class, id);
+            if (trajetRemisePourcentage != null) {
+                em.remove(trajetRemisePourcentage);
             }
             tx.commit();
         } catch (Exception e) {

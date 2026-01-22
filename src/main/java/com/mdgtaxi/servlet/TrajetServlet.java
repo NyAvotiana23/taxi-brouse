@@ -13,7 +13,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -130,6 +129,11 @@ public class TrajetServlet extends HttpServlet {
         Vehicule vehicule = trajet.getVehicule();
         List<VehiculeTarifTypePlace> tarifPlaces = vehiculeService.getTarifTypePlacesByVehicule(vehicule.getId());
         req.setAttribute("tarifPlaces", tarifPlaces);
+
+
+        List<TrajetTarifTypePlaceCategorieRemise> trajetTarifTypePlaceCategorieRemises = trajetService.getTarifTypePlaceCategorieRemisesByTrajetId(id);
+        req.setAttribute("tarifTypePlaceCategorieRemises", trajetTarifTypePlaceCategorieRemises);
+
 
         Map<Long, Double> soldPerType = trajetService.getSoldPlacesPerType(id);
         req.setAttribute("soldPerType", soldPerType);

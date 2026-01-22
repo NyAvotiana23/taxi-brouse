@@ -2,7 +2,6 @@ package com.mdgtaxi.service;
 
 import com.mdgtaxi.entity.*;
 import com.mdgtaxi.util.HibernateUtil;
-import com.mdgtaxi.util.TableUtil;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -27,8 +26,7 @@ public class ReservationService {
     private final EntityManagerFactory emf = HibernateUtil.getEntityManagerFactory();
 
 
-
-    public double getCAprevisionnel (Long idTrajet) {
+    public double getCAprevisionnel(Long idTrajet) {
         double val = 0;
 
         List<TrajetReservation> reservations = getReservationsByTrajetId(idTrajet);
@@ -42,6 +40,7 @@ public class ReservationService {
         }
         return val;
     }
+
     public List<TrajetReservation> searchReservationsWithFilters(Map<String, Object> filters) {
         EntityManager em = emf.createEntityManager();
         try {
@@ -225,20 +224,21 @@ public class ReservationService {
         }
     }
 
-    public TarifTypePlaceCategorieRemise getTarifRemise(Long idTypePlace, Long idCategoriePersonne) {
+    public TrajetTarifTypePlaceCategorieRemise getTarifRemise(Long idTrajet, Long idTypePlace, Long idCategoriePersonne) {
 
         EntityManager em = emf.createEntityManager();
         try {
-            TypedQuery<TarifTypePlaceCategorieRemise> query = em.createQuery(
-                    "SELECT p FROM TarifTypePlaceCategorieRemise p WHERE p.typePlace.id = :idTypePlace AND  p.categoriePersonne.id = :idCategoriePersonne",
-                    TarifTypePlaceCategorieRemise.class);
-
+            TypedQuery<TrajetTarifTypePlaceCategorieRemise> query = em.createQuery(
+                    "SELECT p FROM TrajetTarifTypePlaceCategorieRemise p WHERE p.typePlace.id = :idTypePlace " +
+                            "AND  p.categoriePersonne.id = :idCategoriePersonne AND p.trajet.id =: idTrajet",
+                    TrajetTarifTypePlaceCategorieRemise.class);
 
             query.setParameter("idTypePlace", idTypePlace);
             query.setParameter("idCategoriePersonne", idCategoriePersonne);
+            query.setParameter("idTrajet", idTrajet);
 
 
-            List<TarifTypePlaceCategorieRemise> remise = query.getResultList();
+            List<TrajetTarifTypePlaceCategorieRemise> remise = query.getResultList();
             if (!remise.isEmpty()) {
                 return remise.get(0);
             }
@@ -248,8 +248,44 @@ public class ReservationService {
         }
     }
 
+    /**
+     * Get all tarif pourcentages remises
+     */
+    public List<TrajetRemisePourcentage> getAllTarifPourcentagesRemises() {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<TrajetRemisePourcentage> query = em.createQuery(
+                    "SELECT t FROM TrajetRemisePourcentage t ORDER BY t.id DESC",
+                    TrajetRemisePourcentage.class
+            );
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    public TrajetRemisePourcentage getRemisePourcentageByCategorieApplication(Long idCategorieApplication) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<TrajetRemisePourcentage> query = em.createQuery(
+                    "SELECT t FROM TrajetRemisePourcentage t WHERE t.categorieApplication = :idCategorieApplication ORDER BY t.id DESC",
+                    TrajetRemisePourcentage.class
+            );
+
+            List<TrajetRemisePourcentage> trajetRemisePourcentages = query.getResultList();
+
+            if (!trajetRemisePourcentages.isEmpty()) {
+                return trajetRemisePourcentages.get(0);
+            }
+
+            return null;
+        } finally {
+            em.close();
+        }
+    }
+
     public double getTarifAvecRemise(Long idTrajet, Long idTypePlace, Long idCategoriePersonne) throws Exception {
-        TarifTypePlaceCategorieRemise remise = getTarifRemise(idTypePlace, idCategoriePersonne);
+        TrajetTarifTypePlaceCategorieRemise remise = getTarifRemise(idTrajet, idTypePlace, idCategoriePersonne);
 
         if (remise != null) {
             return remise.getTarifUnitaireAvecRemise();
@@ -259,11 +295,23 @@ public class ReservationService {
 
         VehiculeTarifTypePlace vehiculeTarifTypePlace = vehiculeService.getTarifTypePlaceByVehiculeAndType(t.getVehicule().getId(), idTypePlace);
 
+        TrajetRemisePourcentage trajetRemisePourcentageApplication = getRemisePourcentageByCategorieApplication(idCategoriePersonne);
+
+
         if (vehiculeTarifTypePlace == null) {
             throw new Exception("La voiture avec l'id : " + t.getVehicule().getId() + " Ne contient pas la place : " + idTypePlace);
         }
 
-        return vehiculeTarifTypePlace.getTarifUnitaire();
+        double val = vehiculeTarifTypePlace.getTarifUnitaire();
+
+        if (trajetRemisePourcentageApplication != null) {
+            TrajetTarifTypePlaceCategorieRemise remiseFrom = getTarifRemise(idTrajet, idTypePlace, trajetRemisePourcentageApplication.getCategorieParRapport().getId());
+            if (remiseFrom != null) {
+                val = remiseFrom.getTarifUnitaireAvecRemise() * (1 + trajetRemisePourcentageApplication.getRemisePourcent() / 100);
+            }
+        }
+
+        return val;
 
     }
 

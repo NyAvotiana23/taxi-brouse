@@ -1,10 +1,6 @@
 package com.mdgtaxi.service;
 
-import com.mdgtaxi.entity.Trajet;
-import com.mdgtaxi.entity.TrajetReservation;
-import com.mdgtaxi.entity.TrajetReservationDetails;
-import com.mdgtaxi.entity.TrajetReservationPaiement;
-import com.mdgtaxi.entity.VehiculeTarifTypePlace;
+import com.mdgtaxi.entity.*;
 import com.mdgtaxi.util.HibernateUtil;
 
 import javax.persistence.EntityManager;
@@ -237,6 +233,21 @@ public class TrajetService {
         }
     }
 
+    public List<TrajetTarifTypePlaceCategorieRemise> getTarifTypePlaceCategorieRemisesByTrajetId (Long idTrajet) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<TrajetTarifTypePlaceCategorieRemise> query = em.createQuery(
+                    "SELECT p FROM TrajetTarifTypePlaceCategorieRemise p WHERE  p.trajet.id =: idTrajet",
+                    TrajetTarifTypePlaceCategorieRemise.class);
+
+            query.setParameter("idTrajet", idTrajet);
+
+            List<TrajetTarifTypePlaceCategorieRemise> remise = query.getResultList();
+            return remise;
+        } finally {
+            em.close();
+        }
+    }
 
 
     public Map<Long, Double> getSoldPlacesPerType(Long trajetId) {
@@ -308,6 +319,7 @@ public class TrajetService {
             em.close();
         }
     }
+
     public List<Trajet> getAllUpcomingTrajets(LocalDateTime now) {
         EntityManager em = emf.createEntityManager();
         try {

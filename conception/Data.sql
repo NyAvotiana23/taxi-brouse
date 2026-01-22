@@ -31,6 +31,14 @@ VALUES (4, 1.0, 1.1, '2026-02-01 00:00:00'),
        (5, 1.2, 1.3, '2026-02-01 00:00:00'),
        (6, 0.0, 0.0, '2026-02-01 00:00:00');
 
+INSERT INTO Caisse_Type (libelle)
+VALUES ('Caisse Principale'),
+       ('Caisse Secondaire');
+
+INSERT INTO Caisse (id_caisse_type, nom, solde_initial)
+VALUES (1, 'Caisse 1', 1000000.0),
+       (2, 'Caisse 2', 500000.0);
+
 -- ============================================
 -- DEVISE (Currency and Exchange Rates)
 -- ============================================
@@ -126,6 +134,7 @@ INSERT INTO Vehicule_Type (libelle)
 VALUES ('Moto'),
        ('Van'),
        ('SUV');
+
 
 -- Additional Vehicule_Statut
 INSERT INTO Vehicule_Statut (libelle, score, span_html)
@@ -524,7 +533,6 @@ VALUES (4, 4, 4, 2, 4, '2026-02-01 00:00:00', '2026-02-01 12:00:00', 40.0),
 -- Assuming the constraint is removed, the following will work.
 
 
-
 INSERT INTO Vehicule_Tarif_Type_Place (id_vehicule, id_type_place, tarif_unitaire, nombre_place)
 VALUES (1, 3, 65000.0, 20.0);
 
@@ -539,20 +547,6 @@ VALUES (1, 4, 40000.0, 20.0);
 -- TRAJET_RESERVATION_DETAILS (New: Added as per request)
 -- ============================================
 
--- Trajet_Reservation_Details (Associating to reservations 1-6, with sample nombre_places)
-INSERT INTO Trajet_Reservation_Details (id_trajet_reservation, id_type_place, nombre_places)
-VALUES (1, 1, 1.0), -- Premium for Reservation 1
-       (1, 2, 0.0), -- No Standard
-       (2, 1, 2.0),
-       (2, 2, 3.0),
-       (3, 1, 0.0),
-       (3, 2, 1.0),
-       (4, 1, 1.0),
-       (4, 2, 1.0),
-       (5, 1, 3.0),
-       (5, 2, 2.0),
-       (6, 1, 0.0),
-       (6, 2, 1.0);
 
 -- ============================================
 
@@ -581,27 +575,31 @@ VALUES ('VIP', 'Siege VIP avec services exclusifs'),
 
 
 
-INSERT INTO Trajet_Tarif_Type_Place_Categorie_Remise (id_type_place, id_categorie_personne, tarif_unitaire_avec_remise)
-VALUES (3, 2, 65000); -- VIP
+INSERT INTO Trajet_Tarif_Type_Place_Categorie_Remise (id_type_place, id_trajet, id_categorie_personne,
+                                                      tarif_unitaire_avec_remise)
+VALUES (3, 1, 2, 65000); -- VIP
 
-INSERT INTO Trajet_Tarif_Type_Place_Categorie_Remise (id_type_place, id_categorie_personne, tarif_unitaire_avec_remise)
-VALUES (1, 2, 50000); -- Prenium
+INSERT INTO Trajet_Tarif_Type_Place_Categorie_Remise (id_type_place, id_trajet, id_categorie_personne,
+                                                      tarif_unitaire_avec_remise)
+VALUES (1, 1, 2, 50000); -- Prenium
 
-INSERT INTO Trajet_Tarif_Type_Place_Categorie_Remise (id_type_place, id_categorie_personne, tarif_unitaire_avec_remise)
-VALUES (4, 2, 40000); -- Economique
-
-
-
-
-INSERT INTO Trajet_Tarif_Type_Place_Categorie_Remise (id_type_place, id_categorie_personne, tarif_unitaire_avec_remise)
-VALUES (3, 1, 70000); -- VIP
-
-INSERT INTO Trajet_Tarif_Type_Place_Categorie_Remise (id_type_place, id_categorie_personne, tarif_unitaire_avec_remise)
-VALUES (1, 1, 60000); -- Prenium
-
-INSERT INTO Trajet_Tarif_Type_Place_Categorie_Remise (id_type_place, id_categorie_personne, tarif_unitaire_avec_remise)
-VALUES (4, 1, 50000); -- Economique
+INSERT INTO Trajet_Tarif_Type_Place_Categorie_Remise (id_type_place, id_trajet, id_categorie_personne,
+                                                      tarif_unitaire_avec_remise)
+VALUES (4, 1, 2, 40000); -- Economique
 
 
-INSERT INTO Remise_Pourcentage (categorie_application, categorie_par_rapport, remisePourcent)
-VALUES (3, 2, -20);
+INSERT INTO Trajet_Tarif_Type_Place_Categorie_Remise (id_type_place, id_trajet, id_categorie_personne,
+                                                      tarif_unitaire_avec_remise)
+VALUES (3, 1, 1, 70000); -- VIP
+
+INSERT INTO Trajet_Tarif_Type_Place_Categorie_Remise (id_type_place, id_trajet, id_categorie_personne,
+                                                      tarif_unitaire_avec_remise)
+VALUES (1, 1, 1, 60000); -- Prenium
+
+INSERT INTO Trajet_Tarif_Type_Place_Categorie_Remise (id_type_place, id_trajet, id_categorie_personne,
+                                                      tarif_unitaire_avec_remise)
+VALUES (4, 1, 1, 50000); -- Economique
+
+
+INSERT INTO Trajet_Remise_Pourcentage (id_trajet, categorie_application, categorie_par_rapport, remisePourcent)
+VALUES (1, 3, 2, -20);

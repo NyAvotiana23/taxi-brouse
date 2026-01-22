@@ -538,32 +538,6 @@ package com.mdgtaxi.entity;
 import lombok.Data;
 
 import javax.persistence.*;
-
-@Data
-@Entity
-@Table(name = "Remise_Pourcentage")
-public class RemisePourcentage {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @ManyToOne
-    @JoinColumn(name = "categorie_application", nullable = false)
-    private CategoriePersonne categorieApplication;
-
-    @ManyToOne
-    @JoinColumn(name = "categorie_par_rapport", nullable = false)
-    private CategoriePersonne categorieParRapport;
-
-    @Column(name = "remisePourcent", nullable = false)
-    private double remisePourcent;
-
-}
-package com.mdgtaxi.entity;
-
-import lombok.Data;
-
-import javax.persistence.*;
 import java.io.Serializable;
 
 @Data
@@ -582,32 +556,6 @@ public class ReservationStatut implements Serializable {
 
     @Column(name = "span_html", nullable= false)
     private String spanHtml;
-}
-package com.mdgtaxi.entity;
-
-import lombok.Data;
-
-import javax.persistence.*;
-
-@Data
-@Entity
-@Table(name = "Trajet_Tarif_Type_Place_Categorie_Remise")
-public class TarifTypePlaceCategorieRemise {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-
-    @ManyToOne
-    @JoinColumn(name = "id_type_place", nullable = false)
-    private TypePlace typePlace;
-
-    @ManyToOne
-    @JoinColumn(name = "id_categorie_personne", nullable = false)
-    private CategoriePersonne categoriePersonne;
-
-    @Column(name = "tarif_unitaire_avec_remise", nullable = false)
-    private double tarifUnitaireAvecRemise;
 }
 package com.mdgtaxi.entity;
 
@@ -821,6 +769,36 @@ package com.mdgtaxi.entity;
 import lombok.Data;
 
 import javax.persistence.*;
+
+@Data
+@Entity
+@Table(name = "Trajet_Remise_Pourcentage")
+public class TrajetRemisePourcentage {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "id_trajet", nullable = false)
+    private Trajet trajet;
+
+    @ManyToOne
+    @JoinColumn(name = "categorie_application", nullable = false)
+    private CategoriePersonne categorieApplication;
+
+    @ManyToOne
+    @JoinColumn(name = "categorie_par_rapport", nullable = false)
+    private CategoriePersonne categorieParRapport;
+
+    @Column(name = "remisePourcent", nullable = false)
+    private double remisePourcent;
+
+}
+package com.mdgtaxi.entity;
+
+import lombok.Data;
+
+import javax.persistence.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -987,6 +965,36 @@ public class TrajetStatut implements Serializable {
     @Column(name = "span_html", nullable= false)
     private String spanHtml;
 
+}
+package com.mdgtaxi.entity;
+
+import lombok.Data;
+
+import javax.persistence.*;
+
+@Data
+@Entity
+@Table(name = "Trajet_Tarif_Type_Place_Categorie_Remise")
+public class TrajetTarifTypePlaceCategorieRemise {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+
+    @ManyToOne
+    @JoinColumn(name = "id_trajet", nullable = false)
+    private Trajet trajet;
+
+    @ManyToOne
+    @JoinColumn(name = "id_type_place", nullable = false)
+    private TypePlace typePlace;
+
+    @ManyToOne
+    @JoinColumn(name = "id_categorie_personne", nullable = false)
+    private CategoriePersonne categoriePersonne;
+
+    @Column(name = "tarif_unitaire_avec_remise", nullable = false)
+    private double tarifUnitaireAvecRemise;
 }
 package com.mdgtaxi.entity;
 
