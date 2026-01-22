@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Define the base directory (adjust if needed for Linux mount point)
-BASE_DIR="/mnt/d/S5/Mme Baovola/taxi-brouse/src/main/java/com/mdgtaxi"  # Example if mounted under /mnt/d; change as per your setup
+BASE_DIR="/home/itu/Documents/GitHub/taxi-brouse"  # Example if mounted under /mnt/d; change as per your setup
 
 # Combine entity files
 cat "$BASE_DIR/entity/"*.java > "$BASE_DIR/entity/entities.txt"

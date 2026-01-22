@@ -25,6 +25,24 @@
     <a class="nav-link" href="<%= request.getContextPath() %>/tarif-remises">
       <i class="bi bi-calendar-check-fill"></i> Configuration tarif remise
     </a>
-
+    
+    <!-- Menu Diffusion avec sous-menus -->
+    <div class="nav-item dropdown">
+      <a class="nav-link dropdown-toggle" href="#" id="diffusionDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="bi bi-megaphone-fill"></i> Diffusions
+      </a>
+      <ul class="dropdown-menu" aria-labelledby="diffusionDropdown">
+        <li>
+          <a class="dropdown-item" href="<%= request.getContextPath() %>/diffusions-global">
+            <i class="bi bi-graph-up"></i> Diffusion Globale
+          </a>
+        </li>
+        <li>
+          <a class="dropdown-item" href="<%= request.getContextPath() %>/diffusions">
+            <i class="bi bi-building"></i> Diffusion par Société
+          </a>
+        </li>
+      </ul>
+    </div>
   </nav>
 </div>

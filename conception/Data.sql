@@ -548,14 +548,6 @@ VALUES (1, 4, 40000.0, 20.0);
 -- ============================================
 
 
--- ============================================
-
--- Donnees CategoriePersonne
-
-INSERT INTO Categorie_Personne (libelle)
-VALUES ('Adulte'),
-       ('Enfant'),
-       ('Senior');
 
 --Donnees
 
