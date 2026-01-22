@@ -131,14 +131,6 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <c:set var="societeMap" value="${{}}"/>
-                        <c:forEach var="vm" items="${vmPaiements}">
-                            <c:set var="key" value="${vm.idSociete}"/>
-                            <c:if test="${empty societeData[key]}">
-                                <c:set target="${societeData}" property="${key}" value="${vm}"/>
-                            </c:if>
-                        </c:forEach>
-                        
                         <%-- Groupement par société via scriptlet --%>
                         <%@ page import="java.util.*, com.mdgtaxi.view.VmDiffusionPaiement, java.math.BigDecimal" %>
                         <%

@@ -208,8 +208,17 @@
                     </div>
                     <div class="mb-3">
                         <label for="montantUnite" class="form-label">Montant Unité *</label>
-                        <input type="text" class="form-control" id="montantUnite" 
-                               name="montantUnite" value="${diffusion.montantUnite}" required>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="montantUnite" 
+                                   name="montantUnite" value="${diffusion.montantUnite}" required>
+                            <span class="input-group-text">Ar</span>
+                            <button type="button" class="btn btn-outline-secondary" 
+                                    onclick="document.getElementById('montantUnite').value='${montantUniteDefaut}'"
+                                    title="Appliquer la valeur par défaut de la configuration">
+                                <i class="bi bi-arrow-counterclockwise"></i>
+                            </button>
+                        </div>
+                        <small class="text-muted">Valeur par défaut: <fmt:formatNumber value="${montantUniteDefaut}" type="number" groupingUsed="true"/> Ar</small>
                     </div>
                     <div class="mb-3">
                         <label for="nombre" class="form-label">Nombre *</label>

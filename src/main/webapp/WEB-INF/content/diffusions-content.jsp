@@ -170,8 +170,12 @@
                     </div>
                     <div class="mb-3">
                         <label for="montantUnite" class="form-label">Montant Unité *</label>
-                        <input type="text" class="form-control" id="montantUnite" 
-                               name="montantUnite" required>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="montantUnite" 
+                                   name="montantUnite" value="${montantUniteDefaut}" required>
+                            <span class="input-group-text">Ar</span>
+                        </div>
+                        <small class="text-muted">Valeur par défaut depuis la configuration (COUT_DIFFUSION_TAXI)</small>
                     </div>
                     <div class="mb-3">
                         <label for="nombre" class="form-label">Nombre *</label>

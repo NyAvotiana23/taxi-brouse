@@ -20,6 +20,10 @@ public class DiffusionServlet extends HttpServlet {
     private final PubliciteService publiciteService = new PubliciteService();
     private final SocieteService societeService = new SocieteService();
     private final TrajetService trajetService = new TrajetService();
+    private final ConfigurationService configurationService = new ConfigurationService();
+
+    // Code de configuration pour le coût unitaire de diffusion
+    private static final String CODE_COUT_DIFFUSION = "COUT_DIFFUSION_TAXI";
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -111,6 +115,14 @@ public class DiffusionServlet extends HttpServlet {
         req.setAttribute("publicites", publicites);
         req.setAttribute("societes", societes);
         req.setAttribute("trajets", trajets);
+
+        // Charger toutes les configurations
+        List<Configuration> configurations = configurationService.getAllConfigurations();
+        req.setAttribute("configurations", configurations);
+
+        // Charger le montant unitaire par défaut depuis la configuration
+        String montantDefaut = configurationService.getValeurByCode(CODE_COUT_DIFFUSION, "100000");
+        req.setAttribute("montantUniteDefaut", montantDefaut);
     }
 
     private Map<String, Object> collectFilters(HttpServletRequest req) {
