@@ -15,8 +15,8 @@ import java.math.BigDecimal;
 @Subselect("""
     SELECT
         ROW_NUMBER() OVER (ORDER BY EXTRACT(YEAR FROM t.datetime_depart), EXTRACT(MONTH FROM t.datetime_depart)) AS id,
-        EXTRACT(MONTH FROM t.datetime_depart)::integer AS mois,
-        EXTRACT(YEAR  FROM t.datetime_depart)::integer AS annee,
+        CAST(EXTRACT(MONTH FROM t.datetime_depart) AS integer) AS mois,
+        CAST(EXTRACT(YEAR FROM t.datetime_depart) AS integer) AS annee,
         SUM(CAST(d.montant_unite AS DECIMAL(10,2))) AS montant_total,
         SUM(CAST(d.nombre AS INTEGER))          AS nombre_total
     FROM Diffusion d

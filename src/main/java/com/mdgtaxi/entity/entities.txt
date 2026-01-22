@@ -269,6 +269,34 @@ import lombok.Data;
 
 import javax.persistence.*;
 import java.io.Serializable;
+
+@Data
+@Entity
+@Table(name = "Configuration")
+public class Configuration implements Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "libelle", nullable = false)
+    private String libelle;
+
+    @Column(name = "valeur")
+    private String valeur;
+
+    @ManyToOne
+    @JoinColumn(name = "id_unite", nullable = false)
+    private Unite unite;
+
+    @Column(name = "code")
+    private String code;
+}
+package com.mdgtaxi.entity;
+
+import lombok.Data;
+
+import javax.persistence.*;
+import java.io.Serializable;
 import java.math.BigDecimal;
 
 @Data
@@ -314,6 +342,67 @@ public class DeviseMouvementTaux implements Serializable {
 
     @Column(name = "date_mouvement", nullable = false)
     private LocalDateTime dateMouvement;
+}
+package com.mdgtaxi.entity;
+
+import lombok.Data;
+
+import javax.persistence.*;
+import java.io.Serializable;
+
+@Data
+@Entity
+@Table(name = "Diffusion")
+public class Diffusion implements Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "id_publicite", nullable = false)
+    private Publicite publicite;
+
+    @ManyToOne
+    @JoinColumn(name = "id_trajet", nullable = false)
+    private Trajet trajet;
+
+    @Column(name = "montant_unite")
+    private String code;
+
+    @Column(name = "nombre")
+    private String nombre;
+}
+package com.mdgtaxi.entity;
+
+
+import lombok.Data;
+
+import javax.persistence.*;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Data
+@Entity
+@Table(name = "Diffusion_Paiement")
+public class DiffusionPaiement {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "id_diffusion", nullable = false)
+    private Diffusion diffusion;
+
+    @ManyToOne
+    @JoinColumn(name = "id_societe", nullable = false)
+    private Societe societe;
+
+    @Column(name = "date_paiement", nullable = false)
+    private LocalDateTime datePaiement;
+
+    @Column(name = "montant", nullable = false, precision = 15, scale = 2)
+    private BigDecimal montant;
+
 }
 package com.mdgtaxi.entity;
 
@@ -520,6 +609,31 @@ import java.io.Serializable;
 
 @Data
 @Entity
+@Table(name = "Publicite")
+public class Publicite implements Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "id_societe", nullable = false)
+    private Societe societe;
+
+    @Column(name = "description")
+    private String description;
+
+    @Column(name = "duree")
+    private String duree;
+}
+package com.mdgtaxi.entity;
+
+import lombok.Data;
+
+import javax.persistence.*;
+import java.io.Serializable;
+
+@Data
+@Entity
 @Table(name = "Region")
 public class Region implements Serializable {
     @Id
@@ -557,6 +671,28 @@ public class ReservationStatut implements Serializable {
     @Column(name = "span_html", nullable= false)
     private String spanHtml;
 }
+package com.mdgtaxi.entity;
+
+import lombok.Data;
+
+import javax.persistence.*;
+import java.io.Serializable;
+
+@Data
+@Entity
+@Table(name = "Societe")
+public class Societe implements Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "nom", nullable = false)
+    private String nom;
+
+    @Column(name = "description")
+    private String description;
+}
+
 package com.mdgtaxi.entity;
 
 import lombok.Data;
@@ -1052,6 +1188,25 @@ public class TypePlace {
 
     @Column(name = "description", nullable = false)
     private String description;
+}
+package com.mdgtaxi.entity;
+
+import lombok.Data;
+
+import javax.persistence.*;
+import java.io.Serializable;
+
+@Data
+@Entity
+@Table(name = "Unite")
+public class Unite implements Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "libelle", nullable = false)
+    private String libelle;
+    
 }
 package com.mdgtaxi.entity;
 

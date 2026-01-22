@@ -3,6 +3,7 @@ package com.mdgtaxi.service;
 import com.mdgtaxi.entity.Diffusion;
 import com.mdgtaxi.util.HibernateUtil;
 import com.mdgtaxi.view.VmDiffusionMensuelGlobal;
+import com.mdgtaxi.view.VmDiffusionPaiement;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -257,6 +258,67 @@ public class DiffusionService {
             cq.orderBy(cb.desc(root.get("id")));
 
             TypedQuery<Diffusion> query = em.createQuery(cq);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    public List<VmDiffusionPaiement> getDiffusionPaiements(Long idPublicite, List<Long> idSocietes, Long idTrajet,
+                                                           Integer mois, Integer annee,
+                                                           Integer nombreRepetitionMin, Integer nombreRepetitionMax) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<VmDiffusionPaiement> cq = cb.createQuery(VmDiffusionPaiement.class);
+            Root<VmDiffusionPaiement> root = cq.from(VmDiffusionPaiement.class);
+
+            List<Predicate> predicates = new ArrayList<>();
+
+            // Filtre sur la publicité
+            if (idPublicite != null) {
+                predicates.add(cb.equal(root.get("idPublicite"), idPublicite));
+            }
+
+            // Filtre sur les sociétés (multiple)
+            if (idSocietes != null && !idSocietes.isEmpty()) {
+                predicates.add(root.get("idSociete").in(idSocietes));
+            }
+
+            // Filtre sur le trajet
+            if (idTrajet != null) {
+                predicates.add(cb.equal(root.get("idTrajet"), idTrajet));
+            }
+
+            // Filtre sur le mois
+            if (mois != null) {
+                predicates.add(cb.equal(root.get("mois"), mois));
+            }
+
+            // Filtre sur l'année
+            if (annee != null) {
+                predicates.add(cb.equal(root.get("annee"), annee));
+            }
+
+            // Filtre sur le nombre minimum
+            if (nombreRepetitionMin != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("nombre"), nombreRepetitionMin));
+            }
+
+            // Filtre sur le nombre maximum
+            if (nombreRepetitionMax != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("nombre"), nombreRepetitionMax));
+            }
+
+            // Appliquer les prédicats
+            if (!predicates.isEmpty()) {
+                cq.where(cb.and(predicates.toArray(new Predicate[0])));
+            }
+
+            // Tri par ID diffusion décroissant
+            cq.orderBy(cb.desc(root.get("idDiffusion")));
+
+            TypedQuery<VmDiffusionPaiement> query = em.createQuery(cq);
             return query.getResultList();
         } finally {
             em.close();

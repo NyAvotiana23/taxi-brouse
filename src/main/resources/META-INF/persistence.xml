@@ -10,7 +10,7 @@
             <property name="javax.persistence.jdbc.user" value="@db.username@"/>
             <property name="javax.persistence.jdbc.password" value="@db.password@"/>
             <property name="hibernate.dialect" value="@hibernate.dialect@"/>
-            <property name="hibernate.hbm2ddl.auto" value="create"/> <!-- Or 'create', 'validate', etc. -->
+            <property name="hibernate.hbm2ddl.auto" value="update"/> <!-- Or 'create', 'validate', etc. -->
             <property name="hibernate.show_sql" value="true"/> <!-- For debugging -->
         </properties>
     </persistence-unit>

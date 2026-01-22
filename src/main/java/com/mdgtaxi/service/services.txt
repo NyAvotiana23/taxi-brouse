@@ -261,6 +261,482 @@ public class ClientService {
 }
 package com.mdgtaxi.service;
 
+import com.mdgtaxi.entity.Configuration;
+import com.mdgtaxi.entity.Unite;
+import com.mdgtaxi.util.HibernateUtil;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
+import javax.persistence.NoResultException;
+import javax.persistence.TypedQuery;
+import java.util.List;
+
+public class ConfigurationService {
+
+    private final EntityManagerFactory emf = HibernateUtil.getEntityManagerFactory();
+
+    // CREATE
+    public Configuration createConfiguration(Configuration configuration) {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            em.persist(configuration);
+            tx.commit();
+            return configuration;
+        } catch (Exception e) {
+            if (tx.isActive()) {
+                tx.rollback();
+            }
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
+
+    // READ - by ID
+    public Configuration getConfigurationById(Long id) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            return em.find(Configuration.class, id);
+        } finally {
+            em.close();
+        }
+    }
+
+    // READ - by Code (la mÃ©thode demandÃ©e)
+    public Configuration getByCode(String code) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<Configuration> query = em.createQuery(
+                "SELECT c FROM Configuration c WHERE c.code = :code",
+                Configuration.class
+            );
+            query.setParameter("code", code);
+            // On attend normalement 0 ou 1 rÃ©sultat
+            return query.getSingleResult();
+        } catch (NoResultException e) {
+            return null;  // ou throw new EntityNotFoundException() selon votre convention
+        } catch (Exception e) {
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
+
+    // READ - all
+    public List<Configuration> getAllConfigurations() {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<Configuration> query = em.createQuery(
+                "SELECT c FROM Configuration c ORDER BY c.libelle ASC",
+                Configuration.class
+            );
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    // READ - by Unite (optionnel mais souvent utile)
+    public List<Configuration> getConfigurationsByUnite(Long uniteId) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<Configuration> query = em.createQuery(
+                "SELECT c FROM Configuration c WHERE c.unite.id = :uniteId ORDER BY c.libelle ASC",
+                Configuration.class
+            );
+            query.setParameter("uniteId", uniteId);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    // UPDATE
+    public Configuration updateConfiguration(Configuration configuration) {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            Configuration updated = em.merge(configuration);
+            tx.commit();
+            return updated;
+        } catch (Exception e) {
+            if (tx.isActive()) {
+                tx.rollback();
+            }
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
+
+    // DELETE
+    public void deleteConfiguration(Long id) {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            Configuration configuration = em.find(Configuration.class, id);
+            if (configuration != null) {
+                em.remove(configuration);
+            }
+            tx.commit();
+        } catch (Exception e) {
+            if (tx.isActive()) {
+                tx.rollback();
+            }
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
+
+    // MÃ©thode bonus : getValeurByCode (trÃ¨s pratique pour les paramÃ¨tres applicatifs)
+    public String getValeurByCode(String code) {
+        Configuration config = getByCode(code);
+        return (config != null) ? config.getValeur() : null;
+    }
+
+    // Variante avec valeur par dÃ©faut
+    public String getValeurByCode(String code, String defaultValue) {
+        Configuration config = getByCode(code);
+        return (config != null && config.getValeur() != null) 
+            ? config.getValeur() 
+            : defaultValue;
+    }
+}
+package com.mdgtaxi.service;
+
+import com.mdgtaxi.entity.Diffusion;
+import com.mdgtaxi.util.HibernateUtil;
+import com.mdgtaxi.view.VmDiffusionMensuelGlobal;
+import com.mdgtaxi.view.VmDiffusionPaiement;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import java.util.ArrayList;
+import java.util.List;
+
+public class DiffusionService {
+
+    private final EntityManagerFactory emf = HibernateUtil.getEntityManagerFactory();
+
+    // CREATE
+    public Diffusion createDiffusion(Diffusion diffusion) {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            em.persist(diffusion);
+            tx.commit();
+            return diffusion;
+        } catch (Exception e) {
+            if (tx.isActive())
+                tx.rollback();
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
+
+    // READ - Get by ID
+    public Diffusion getDiffusionById(Long id) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            return em.find(Diffusion.class, id);
+        } finally {
+            em.close();
+        }
+    }
+
+    // READ - Get all
+    public List<Diffusion> getAllDiffusions() {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<Diffusion> query = em.createQuery(
+                    "SELECT d FROM Diffusion d ORDER BY d.id DESC",
+                    Diffusion.class
+            );
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    // READ - Get by Publicite ID
+    public List<Diffusion> getDiffusionsByPubliciteId(Long publiciteId) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<Diffusion> query = em.createQuery(
+                    "SELECT d FROM Diffusion d WHERE d.publicite.id = :publiciteId ORDER BY d.id DESC",
+                    Diffusion.class
+            );
+            query.setParameter("publiciteId", publiciteId);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    // READ - Get by Trajet ID
+    public List<Diffusion> getDiffusionsByTrajetId(Long trajetId) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<Diffusion> query = em.createQuery(
+                    "SELECT d FROM Diffusion d WHERE d.trajet.id = :trajetId ORDER BY d.id DESC",
+                    Diffusion.class
+            );
+            query.setParameter("trajetId", trajetId);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    // UPDATE
+    public Diffusion updateDiffusion(Diffusion diffusion) {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            Diffusion updated = em.merge(diffusion);
+            tx.commit();
+            return updated;
+        } catch (Exception e) {
+            if (tx.isActive())
+                tx.rollback();
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
+
+    // DELETE
+    public void deleteDiffusion(Long id) {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            Diffusion diffusion = em.find(Diffusion.class, id);
+            if (diffusion != null) {
+                em.remove(diffusion);
+            }
+            tx.commit();
+        } catch (Exception e) {
+            if (tx.isActive())
+                tx.rollback();
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
+
+    // Fonction spÃ©cifique : getDiffusionMensuel avec filtrage
+    public List<VmDiffusionMensuelGlobal> getDiffusionMensuel(Integer mois, Integer annee, 
+                                                               Double montantMin, Double montantMax) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<VmDiffusionMensuelGlobal> cq = cb.createQuery(VmDiffusionMensuelGlobal.class);
+            Root<VmDiffusionMensuelGlobal> root = cq.from(VmDiffusionMensuelGlobal.class);
+
+            List<Predicate> predicates = new ArrayList<>();
+
+            // Filtre sur le mois
+            if (mois != null) {
+                predicates.add(cb.equal(root.get("mois"), mois));
+            }
+
+            // Filtre sur l'annÃ©e
+            if (annee != null) {
+                predicates.add(cb.equal(root.get("annee"), annee));
+            }
+
+            // Filtre sur le montant minimum
+            if (montantMin != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("montantTotal"), montantMin));
+            }
+
+            // Filtre sur le montant maximum
+            if (montantMax != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("montantTotal"), montantMax));
+            }
+
+            // Appliquer les prÃ©dicats
+            if (!predicates.isEmpty()) {
+                cq.where(cb.and(predicates.toArray(new Predicate[0])));
+            }
+
+            // Tri par annÃ©e et mois dÃ©croissants
+            cq.orderBy(cb.desc(root.get("annee")), cb.desc(root.get("mois")));
+
+            TypedQuery<VmDiffusionMensuelGlobal> query = em.createQuery(cq);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    // Fonction supplÃ©mentaire : obtenir toutes les statistiques mensuelles
+    public List<VmDiffusionMensuelGlobal> getAllDiffusionMensuel() {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<VmDiffusionMensuelGlobal> query = em.createQuery(
+                    "SELECT v FROM VmDiffusionMensuelGlobal v ORDER BY v.annee DESC, v.mois DESC",
+                    VmDiffusionMensuelGlobal.class
+            );
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    // Fonction de filtrage avancÃ© des diffusions
+    public List<Diffusion> getDiffusion(Long idPublicite, Long idSociete, Long idTrajet,
+                                        Integer mois, Integer annee,
+                                        Integer nombreRepetitionMin, Integer nombreRepetitionMax) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<Diffusion> cq = cb.createQuery(Diffusion.class);
+            Root<Diffusion> root = cq.from(Diffusion.class);
+
+            List<Predicate> predicates = new ArrayList<>();
+
+            // Filtre sur la publicitÃ©
+            if (idPublicite != null) {
+                predicates.add(cb.equal(root.get("publicite").get("id"), idPublicite));
+            }
+
+            // Filtre sur la sociÃ©tÃ© (via publicitÃ©)
+            if (idSociete != null) {
+                predicates.add(cb.equal(root.get("publicite").get("societe").get("id"), idSociete));
+            }
+
+            // Filtre sur le trajet
+            if (idTrajet != null) {
+                predicates.add(cb.equal(root.get("trajet").get("id"), idTrajet));
+            }
+
+            // Filtre sur le mois (via trajet.datetimeDepart)
+            if (mois != null) {
+                predicates.add(cb.equal(
+                    cb.function("MONTH", Integer.class, root.get("trajet").get("datetimeDepart")),
+                    mois
+                ));
+            }
+
+            // Filtre sur l'annÃ©e (via trajet.datetimeDepart)
+            if (annee != null) {
+                predicates.add(cb.equal(
+                    cb.function("YEAR", Integer.class, root.get("trajet").get("datetimeDepart")),
+                    annee
+                ));
+            }
+
+            // Filtre sur le nombre minimum
+            if (nombreRepetitionMin != null) {
+                predicates.add(cb.greaterThanOrEqualTo(
+                    cb.function("CAST", Integer.class, root.get("nombre")),
+                    nombreRepetitionMin
+                ));
+            }
+
+            // Filtre sur le nombre maximum
+            if (nombreRepetitionMax != null) {
+                predicates.add(cb.lessThanOrEqualTo(
+                    cb.function("CAST", Integer.class, root.get("nombre")),
+                    nombreRepetitionMax
+                ));
+            }
+
+            // Appliquer les prÃ©dicats
+            if (!predicates.isEmpty()) {
+                cq.where(cb.and(predicates.toArray(new Predicate[0])));
+            }
+
+            // Tri par ID dÃ©croissant
+            cq.orderBy(cb.desc(root.get("id")));
+
+            TypedQuery<Diffusion> query = em.createQuery(cq);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    public List<VmDiffusionPaiement> getDiffusionPaiements(Long idPublicite, List<Long> idSocietes, Long idTrajet,
+                                                           Integer mois, Integer annee,
+                                                           Integer nombreRepetitionMin, Integer nombreRepetitionMax) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<VmDiffusionPaiement> cq = cb.createQuery(VmDiffusionPaiement.class);
+            Root<VmDiffusionPaiement> root = cq.from(VmDiffusionPaiement.class);
+
+            List<Predicate> predicates = new ArrayList<>();
+
+            // Filtre sur la publicitÃ©
+            if (idPublicite != null) {
+                predicates.add(cb.equal(root.get("idPublicite"), idPublicite));
+            }
+
+            // Filtre sur les sociÃ©tÃ©s (multiple)
+            if (idSocietes != null && !idSocietes.isEmpty()) {
+                predicates.add(root.get("idSociete").in(idSocietes));
+            }
+
+            // Filtre sur le trajet
+            if (idTrajet != null) {
+                predicates.add(cb.equal(root.get("idTrajet"), idTrajet));
+            }
+
+            // Filtre sur le mois
+            if (mois != null) {
+                predicates.add(cb.equal(root.get("mois"), mois));
+            }
+
+            // Filtre sur l'annÃ©e
+            if (annee != null) {
+                predicates.add(cb.equal(root.get("annee"), annee));
+            }
+
+            // Filtre sur le nombre minimum
+            if (nombreRepetitionMin != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("nombre"), nombreRepetitionMin));
+            }
+
+            // Filtre sur le nombre maximum
+            if (nombreRepetitionMax != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("nombre"), nombreRepetitionMax));
+            }
+
+            // Appliquer les prÃ©dicats
+            if (!predicates.isEmpty()) {
+                cq.where(cb.and(predicates.toArray(new Predicate[0])));
+            }
+
+            // Tri par ID diffusion dÃ©croissant
+            cq.orderBy(cb.desc(root.get("idDiffusion")));
+
+            TypedQuery<VmDiffusionPaiement> query = em.createQuery(cq);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+}
+package com.mdgtaxi.service;
+
 import com.mdgtaxi.dto.EntityDetailWithStatusDto;
 import com.mdgtaxi.dto.EntityListWithStatusDto;
 import com.mdgtaxi.dto.EntityStatusCriteria;
@@ -1130,6 +1606,113 @@ public class MouvementStatusService {
 }
 package com.mdgtaxi.service;
 
+import com.mdgtaxi.entity.Publicite;
+import com.mdgtaxi.util.HibernateUtil;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
+import javax.persistence.TypedQuery;
+import java.util.List;
+
+public class PubliciteService {
+
+    private final EntityManagerFactory emf = HibernateUtil.getEntityManagerFactory();
+
+    // CREATE
+    public Publicite createPublicite(Publicite publicite) {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            em.persist(publicite);
+            tx.commit();
+            return publicite;
+        } catch (Exception e) {
+            if (tx.isActive()) tx.rollback();
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
+
+    // READ - by ID
+    public Publicite getPubliciteById(Long id) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            return em.find(Publicite.class, id);
+        } finally {
+            em.close();
+        }
+    }
+
+    // READ - all
+    public List<Publicite> getAllPublicites() {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<Publicite> query = em.createQuery(
+                    "SELECT p FROM Publicite p ORDER BY p.id DESC",
+                    Publicite.class
+            );
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    // READ - by Societe
+    public List<Publicite> getPublicitesBySocieteId(Long societeId) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<Publicite> query = em.createQuery(
+                    "SELECT p FROM Publicite p WHERE p.societe.id = :societeId ORDER BY p.id DESC",
+                    Publicite.class
+            );
+            query.setParameter("societeId", societeId);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    // UPDATE
+    public Publicite updatePublicite(Publicite publicite) {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            Publicite updated = em.merge(publicite);
+            tx.commit();
+            return updated;
+        } catch (Exception e) {
+            if (tx.isActive()) tx.rollback();
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
+
+    // DELETE
+    public void deletePublicite(Long id) {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            Publicite publicite = em.find(Publicite.class, id);
+            if (publicite != null) {
+                em.remove(publicite);
+            }
+            tx.commit();
+        } catch (Exception e) {
+            if (tx.isActive()) tx.rollback();
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
+}
+package com.mdgtaxi.service;
+
 import com.mdgtaxi.entity.*;
 import com.mdgtaxi.util.HibernateUtil;
 
@@ -1722,6 +2305,113 @@ public class ReservationService {
             if (tx.isActive())
                 tx.rollback();
             throw e;
+        } finally {
+            em.close();
+        }
+    }
+}
+package com.mdgtaxi.service;
+
+import com.mdgtaxi.entity.Societe;
+import com.mdgtaxi.util.HibernateUtil;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
+import javax.persistence.TypedQuery;
+import java.util.List;
+
+public class SocieteService {
+
+    private final EntityManagerFactory emf = HibernateUtil.getEntityManagerFactory();
+
+    // CREATE
+    public Societe createSociete(Societe societe) {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            em.persist(societe);
+            tx.commit();
+            return societe;
+        } catch (Exception e) {
+            if (tx.isActive()) tx.rollback();
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
+
+    // READ - by ID
+    public Societe getSocieteById(Long id) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            return em.find(Societe.class, id);
+        } finally {
+            em.close();
+        }
+    }
+
+    // READ - all
+    public List<Societe> getAllSocietes() {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<Societe> query = em.createQuery(
+                    "SELECT s FROM Societe s ORDER BY s.nom ASC",
+                    Societe.class
+            );
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    // UPDATE
+    public Societe updateSociete(Societe societe) {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            Societe updated = em.merge(societe);
+            tx.commit();
+            return updated;
+        } catch (Exception e) {
+            if (tx.isActive()) tx.rollback();
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
+
+    // DELETE
+    public void deleteSociete(Long id) {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            Societe societe = em.find(Societe.class, id);
+            if (societe != null) {
+                em.remove(societe);
+            }
+            tx.commit();
+        } catch (Exception e) {
+            if (tx.isActive()) tx.rollback();
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
+
+    // Optionnel : recherche par nom (partiel)
+    public List<Societe> findByNomContaining(String nom) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<Societe> query = em.createQuery(
+                    "SELECT s FROM Societe s WHERE LOWER(s.nom) LIKE LOWER(:nom) ORDER BY s.nom ASC",
+                    Societe.class
+            );
+            query.setParameter("nom", "%" + nom + "%");
+            return query.getResultList();
         } finally {
             em.close();
         }
@@ -2329,6 +3019,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class TrajetService {
+    
 
     private final EntityManagerFactory emf = HibernateUtil.getEntityManagerFactory();
 
@@ -2742,6 +3433,113 @@ public class TypeObjectService {
 
     private String getEntityName(String tableName) {
         return tableName.replace("_", "");
+    }
+}
+package com.mdgtaxi.service;
+
+import com.mdgtaxi.entity.Unite;
+import com.mdgtaxi.util.HibernateUtil;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
+import javax.persistence.TypedQuery;
+import java.util.List;
+
+public class UniteService {
+
+    private final EntityManagerFactory emf = HibernateUtil.getEntityManagerFactory();
+
+    // CREATE
+    public Unite createUnite(Unite unite) {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            em.persist(unite);
+            tx.commit();
+            return unite;
+        } catch (Exception e) {
+            if (tx.isActive()) tx.rollback();
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
+
+    // READ - by ID
+    public Unite getUniteById(Long id) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            return em.find(Unite.class, id);
+        } finally {
+            em.close();
+        }
+    }
+
+    // READ - all
+    public List<Unite> getAllUnites() {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<Unite> query = em.createQuery(
+                    "SELECT u FROM Unite u ORDER BY u.libelle ASC",
+                    Unite.class
+            );
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    // UPDATE
+    public Unite updateUnite(Unite unite) {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            Unite updated = em.merge(unite);
+            tx.commit();
+            return updated;
+        } catch (Exception e) {
+            if (tx.isActive()) tx.rollback();
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
+
+    // DELETE
+    public void deleteUnite(Long id) {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            Unite unite = em.find(Unite.class, id);
+            if (unite != null) {
+                em.remove(unite);
+            }
+            tx.commit();
+        } catch (Exception e) {
+            if (tx.isActive()) tx.rollback();
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
+
+    // Optionnel : recherche par libellÃ©
+    public List<Unite> findByLibelleContaining(String libelle) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<Unite> query = em.createQuery(
+                    "SELECT u FROM Unite u WHERE LOWER(u.libelle) LIKE LOWER(:libelle) ORDER BY u.libelle ASC",
+                    Unite.class
+            );
+            query.setParameter("libelle", "%" + libelle + "%");
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
     }
 }
 package com.mdgtaxi.service;
