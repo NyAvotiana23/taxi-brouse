@@ -17,8 +17,8 @@ import java.math.BigDecimal;
         ROW_NUMBER() OVER (ORDER BY EXTRACT(YEAR FROM t.datetime_depart), EXTRACT(MONTH FROM t.datetime_depart)) AS id,
         CAST(EXTRACT(MONTH FROM t.datetime_depart) AS integer) AS mois,
         CAST(EXTRACT(YEAR FROM t.datetime_depart) AS integer) AS annee,
-        d.montant_unite AS montant_total,
-        SUM(CAST(d.nombre AS INTEGER))          AS nombre_total
+        SUM(CAST(d.montant_unite AS DECIMAL(15,2)) * CAST(d.nombre AS INTEGER)) AS montant_total,
+        SUM(CAST(d.nombre AS INTEGER)) AS nombre_total
     FROM Diffusion d
     INNER JOIN Trajet t ON d.id_trajet = t.id
     GROUP BY EXTRACT(YEAR FROM t.datetime_depart), EXTRACT(MONTH FROM t.datetime_depart)

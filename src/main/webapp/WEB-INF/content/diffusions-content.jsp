@@ -104,13 +104,14 @@
                                 <td>${diffusion.publicite.societe.nom}</td>
                                 <td>${diffusion.publicite.description}</td>
                                 <td>
-                                    ${diffusion.trajet.ligne.depart} → ${diffusion.trajet.ligne.arrivee}
+                                    ${diffusion.trajet.ligne.villeDepart.nom} → ${diffusion.trajet.ligne.villeArrivee.nom}
                                 </td>
                                 <td>
-                                    <fmt:formatDate value="${diffusion.trajet.datetimeDepart}" 
-                                                   pattern="dd/MM/yyyy HH:mm"/>
+                                    <fmt:parseDate value="${diffusion.trajet.datetimeDepart}" 
+                                                   pattern="yyyy-MM-dd'T'HH:mm" var="parsedDate" type="both"/>
+                                    <fmt:formatDate value="${parsedDate}" pattern="dd/MM/yyyy HH:mm"/>
                                 </td>
-                                <td>${diffusion.code}</td>
+                                <td><fmt:formatNumber value="${diffusion.montantUnite}" type="number" groupingUsed="true"/> Ar</td>
                                 <td>${diffusion.nombre}</td>
                                 <td>
                                     <a href="${pageContext.request.contextPath}/diffusions?action=detail&id=${diffusion.id}" 
@@ -162,8 +163,7 @@
                             <option value="">Sélectionner un trajet</option>
                             <c:forEach var="trajet" items="${trajets}">
                                 <option value="${trajet.id}">
-                                    ${trajet.ligne.depart} → ${trajet.ligne.arrivee} - 
-                                    <fmt:formatDate value="${trajet.datetimeDepart}" pattern="dd/MM/yyyy HH:mm"/>
+                                    #${trajet.id} - ${trajet.ligne.villeDepart.nom} → ${trajet.ligne.villeArrivee.nom}
                                 </option>
                             </c:forEach>
                         </select>

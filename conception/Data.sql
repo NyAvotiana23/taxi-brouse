@@ -297,18 +297,19 @@ VALUES ('En cours', 10, '<span class="badge bg-info">En cours</span>'),
        ('Termine', 20, '<span class="badge bg-success">Termine</span>'),
        ('Annule', 0, '<span class="badge bg-danger">Annule</span>');
 
--- Trajet (Adapted: Removed frais_unitaire as per entity definition)
+-- Trajet (avec frais_unitaire en Ariary)
+-- Trajets en décembre 2025 pour les diffusions publicitaires
 INSERT INTO Trajet (id_ligne, id_chauffeur, id_vehicule, nombre_passager, id_trajet_statut, datetime_depart,
-                    datetime_arrivee)
-VALUES (1, 1, 1, 5, 1, '2026-01-01 00:00:00', '2026-01-01 10:00:00'),
-       (2, 2, 2, 20, 1, '2026-01-01 00:00:00', '2026-01-01 12:00:00'),
-       (3, 3, 3, 2, 1, '2026-01-01 00:00:00', '2026-01-01 14:00:00');
+                    datetime_arrivee, frais_unitaire)
+VALUES (1, 1, 1, 5, 2, '2025-12-05 08:00:00', '2025-12-05 18:00:00', 25000.00),
+       (2, 2, 2, 20, 2, '2025-12-10 06:00:00', '2025-12-10 16:00:00', 35000.00),
+       (3, 3, 3, 2, 2, '2025-12-15 07:00:00', '2025-12-15 15:00:00', 30000.00);
 
 -- Trajet_Mouvement_Statut
 INSERT INTO Trajet_Mouvement_Statut (id_trajet, date_mouvement, id_nouveau_statut, observation)
-VALUES (1, '2026-01-01 00:00:00', 1, 'Initial status'),
-       (2, '2026-01-01 00:00:00', 1, 'Initial status'),
-       (3, '2026-01-01 00:00:00', 1, 'Initial status');
+VALUES (1, '2025-12-05 00:00:00', 2, 'Trajet terminé'),
+       (2, '2025-12-10 00:00:00', 2, 'Trajet terminé'),
+       (3, '2025-12-15 00:00:00', 2, 'Trajet terminé');
 
 -- Trajet_Motif_Arret
 INSERT INTO Trajet_Motif_Arret (libelle)
@@ -336,12 +337,12 @@ VALUES ('Prevu', 5, '<span class="badge bg-warning">Prevu</span>'),
        ('En retard', 15, '<span class="badge bg-danger">En retard</span>'),
        ('Avance', 25, '<span class="badge bg-primary">Avance</span>');
 
--- Additional Trajet (Adapted: Removed frais_unitaire)
+-- Additional Trajet (avec frais_unitaire en Ariary)
 INSERT INTO Trajet (id_ligne, id_chauffeur, id_vehicule, nombre_passager, id_trajet_statut, datetime_depart,
-                    datetime_arrivee)
-VALUES (4, 4, 4, 2, 4, '2026-02-01 00:00:00', '2026-02-01 12:00:00'),
-       (5, 5, 5, 15, 5, '2026-02-01 00:00:00', '2026-02-01 14:00:00'),
-       (6, 6, 6, 5, 6, '2026-02-01 00:00:00', '2026-02-01 16:00:00');
+                    datetime_arrivee, frais_unitaire)
+VALUES (4, 4, 4, 2, 4, '2026-02-01 08:00:00', '2026-02-01 18:00:00', 28000.00),
+       (5, 5, 5, 15, 5, '2026-02-15 06:00:00', '2026-02-15 18:00:00', 40000.00),
+       (6, 6, 6, 5, 6, '2026-02-20 07:00:00', '2026-02-20 15:00:00', 32000.00);
 
 -- Additional Trajet_Mouvement_Statut
 INSERT INTO Trajet_Mouvement_Statut (id_trajet, date_mouvement, id_nouveau_statut, observation)
@@ -634,3 +635,31 @@ VALUES (1, 'Campagne publicitaire décembre - 20 diffusions', 'Decembre 2025');
 -- Lewis : 10 diffusions × 100000 = 1 000 000 Ariary
 INSERT INTO Publicite (id_societe, description, duree)
 VALUES (2, 'Campagne publicitaire décembre - 10 diffusions', 'Decembre 2025');
+
+-- ============================================
+-- DIFFUSION (Diffusions publicitaires sur trajets)
+-- ============================================
+-- Vaniala : 20 diffusions sur différents trajets à 100000 Ar/diffusion = 2 000 000 Ar total
+INSERT INTO Diffusion (id_publicite, id_trajet, montant_unite, nombre)
+VALUES (1, 1, 100000, 5),   -- 5 diffusions sur trajet 1 = 500 000 Ar
+       (1, 2, 100000, 8),   -- 8 diffusions sur trajet 2 = 800 000 Ar
+       (1, 3, 100000, 7);   -- 7 diffusions sur trajet 3 = 700 000 Ar
+-- Total Vaniala : 5+8+7 = 20 diffusions = 2 000 000 Ar
+
+-- Lewis : 10 diffusions sur différents trajets à 100000 Ar/diffusion = 1 000 000 Ar total
+INSERT INTO Diffusion (id_publicite, id_trajet, montant_unite, nombre)
+VALUES (2, 1, 100000, 4),   -- 4 diffusions sur trajet 1 = 400 000 Ar
+       (2, 2, 100000, 6);   -- 6 diffusions sur trajet 2 = 600 000 Ar
+-- Total Lewis : 4+6 = 10 diffusions = 1 000 000 Ar
+
+-- ============================================
+-- DIFFUSION_PAIEMENT (Paiements des sociétés pour les diffusions)
+-- ============================================
+-- Vaniala a payé 1 000 000 Ar sur les 2 000 000 Ar dus (reste 1 000 000 Ar)
+INSERT INTO Diffusion_Paiement (id_diffusion, id_societe, date_paiement, montant)
+VALUES (1, 1, '2025-12-15 10:00:00', 500000),   -- Paiement partiel diffusion 1
+       (2, 1, '2025-12-20 14:30:00', 500000);   -- Paiement partiel diffusion 2
+-- Total payé par Vaniala : 500000 + 500000 = 1 000 000 Ar
+-- Reste à payer : 2 000 000 - 1 000 000 = 1 000 000 Ar
+
+-- Lewis n'a pas encore payé (reste 1 000 000 Ar)

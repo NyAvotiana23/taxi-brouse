@@ -26,5 +26,5 @@ public class Diffusion implements Serializable {
     private BigDecimal montantUnite;
 
     @Column(name = "nombre")
-    private String nombre;
+    private Integer nombre;
 }

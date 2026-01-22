@@ -43,7 +43,7 @@
                         </tr>
                         <tr>
                             <th>Montant Unité:</th>
-                            <td><strong>${diffusion.code}</strong></td>
+                            <td><strong><fmt:formatNumber value="${diffusion.montantUnite}" type="number" groupingUsed="true"/> Ar</strong></td>
                         </tr>
                         <tr>
                             <th>Nombre de Diffusions:</th>
@@ -53,8 +53,8 @@
                             <th>Montant Total:</th>
                             <td>
                                 <span class="badge bg-success fs-6">
-                                    <c:set var="total" value="${diffusion.code * diffusion.nombre}"/>
-                                    <fmt:formatNumber value="${total}" type="currency" currencySymbol="Ar"/>
+                                    <c:set var="total" value="${diffusion.montantUnite * diffusion.nombre}"/>
+                                    <fmt:formatNumber value="${total}" type="number" groupingUsed="true"/> Ar
                                 </span>
                             </td>
                         </tr>
@@ -113,9 +113,9 @@
                         <tr>
                             <th>Ligne:</th>
                             <td>
-                                <strong>${diffusion.trajet.ligne.depart}</strong> 
+                                <strong>${diffusion.trajet.ligne.villeDepart.nom}</strong> 
                                 <i class="bi bi-arrow-right"></i> 
-                                <strong>${diffusion.trajet.ligne.arrivee}</strong>
+                                <strong>${diffusion.trajet.ligne.villeArrivee.nom}</strong>
                             </td>
                         </tr>
                         <tr>
@@ -133,8 +133,9 @@
                         <tr>
                             <th style="width: 40%;">Date Départ:</th>
                             <td>
-                                <fmt:formatDate value="${diffusion.trajet.datetimeDepart}" 
-                                              pattern="dd/MM/yyyy HH:mm"/>
+                                <fmt:parseDate value="${diffusion.trajet.datetimeDepart}" 
+                                              pattern="yyyy-MM-dd'T'HH:mm" var="parsedDepart" type="both"/>
+                                <fmt:formatDate value="${parsedDepart}" pattern="dd/MM/yyyy HH:mm"/>
                             </td>
                         </tr>
                         <tr>
@@ -142,8 +143,9 @@
                             <td>
                                 <c:choose>
                                     <c:when test="${not empty diffusion.trajet.datetimeArrivee}">
-                                        <fmt:formatDate value="${diffusion.trajet.datetimeArrivee}" 
-                                                      pattern="dd/MM/yyyy HH:mm"/>
+                                        <fmt:parseDate value="${diffusion.trajet.datetimeArrivee}" 
+                                                      pattern="yyyy-MM-dd'T'HH:mm" var="parsedArrivee" type="both"/>
+                                        <fmt:formatDate value="${parsedArrivee}" pattern="dd/MM/yyyy HH:mm"/>
                                     </c:when>
                                     <c:otherwise>
                                         <span class="text-muted">Non définie</span>
@@ -199,8 +201,7 @@
                             <c:forEach var="trajet" items="${trajets}">
                                 <option value="${trajet.id}" 
                                         ${trajet.id == diffusion.trajet.id ? 'selected' : ''}>
-                                    ${trajet.ligne.depart} → ${trajet.ligne.arrivee} - 
-                                    <fmt:formatDate value="${trajet.datetimeDepart}" pattern="dd/MM/yyyy HH:mm"/>
+                                    #${trajet.id} - ${trajet.ligne.villeDepart.nom} → ${trajet.ligne.villeArrivee.nom}
                                 </option>
                             </c:forEach>
                         </select>
@@ -208,7 +209,7 @@
                     <div class="mb-3">
                         <label for="montantUnite" class="form-label">Montant Unité *</label>
                         <input type="text" class="form-control" id="montantUnite" 
-                               name="montantUnite" value="${diffusion.code}" required>
+                               name="montantUnite" value="${diffusion.montantUnite}" required>
                     </div>
                     <div class="mb-3">
                         <label for="nombre" class="form-label">Nombre *</label>

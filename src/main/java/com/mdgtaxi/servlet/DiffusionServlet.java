@@ -171,7 +171,7 @@ public class DiffusionServlet extends HttpServlet {
         diffusion.setTrajet(trajet);
 
         diffusion.setMontantUnite(BigDecimal.valueOf(Double.parseDouble(req.getParameter("montantUnite"))));
-        diffusion.setNombre(req.getParameter("nombre"));
+        diffusion.setNombre(Integer.valueOf(req.getParameter("nombre")));
 
         return diffusion;
     }
