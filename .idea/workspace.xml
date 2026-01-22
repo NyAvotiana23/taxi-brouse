@@ -5,8 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c1c861f5-aebe-49fb-9999-4ef53b312464" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/diffusion-global.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/diffusions-global.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/diffusion.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/diffusions.jsp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/service/DiffusionPaiementService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/service/DiffusionPaiementServlet.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/servlet/DiffusionPaiementDashboardServlet.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/Diffusion.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/Diffusion.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/servlet/DiffusionServlet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/servlet/DiffusionServlet.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/view/VmDiffusionMensuelGlobal.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/view/VmDiffusionMensuelGlobal.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/diffusion-content.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/diffusions-content.jsp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/diffusion-global-content.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/diffusions-global-content.jsp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/includes/sidebar.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/includes/sidebar.jsp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -154,7 +162,7 @@
       <workItem from="1768837887771" duration="62000" />
       <workItem from="1768972213345" duration="1531000" />
       <workItem from="1769057139277" duration="3395000" />
-      <workItem from="1769066249091" duration="3517000" />
+      <workItem from="1769066249091" duration="4617000" />
     </task>
     <servers />
   </component>

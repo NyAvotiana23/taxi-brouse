@@ -42,6 +42,12 @@
             <i class="bi bi-building"></i> Diffusion par Société
           </a>
         </li>
+
+        <li>
+          <a class="dropdown-item" href="<%= request.getContextPath() %>/paiements-dashboard">
+            <i class="bi bi-building"></i> Paiement dashboard
+          </a>
+        </li>
       </ul>
     </div>
   </nav>

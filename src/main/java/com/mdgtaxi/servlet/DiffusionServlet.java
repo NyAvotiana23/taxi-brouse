@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.*;
 
 @WebServlet("/diffusions")
@@ -49,22 +50,22 @@ public class DiffusionServlet extends HttpServlet {
 
         // Collecte des filtres
         Map<String, Object> filters = collectFilters(req);
-        
+
         List<Diffusion> diffusions;
         if (!filters.isEmpty()) {
             diffusions = diffusionService.getDiffusion(
-                (Long) filters.get("idPublicite"),
-                (Long) filters.get("idSociete"),
-                (Long) filters.get("idTrajet"),
-                (Integer) filters.get("mois"),
-                (Integer) filters.get("annee"),
-                (Integer) filters.get("nombreMin"),
-                (Integer) filters.get("nombreMax")
+                    (Long) filters.get("idPublicite"),
+                    (Long) filters.get("idSociete"),
+                    (Long) filters.get("idTrajet"),
+                    (Integer) filters.get("mois"),
+                    (Integer) filters.get("annee"),
+                    (Integer) filters.get("nombreMin"),
+                    (Integer) filters.get("nombreMax")
             );
         } else {
             diffusions = diffusionService.getAllDiffusions();
         }
-        
+
         req.setAttribute("diffusions", diffusions);
         req.getRequestDispatcher("/diffusions.jsp").forward(req, resp);
     }
@@ -169,7 +170,7 @@ public class DiffusionServlet extends HttpServlet {
         trajet.setId(Long.valueOf(req.getParameter("idTrajet")));
         diffusion.setTrajet(trajet);
 
-        diffusion.setCode(req.getParameter("montantUnite"));
+        diffusion.setMontantUnite(BigDecimal.valueOf(Double.parseDouble(req.getParameter("montantUnite"))));
         diffusion.setNombre(req.getParameter("nombre"));
 
         return diffusion;

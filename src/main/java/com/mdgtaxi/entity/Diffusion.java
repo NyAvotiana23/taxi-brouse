@@ -4,6 +4,7 @@ import lombok.Data;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 @Data
 @Entity
@@ -22,7 +23,7 @@ public class Diffusion implements Serializable {
     private Trajet trajet;
 
     @Column(name = "montant_unite")
-    private String code;
+    private BigDecimal montantUnite;
 
     @Column(name = "nombre")
     private String nombre;
