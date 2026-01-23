@@ -245,7 +245,7 @@ FROM Trajet t
          INNER JOIN Vehicule v ON t.id_vehicule = v.id
          LEFT JOIN Trajet_Reservation tr ON t.id = tr.id_trajet
     AND tr.id_reservation_statut NOT IN (
-        SELECT id FROM Reservation_StatutWHERE libelle = 'Annulé'
+        SELECT id FROM Reservation_Statut WHERE libelle = 'Annulé'
     )
 GROUP BY t.id, v.maximum_passager;
 
@@ -292,7 +292,7 @@ SELECT DISTINCT ON (trms.id_trajet_reservation)
     rs.libelle AS libelle_statut,
     trms.date_mouvement
 FROM Trajet_Reservation_Mouvement_Status trms
-         INNER JOIN Reservation_Statutrs ON trms.id_nouveau_statut = rs.id
+         INNER JOIN Reservation_Statut rs ON trms.id_nouveau_statut = rs.id
 ORDER BY trms.id_trajet_reservation, trms.date_mouvement DESC;
 
 -- Vue matérialisée : Détails des réservations
@@ -311,7 +311,7 @@ SELECT
 FROM Trajet_Reservation tr
          INNER JOIN Client c ON tr.id_client = c.id
          INNER JOIN Type_Client tc ON c.id_type_client = tc.id
-         INNER JOIN Reservation_Statutrs ON tr.id_reservation_statut = rs.id
+         INNER JOIN Reservation_Statut rs ON tr.id_reservation_statut = rs.id
          LEFT JOIN VM_Reservation_Statut_Actuel rsa ON tr.id = rsa.id_trajet_reservation;
 
 CREATE UNIQUE INDEX idx_vm_reservation_detail_id ON VM_Reservation_Detail (id_reservation);

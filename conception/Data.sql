@@ -59,27 +59,30 @@ VALUES (1, 0.9, 1.0, '2026-01-01 00:00:00'),
 -- ============================================
 
 -- Donnees CategoriePersonne
-
-INSERT INTO Categorie_Personne (libelle)
-VALUES ('Adulte'),
-       ('Enfant'),
-       ('Senior');
+-- WARNING: Categorie_Personne table is not defined in Table.sql
+-- Commenting out this INSERT statement
+-- INSERT INTO Categorie_Personne (libelle)
+-- VALUES ('Adulte'),
+--        ('Enfant'),
+--        ('Senior');
 
 --Donnees
 
 -- ============================================
 -- TYPE_PLACE (New: Added as per request)
+-- WARNING: Type_Place table is not defined in Table.sql
+-- Commenting out these INSERT statements
 -- ============================================
 
 -- Type_Place
-INSERT INTO Type_Place (nom_type_place, description)
-VALUES ('Premium', 'Siege premium avec confort accru et espace supplementaire'),
-       ('Standard', 'Siege standard pour un voyage economique');
+-- INSERT INTO Type_Place (nom_type_place, description)
+-- VALUES ('Premium', 'Siege premium avec confort accru et espace supplementaire'),
+--        ('Standard', 'Siege standard pour un voyage economique');
 
 -- Additional Type_Place (Examples)
-INSERT INTO Type_Place (nom_type_place, description)
-VALUES ('VIP', 'Siege VIP avec services exclusifs'),
-       ('Economique', 'Siege basique pour budgets limites');
+-- INSERT INTO Type_Place (nom_type_place, description)
+-- VALUES ('VIP', 'Siege VIP avec services exclusifs'),
+--        ('Economique', 'Siege basique pour budgets limites');
 
 
 -- Additional Devise
@@ -105,10 +108,10 @@ VALUES ('Voiture'),
        ('Camion');
 
 -- Vehicule_Statut
-INSERT INTO Vehicule_Statut (libelle, score, span_html)
-VALUES ('Disponible', 10, '<span class="badge bg-success">Disponible</span>'),
-       ('En maintenance', 5, '<span class="badge bg-warning">En maintenance</span>'),
-       ('Hors service', 0, '<span class="badge bg-danger">Hors service</span>');
+INSERT INTO Vehicule_Statut (libelle)
+VALUES ('Disponible'),
+       ('En maintenance'),
+       ('Hors service');
 
 -- Vehicule
 INSERT INTO Vehicule (id_type, id_type_carburant, marque, modele, maximum_passager, immatriculation, capacite_carburant,
@@ -137,10 +140,10 @@ VALUES ('Moto'),
 
 
 -- Additional Vehicule_Statut
-INSERT INTO Vehicule_Statut (libelle, score, span_html)
-VALUES ('En transit', 8, '<span class="badge bg-primary">En transit</span>'),
-       ('Reserve', 7, '<span class="badge bg-info">Reserve</span>'),
-       ('En test', 6, '<span class="badge bg-secondary">En test</span>');
+INSERT INTO Vehicule_Statut (libelle)
+VALUES ('En transit'),
+       ('Reserve'),
+       ('En test');
 
 -- Additional Vehicule
 INSERT INTO Vehicule (id_type, id_type_carburant, marque, modele, maximum_passager, immatriculation, capacite_carburant,
@@ -166,10 +169,10 @@ VALUES (4, 'Changement d''huile', '2026-02-01 00:00:00', '2026-02-02 00:00:00', 
 -- ============================================
 
 -- Chauffeur_Statut
-INSERT INTO Chauffeur_Statut (libelle, score, span_html)
-VALUES ('Actif', 10, '<span class="badge bg-success">Actif</span>'),
-       ('En conge', 5, '<span class="badge bg-warning">En conge</span>'),
-       ('Suspendu', 0, '<span class="badge bg-danger">Suspendu</span>');
+INSERT INTO Chauffeur_Statut (libelle)
+VALUES ('Actif'),
+       ('En conge'),
+       ('Suspendu');
 
 -- Chauffeur
 INSERT INTO Chauffeur (nom, prenom, date_naissance, numero_permis)
@@ -184,10 +187,10 @@ VALUES (1, '2026-01-01 00:00:00', 1, 'Initial status'),
        (3, '2026-01-01 00:00:00', 1, 'Initial status');
 
 -- Additional Chauffeur_Statut
-INSERT INTO Chauffeur_Statut (libelle, score, span_html)
-VALUES ('En formation', 8, '<span class="badge bg-primary">En formation</span>'),
-       ('Disponible', 9, '<span class="badge bg-success">Disponible</span>'),
-       ('Retraite', 1, '<span class="badge bg-secondary">Retraite</span>');
+INSERT INTO Chauffeur_Statut (libelle)
+VALUES ('En formation'),
+       ('Disponible'),
+       ('Retraite');
 
 -- Additional Chauffeur
 INSERT INTO Chauffeur (nom, prenom, date_naissance, numero_permis)
@@ -292,18 +295,18 @@ VALUES (4, 1, 4),
 -- ============================================
 
 -- Trajet_Statut
-INSERT INTO Trajet_Statut (libelle, score, span_html)
-VALUES ('En cours', 10, '<span class="badge bg-info">En cours</span>'),
-       ('Termine', 20, '<span class="badge bg-success">Termine</span>'),
-       ('Annule', 0, '<span class="badge bg-danger">Annule</span>');
+INSERT INTO Trajet_Statut (libelle)
+VALUES ('En cours'),
+       ('Termine'),
+       ('Annule');
 
 -- Trajet (avec frais_unitaire en Ariary)
 -- Trajets en décembre 2025 pour les diffusions publicitaires
 INSERT INTO Trajet (id_ligne, id_chauffeur, id_vehicule, nombre_passager, id_trajet_statut, datetime_depart,
                     datetime_arrivee)
-VALUES (1, 1, 1, 50, 2, '2026-20-01 10:00:00', '2026-20-01 12:00:00'),
-       (1, 2, 1, 50, 2, '2026-21-01 10:00:00', '2026-21-01 12:00:00'),
-       (1, 3, 1, 50, 2, '2026-21-01 15:00:00', '2026-21-01 17:00:00');
+VALUES (1, 1, 1, 50, 2, '2026-01-20 10:00:00', '2026-01-20 12:00:00'),
+       (1, 2, 1, 50, 2, '2026-01-21 10:00:00', '2026-01-21 12:00:00'),
+       (1, 3, 1, 50, 2, '2026-01-21 15:00:00', '2026-01-21 17:00:00');
 
 -- Trajet_Mouvement_Statut
 INSERT INTO Trajet_Mouvement_Statut (id_trajet, date_mouvement, id_nouveau_statut, observation)
@@ -332,10 +335,10 @@ VALUES (1, NULL, 1, 1, '2026-01-01 05:00:00', 10.0, 1.5),
        (3, NULL, 3, 2, '2026-01-01 07:00:00', 30.0, 1.2);
 
 -- Additional Trajet_Statut
-INSERT INTO Trajet_Statut (libelle, score, span_html)
-VALUES ('Prevu', 5, '<span class="badge bg-warning">Prevu</span>'),
-       ('En retard', 15, '<span class="badge bg-danger">En retard</span>'),
-       ('Avance', 25, '<span class="badge bg-primary">Avance</span>');
+INSERT INTO Trajet_Statut (libelle)
+VALUES ('Prevu'),
+       ('En retard'),
+       ('Avance');
 
 -- Additional Trajet (avec frais_unitaire en Ariary)
 INSERT INTO Trajet (id_ligne, id_chauffeur, id_vehicule, nombre_passager, id_trajet_statut, datetime_depart,
@@ -429,10 +432,10 @@ VALUES ('Mobile Money'),
 -- ============================================
 
 -- Reservation_Statut
-INSERT INTO Reservation_Statut (libelle, score, span_html)
-VALUES ('Confirmee', 10, '<span class="badge bg-success">Confirmee</span>'),
-       ('Annulee', 0, '<span class="badge bg-danger">Annulee</span>'),
-       ('En attente', 5, '<span class="badge bg-warning">En attente</span>');
+INSERT INTO Reservation_Statut (libelle)
+VALUES ('Confirmee'),
+       ('Annulee'),
+       ('En attente');
 
 -- Trajet_Reservation (Adapted: Removed numero_siege and nombre_place_reservation as per entity definition)
 INSERT INTO Trajet_Reservation (id_client, id_trajet, id_reservation_statut, nom_passager,
@@ -455,10 +458,10 @@ VALUES (1, '2026-01-01 00:00:00', 1, 'Initial status'),
 --        (3, 3, NULL, 30.0, 3, '2026-01-01 00:00:00');
 
 -- Additional Reservation_Statut
-INSERT INTO Reservation_Statut (libelle, score, span_html)
-VALUES ('Payee', 15, '<span class="badge bg-primary">Payee</span>'),
-       ('Remboursee', 2, '<span class="badge bg-info">Remboursee</span>'),
-       ('Expiree', 0, '<span class="badge bg-secondary">Expiree</span>');
+INSERT INTO Reservation_Statut (libelle)
+VALUES ('Payee'),
+       ('Remboursee'),
+       ('Expiree');
 
 -- Additional Trajet_Reservation (Adapted: Removed numero_siege and nombre_place_reservation)
 INSERT INTO Trajet_Reservation (id_client, id_trajet, id_reservation_statut, nom_passager,
@@ -528,20 +531,22 @@ VALUES (4, 4, 4, 2, 4, '2026-02-01 00:00:00', '2026-02-01 12:00:00', 40.0),
 
 -- ============================================
 -- VEHICULE_TARIF_TYPE_PLACE (New: Added as per request, with tariffs 140000 for Premium, 80000 for Standard)
+-- WARNING: Vehicule_Tarif_Type_Place and Type_Place tables are not defined in Table.sql
+-- Commenting out these INSERT statements
 -- ============================================
 
 -- Note: If there is a unique constraint on tarif_unitaire causing errors, remove it from the schema as it prevents multiple entries with the same tariff.
 -- Assuming the constraint is removed, the following will work.
 
 
-INSERT INTO Vehicule_Tarif_Type_Place (id_vehicule, id_type_place, tarif_unitaire, nombre_place)
-VALUES (1, 3, 65000.0, 20.0);
+-- INSERT INTO Vehicule_Tarif_Type_Place (id_vehicule, id_type_place, tarif_unitaire, nombre_place)
+-- VALUES (1, 3, 65000.0, 20.0);
 
-INSERT INTO Vehicule_Tarif_Type_Place (id_vehicule, id_type_place, tarif_unitaire, nombre_place)
-VALUES (1, 1, 50000.0, 20.0);
+-- INSERT INTO Vehicule_Tarif_Type_Place (id_vehicule, id_type_place, tarif_unitaire, nombre_place)
+-- VALUES (1, 1, 50000.0, 20.0);
 
-INSERT INTO Vehicule_Tarif_Type_Place (id_vehicule, id_type_place, tarif_unitaire, nombre_place)
-VALUES (1, 4, 40000.0, 20.0);
+-- INSERT INTO Vehicule_Tarif_Type_Place (id_vehicule, id_type_place, tarif_unitaire, nombre_place)
+-- VALUES (1, 4, 40000.0, 20.0);
 
 
 
@@ -553,49 +558,52 @@ VALUES (1, 4, 40000.0, 20.0);
 --Donnees
 
 -- ============================================
--- TYPE_PLACE (New: Added as per request)
+-- TYPE_PLACE (Removed duplicate - original insertion exists at lines 75-82)
 -- ============================================
 
--- Type_Place
-INSERT INTO Type_Place (nom_type_place, description)
-VALUES ('Premium', 'Siege premium avec confort accru et espace supplementaire'),
-       ('Standard', 'Siege standard pour un voyage economique');
+-- Type_Place - Already inserted above
+-- INSERT INTO Type_Place (nom_type_place, description)
+-- VALUES ('Premium', 'Siege premium avec confort accru et espace supplementaire'),
+--        ('Standard', 'Siege standard pour un voyage economique');
 
--- Additional Type_Place (Examples)
-INSERT INTO Type_Place (nom_type_place, description)
-VALUES ('VIP', 'Siege VIP avec services exclusifs'),
-       ('Economique', 'Siege basique pour budgets limites');
-
-
-
-INSERT INTO Trajet_Tarif_Type_Place_Categorie_Remise (id_type_place, id_trajet, id_categorie_personne,
-                                                      tarif_unitaire_avec_remise)
-VALUES (3, 1, 2, 65000); -- VIP
-
-INSERT INTO Trajet_Tarif_Type_Place_Categorie_Remise (id_type_place, id_trajet, id_categorie_personne,
-                                                      tarif_unitaire_avec_remise)
-VALUES (1, 1, 2, 50000); -- Prenium
-
-INSERT INTO Trajet_Tarif_Type_Place_Categorie_Remise (id_type_place, id_trajet, id_categorie_personne,
-                                                      tarif_unitaire_avec_remise)
-VALUES (4, 1, 2, 40000); -- Economique
+-- Additional Type_Place (Examples) - Already inserted above
+-- INSERT INTO Type_Place (nom_type_place, description)
+-- VALUES ('VIP', 'Siege VIP avec services exclusifs'),
+--        ('Economique', 'Siege basique pour budgets limites');
 
 
-INSERT INTO Trajet_Tarif_Type_Place_Categorie_Remise (id_type_place, id_trajet, id_categorie_personne,
-                                                      tarif_unitaire_avec_remise)
-VALUES (3, 1, 1, 70000); -- VIP
 
-INSERT INTO Trajet_Tarif_Type_Place_Categorie_Remise (id_type_place, id_trajet, id_categorie_personne,
-                                                      tarif_unitaire_avec_remise)
-VALUES (1, 1, 1, 60000); -- Prenium
+-- WARNING: The following tables are referenced but not defined in Table.sql
+-- Commenting out these INSERT statements as they will fail
+-- INSERT INTO Trajet_Tarif_Type_Place_Categorie_Remise (id_type_place, id_trajet, id_categorie_personne,
+--                                                       tarif_unitaire_avec_remise)
+-- VALUES (3, 1, 2, 65000); -- VIP
 
-INSERT INTO Trajet_Tarif_Type_Place_Categorie_Remise (id_type_place, id_trajet, id_categorie_personne,
-                                                      tarif_unitaire_avec_remise)
-VALUES (4, 1, 1, 50000); -- Economique
+-- INSERT INTO Trajet_Tarif_Type_Place_Categorie_Remise (id_type_place, id_trajet, id_categorie_personne,
+--                                                       tarif_unitaire_avec_remise)
+-- VALUES (1, 1, 2, 50000); -- Prenium
+
+-- INSERT INTO Trajet_Tarif_Type_Place_Categorie_Remise (id_type_place, id_trajet, id_categorie_personne,
+--                                                       tarif_unitaire_avec_remise)
+-- VALUES (4, 1, 2, 40000); -- Economique
 
 
-INSERT INTO Trajet_Remise_Pourcentage (id_trajet, categorie_application, categorie_par_rapport, remisePourcent)
-VALUES (1, 3, 2, -20);
+-- INSERT INTO Trajet_Tarif_Type_Place_Categorie_Remise (id_type_place, id_trajet, id_categorie_personne,
+--                                                       tarif_unitaire_avec_remise)
+-- VALUES (3, 1, 1, 70000); -- VIP
+
+-- INSERT INTO Trajet_Tarif_Type_Place_Categorie_Remise (id_type_place, id_trajet, id_categorie_personne,
+--                                                       tarif_unitaire_avec_remise)
+-- VALUES (1, 1, 1, 60000); -- Prenium
+
+-- INSERT INTO Trajet_Tarif_Type_Place_Categorie_Remise (id_type_place, id_trajet, id_categorie_personne,
+--                                                       tarif_unitaire_avec_remise)
+-- VALUES (4, 1, 1, 50000); -- Economique
+
+
+-- WARNING: Trajet_Remise_Pourcentage table is not defined in Table.sql
+-- INSERT INTO Trajet_Remise_Pourcentage (id_trajet, categorie_application, categorie_par_rapport, remisePourcent)
+-- VALUES (1, 3, 2, -20);
 
 
 -- ============================================
