@@ -219,6 +219,216 @@ public class ChauffeurService {
 }
 package com.mdgtaxi.service;
 
+import com.mdgtaxi.util.HibernateUtil;
+import com.mdgtaxi.view.VmTrajetCaComplet;
+import com.mdgtaxi.view.VmTrajetCaReel;
+import com.mdgtaxi.view.VmTrajetPrevisionCaTotal;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.*;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+public class ChiffreAffaireService {
+    
+    private final EntityManagerFactory emf = HibernateUtil.getEntityManagerFactory();
+
+    // ===== VmTrajetPrevisionCaTotal =====
+    
+    public List<VmTrajetPrevisionCaTotal> getAllPrevisions() {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<VmTrajetPrevisionCaTotal> query = em.createQuery(
+                "SELECT v FROM VmTrajetPrevisionCaTotal v ORDER BY v.dateDepart DESC, v.heureDepart DESC",
+                VmTrajetPrevisionCaTotal.class
+            );
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    public VmTrajetPrevisionCaTotal getPrevisionByTrajetId(Long idTrajet) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            return em.find(VmTrajetPrevisionCaTotal.class, idTrajet);
+        } finally {
+            em.close();
+        }
+    }
+
+    public List<VmTrajetPrevisionCaTotal> searchPrevisions(Map<String, Object> filters) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<VmTrajetPrevisionCaTotal> cq = cb.createQuery(VmTrajetPrevisionCaTotal.class);
+            Root<VmTrajetPrevisionCaTotal> root = cq.from(VmTrajetPrevisionCaTotal.class);
+
+            List<Predicate> predicates = buildPredicates(cb, root, filters);
+
+            if (!predicates.isEmpty()) {
+                cq.where(cb.and(predicates.toArray(new Predicate[0])));
+            }
+
+            cq.orderBy(cb.desc(root.get("dateDepart")), cb.desc(root.get("heureDepart")));
+
+            TypedQuery<VmTrajetPrevisionCaTotal> query = em.createQuery(cq);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    // ===== VmTrajetCaReel =====
+    
+    public List<VmTrajetCaReel> getAllCaReels() {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<VmTrajetCaReel> query = em.createQuery(
+                "SELECT v FROM VmTrajetCaReel v ORDER BY v.dateDepart DESC, v.heureDepart DESC",
+                VmTrajetCaReel.class
+            );
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    public VmTrajetCaReel getCaReelByTrajetId(Long idTrajet) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            return em.find(VmTrajetCaReel.class, idTrajet);
+        } finally {
+            em.close();
+        }
+    }
+
+    public List<VmTrajetCaReel> searchCaReels(Map<String, Object> filters) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<VmTrajetCaReel> cq = cb.createQuery(VmTrajetCaReel.class);
+            Root<VmTrajetCaReel> root = cq.from(VmTrajetCaReel.class);
+
+            List<Predicate> predicates = buildPredicates(cb, root, filters);
+
+            if (!predicates.isEmpty()) {
+                cq.where(cb.and(predicates.toArray(new Predicate[0])));
+            }
+
+            cq.orderBy(cb.desc(root.get("dateDepart")), cb.desc(root.get("heureDepart")));
+
+            TypedQuery<VmTrajetCaReel> query = em.createQuery(cq);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    // ===== VmTrajetCaComplet =====
+    
+    public List<VmTrajetCaComplet> getAllCaComplets() {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<VmTrajetCaComplet> query = em.createQuery(
+                "SELECT v FROM VmTrajetCaComplet v ORDER BY v.dateDepart DESC, v.heureDepart DESC",
+                VmTrajetCaComplet.class
+            );
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    public VmTrajetCaComplet getCaCompletByTrajetId(Long idTrajet) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            return em.find(VmTrajetCaComplet.class, idTrajet);
+        } finally {
+            em.close();
+        }
+    }
+
+    public List<VmTrajetCaComplet> searchCaComplets(Map<String, Object> filters) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<VmTrajetCaComplet> cq = cb.createQuery(VmTrajetCaComplet.class);
+            Root<VmTrajetCaComplet> root = cq.from(VmTrajetCaComplet.class);
+
+            List<Predicate> predicates = buildPredicates(cb, root, filters);
+
+            if (!predicates.isEmpty()) {
+                cq.where(cb.and(predicates.toArray(new Predicate[0])));
+            }
+
+            cq.orderBy(cb.desc(root.get("dateDepart")), cb.desc(root.get("heureDepart")));
+
+            TypedQuery<VmTrajetCaComplet> query = em.createQuery(cq);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    // ===== MÃ©thodes utilitaires =====
+    
+    private <T> List<Predicate> buildPredicates(CriteriaBuilder cb, Root<T> root, Map<String, Object> filters) {
+        List<Predicate> predicates = new ArrayList<>();
+
+        for (Map.Entry<String, Object> entry : filters.entrySet()) {
+            String key = entry.getKey();
+            Object value = entry.getValue();
+
+            if (value == null) continue;
+
+            switch (key) {
+                case "idTrajet":
+                    predicates.add(cb.equal(root.get("idTrajet"), value));
+                    break;
+                case "nomVilleDepart":
+                    predicates.add(cb.like(cb.lower(root.get("nomVilleDepart")), "%" + value.toString().toLowerCase() + "%"));
+                    break;
+                case "nomVilleArrive":
+                    predicates.add(cb.like(cb.lower(root.get("nomVilleArrive")), "%" + value.toString().toLowerCase() + "%"));
+                    break;
+                case "immatriculationVehicule":
+                    predicates.add(cb.like(cb.lower(root.get("immatriculationVehicule")), "%" + value.toString().toLowerCase() + "%"));
+                    break;
+                case "dateDepart":
+                    predicates.add(cb.equal(root.get("dateDepart"), value));
+                    break;
+                case "dateDepart>=":
+                    predicates.add(cb.greaterThanOrEqualTo(root.get("dateDepart"), (LocalDate) value));
+                    break;
+                case "dateDepart<=":
+                    predicates.add(cb.lessThanOrEqualTo(root.get("dateDepart"), (LocalDate) value));
+                    break;
+                case "heureDepart":
+                    predicates.add(cb.equal(root.get("heureDepart"), value));
+                    break;
+                case "heureDepart>=":
+                    predicates.add(cb.greaterThanOrEqualTo(root.get("heureDepart"), (LocalTime) value));
+                    break;
+                case "heureDepart<=":
+                    predicates.add(cb.lessThanOrEqualTo(root.get("heureDepart"), (LocalTime) value));
+                    break;
+                default:
+                    // Ignorer les filtres inconnus
+                    break;
+            }
+        }
+
+        return predicates;
+    }
+}
+package com.mdgtaxi.service;
+
 import com.mdgtaxi.entity.Client;
 import com.mdgtaxi.util.HibernateUtil;
 
@@ -406,6 +616,256 @@ public class ConfigurationService {
         return (config != null && config.getValeur() != null) 
             ? config.getValeur() 
             : defaultValue;
+    }
+}
+package com.mdgtaxi.service;
+
+import com.mdgtaxi.entity.Diffusion;
+import com.mdgtaxi.entity.DiffusionPaiement;
+import com.mdgtaxi.entity.Societe;
+import com.mdgtaxi.util.HibernateUtil;
+import com.mdgtaxi.view.VmDiffusionPaiement;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+public class DiffusionPaiementService {
+
+    private final EntityManagerFactory emf = HibernateUtil.getEntityManagerFactory();
+
+    // CREATE
+    public DiffusionPaiement createPaiement(DiffusionPaiement paiement) {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            em.persist(paiement);
+            tx.commit();
+            return paiement;
+        } catch (Exception e) {
+            if (tx.isActive())
+                tx.rollback();
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
+
+    // READ - by ID
+    public DiffusionPaiement getPaiementById(Long id) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            return em.find(DiffusionPaiement.class, id);
+        } finally {
+            em.close();
+        }
+    }
+
+    // READ - all
+    public List<DiffusionPaiement> getAllPaiements() {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<DiffusionPaiement> query = em.createQuery(
+                    "SELECT p FROM DiffusionPaiement p ORDER BY p.datePaiement DESC",
+                    DiffusionPaiement.class
+            );
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    // READ - by Diffusion ID
+    public List<DiffusionPaiement> getPaiementsByDiffusionId(Long diffusionId) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<DiffusionPaiement> query = em.createQuery(
+                    "SELECT p FROM DiffusionPaiement p WHERE p.diffusion.id = :diffusionId ORDER BY p.datePaiement DESC",
+                    DiffusionPaiement.class
+            );
+            query.setParameter("diffusionId", diffusionId);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    // READ - by Societe ID
+    public List<DiffusionPaiement> getPaiementsBySocieteId(Long societeId) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<DiffusionPaiement> query = em.createQuery(
+                    "SELECT p FROM DiffusionPaiement p WHERE p.societe.id = :societeId ORDER BY p.datePaiement DESC",
+                    DiffusionPaiement.class
+            );
+            query.setParameter("societeId", societeId);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    // UPDATE
+    public DiffusionPaiement updatePaiement(DiffusionPaiement paiement) {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            DiffusionPaiement updated = em.merge(paiement);
+            tx.commit();
+            return updated;
+        } catch (Exception e) {
+            if (tx.isActive())
+                tx.rollback();
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
+
+    // DELETE
+    public void deletePaiement(Long id) {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            DiffusionPaiement paiement = em.find(DiffusionPaiement.class, id);
+            if (paiement != null) {
+                em.remove(paiement);
+            }
+            tx.commit();
+        } catch (Exception e) {
+            if (tx.isActive())
+                tx.rollback();
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
+
+    // Get VmDiffusionPaiement with filters
+    public List<VmDiffusionPaiement> getVmPaiements(Long idPublicite, List<Long> idSocietes, Long idTrajet,
+                                                    Integer mois, Integer annee,
+                                                    Integer nombreRepetitionMin, Integer nombreRepetitionMax) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<VmDiffusionPaiement> cq = cb.createQuery(VmDiffusionPaiement.class);
+            Root<VmDiffusionPaiement> root = cq.from(VmDiffusionPaiement.class);
+
+            List<Predicate> predicates = new ArrayList<>();
+
+            if (idPublicite != null) {
+                predicates.add(cb.equal(root.get("idPublicite"), idPublicite));
+            }
+
+            if (idSocietes != null && !idSocietes.isEmpty()) {
+                predicates.add(root.get("idSociete").in(idSocietes));
+            }
+
+            if (idTrajet != null) {
+                predicates.add(cb.equal(root.get("idTrajet"), idTrajet));
+            }
+
+            if (mois != null) {
+                predicates.add(cb.equal(root.get("mois"), mois));
+            }
+
+            if (annee != null) {
+                predicates.add(cb.equal(root.get("annee"), annee));
+            }
+
+            if (nombreRepetitionMin != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("nombre"), nombreRepetitionMin));
+            }
+
+            if (nombreRepetitionMax != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("nombre"), nombreRepetitionMax));
+            }
+
+            if (!predicates.isEmpty()) {
+                cq.where(cb.and(predicates.toArray(new Predicate[0])));
+            }
+
+            cq.orderBy(cb.desc(root.get("idDiffusion")));
+
+            TypedQuery<VmDiffusionPaiement> query = em.createQuery(cq);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    // Get all VmDiffusionPaiement
+    public List<VmDiffusionPaiement> getAllVmPaiements() {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<VmDiffusionPaiement> query = em.createQuery(
+                    "SELECT v FROM VmDiffusionPaiement v ORDER BY v.idDiffusion DESC",
+                    VmDiffusionPaiement.class
+            );
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    // New method for proportional payment based on filters
+    public void makeProportionalPayment(Long idPublicite, List<Long> idSocietes, Long idTrajet,
+                                        Integer mois, Integer annee,
+                                        Integer nombreMin, Integer nombreMax,
+                                        BigDecimal amount) {
+        List<VmDiffusionPaiement> vms = getVmPaiements(idPublicite, idSocietes, idTrajet, mois, annee, nombreMin, nombreMax);
+
+        BigDecimal totalRemaining = BigDecimal.ZERO;
+        for (VmDiffusionPaiement vm : vms) {
+            BigDecimal remaining = vm.getMontantTotal().subtract(vm.getMontantPaye());
+            if (remaining.compareTo(BigDecimal.ZERO) > 0) {
+                totalRemaining = totalRemaining.add(remaining);
+            }
+        }
+
+        if (totalRemaining.compareTo(BigDecimal.ZERO) == 0) {
+            throw new IllegalStateException("Aucun montant dÃ» pour les critÃ¨res sÃ©lectionnÃ©s.");
+        }
+
+        if (amount.compareTo(totalRemaining) > 0) {
+            throw new IllegalArgumentException("Le montant de paiement excÃ¨de le montant dÃ».");
+        }
+
+        BigDecimal ratio = amount.divide(totalRemaining, 10, RoundingMode.HALF_UP);
+
+        LocalDateTime date = LocalDateTime.now();
+
+        for (VmDiffusionPaiement vm : vms) {
+            BigDecimal remaining = vm.getMontantTotal().subtract(vm.getMontantPaye());
+            if (remaining.compareTo(BigDecimal.ZERO) > 0) {
+                BigDecimal payAmount = remaining.multiply(ratio).setScale(2, RoundingMode.HALF_UP);
+                if (payAmount.compareTo(BigDecimal.ZERO) > 0) {
+                    DiffusionPaiement p = new DiffusionPaiement();
+                    Diffusion d = new Diffusion();
+                    d.setId(vm.getIdDiffusion());
+                    p.setDiffusion(d);
+                    Societe s = new Societe();
+                    s.setId(vm.getIdSociete());
+                    p.setSociete(s);
+                    p.setDatePaiement(date);
+                    p.setMontantPaye(payAmount);
+                    createPaiement(p);
+                }
+            }
+        }
     }
 }
 package com.mdgtaxi.service;

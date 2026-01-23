@@ -349,6 +349,8 @@ import lombok.Data;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Data
 @Entity
@@ -359,18 +361,46 @@ public class Diffusion implements Serializable {
     private Long id;
 
     @ManyToOne
+    @JoinColumn(name = "id_societe", nullable = false)
+    private Societe societe;
+
+    @Column(name = "date_creation")
+    private LocalDateTime dateCreation;
+}
+package com.mdgtaxi.entity;
+
+import lombok.Data;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Data
+@Entity
+@Table(name = "Diffusion_Detail")
+public class DiffusionDetail implements Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
     @JoinColumn(name = "id_publicite", nullable = false)
     private Publicite publicite;
+
+    @ManyToOne
+    @JoinColumn(name = "id_diffusion", nullable = false)
+    private Diffusion diffusion;
 
     @ManyToOne
     @JoinColumn(name = "id_trajet", nullable = false)
     private Trajet trajet;
 
-    @Column(name = "montant_unite")
-    private String code;
+    @Column(name = "nombre_repetition")
+    private Integer nombreRepetition;
 
-    @Column(name = "nombre")
-    private String nombre;
+    @Column(name = "montant_unitaire")
+    private BigDecimal montantUnitaire;
 }
 package com.mdgtaxi.entity;
 
@@ -400,9 +430,40 @@ public class DiffusionPaiement {
     @Column(name = "date_paiement", nullable = false)
     private LocalDateTime datePaiement;
 
-    @Column(name = "montant", nullable = false, precision = 15, scale = 2)
-    private BigDecimal montant;
+    @Column(name = "montant_paye", nullable = false, precision = 15, scale = 2)
+    private BigDecimal montantPaye;
 
+}
+package com.mdgtaxi.entity;
+
+
+import lombok.Data;
+
+import javax.persistence.*;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Data
+@Entity
+@Table(name = "Diffusion_Paiement_Repartition")
+public class DiffusionPaiementRepartition {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "id_diffusion_detail", nullable = false)
+    private DiffusionDetail diffusiondDetail;
+
+    @ManyToOne
+    @JoinColumn(name = "id_diffusion_paiement", nullable = false)
+    private DiffusionPaiement diffusionPaiement;
+
+    @Column(name = "montant_paye", nullable = false)
+    private BigDecimal montantPaye;
+
+    @Column(name = "pourcentage", nullable = false)
+    private Double pourcentage;
 }
 package com.mdgtaxi.entity;
 
@@ -734,8 +795,6 @@ public class Trajet implements Serializable {
 
     @Column(name = "datetime_arrivee")
     private LocalDateTime datetimeArrivee;
-
-
 }
 package com.mdgtaxi.entity;
 

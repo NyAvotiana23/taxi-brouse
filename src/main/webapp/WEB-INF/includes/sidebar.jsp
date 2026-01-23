@@ -23,9 +23,33 @@
       <i class="bi bi-calendar-check-fill"></i> Réservations
     </a>
     <a class="nav-link" href="<%= request.getContextPath() %>/tarif-remises">
-      <i class="bi bi-calendar-check-fill"></i> Configuration tarif remise
+      <i class="bi bi-percent"></i> Configuration tarif remise
     </a>
-    
+
+    <!-- Menu Chiffre d'Affaires avec sous-menus -->
+    <div class="nav-item dropdown">
+      <a class="nav-link dropdown-toggle" href="#" id="caDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="bi bi-currency-exchange"></i> Chiffre d'Affaires
+      </a>
+      <ul class="dropdown-menu" aria-labelledby="caDropdown">
+        <li>
+          <a class="dropdown-item" href="<%= request.getContextPath() %>/chiffre-affaire?type=prevision">
+            <i class="bi bi-graph-up-arrow"></i> CA Prévisionnel
+          </a>
+        </li>
+        <li>
+          <a class="dropdown-item" href="<%= request.getContextPath() %>/chiffre-affaire?type=reel">
+            <i class="bi bi-cash-stack"></i> CA Réel
+          </a>
+        </li>
+        <li>
+          <a class="dropdown-item" href="<%= request.getContextPath() %>/chiffre-affaire?type=complet">
+            <i class="bi bi-clipboard-data"></i> CA Complet
+          </a>
+        </li>
+      </ul>
+    </div>
+
     <!-- Menu Diffusion avec sous-menus -->
     <div class="nav-item dropdown">
       <a class="nav-link dropdown-toggle" href="#" id="diffusionDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -42,10 +66,9 @@
             <i class="bi bi-building"></i> Diffusion par Société
           </a>
         </li>
-
         <li>
           <a class="dropdown-item" href="<%= request.getContextPath() %>/paiements-dashboard">
-            <i class="bi bi-building"></i> Paiement dashboard
+            <i class="bi bi-wallet2"></i> Paiement Dashboard
           </a>
         </li>
       </ul>

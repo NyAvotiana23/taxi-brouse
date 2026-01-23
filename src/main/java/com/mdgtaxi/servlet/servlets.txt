@@ -248,6 +248,181 @@ public class ChauffeurServlet extends HttpServlet {
 }
 package com.mdgtaxi.servlet;
 
+import com.mdgtaxi.service.ChiffreAffaireService;
+import com.mdgtaxi.service.VilleService;
+import com.mdgtaxi.service.VehiculeService;
+import com.mdgtaxi.entity.Ville;
+import com.mdgtaxi.entity.Vehicule;
+import com.mdgtaxi.view.VmTrajetCaComplet;
+import com.mdgtaxi.view.VmTrajetCaReel;
+import com.mdgtaxi.view.VmTrajetPrevisionCaTotal;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@WebServlet("/chiffre-affaire")
+public class ChiffreAffaireServlet extends HttpServlet {
+
+    private final ChiffreAffaireService caService = new ChiffreAffaireService();
+    private final VilleService villeService = new VilleService();
+    private final VehiculeService vehiculeService = new VehiculeService();
+
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String type = req.getParameter("type"); // prevision, reel, complet
+        String action = req.getParameter("action");
+        String idTrajetStr = req.getParameter("idTrajet");
+
+        // Charger les donnÃ©es de rÃ©fÃ©rence pour les filtres
+        loadReferenceData(req);
+
+        // Si on demande le dÃ©tail d'un trajet spÃ©cifique
+        if ("detail".equals(action) && idTrajetStr != null && !idTrajetStr.isEmpty()) {
+            Long idTrajet = Long.valueOf(idTrajetStr);
+            handleDetail(req, type, idTrajet);
+            req.getRequestDispatcher("/chiffre-affaire-detail.jsp").forward(req, resp);
+            return;
+        }
+
+        // Collecter les filtres
+        Map<String, Object> filters = collectFilters(req);
+
+        // SÃ©lectionner la vue Ã  afficher selon le type
+        if ("reel".equals(type)) {
+            List<VmTrajetCaReel> caReels = filters.isEmpty() 
+                ? caService.getAllCaReels() 
+                : caService.searchCaReels(filters);
+            req.setAttribute("caReels", caReels);
+            req.setAttribute("type", "reel");
+            req.getRequestDispatcher("/chiffre-affaire-reel.jsp").forward(req, resp);
+        } else if ("complet".equals(type)) {
+            List<VmTrajetCaComplet> caComplets = filters.isEmpty() 
+                ? caService.getAllCaComplets() 
+                : caService.searchCaComplets(filters);
+            req.setAttribute("caComplets", caComplets);
+            req.setAttribute("type", "complet");
+            req.getRequestDispatcher("/chiffre-affaire-complet.jsp").forward(req, resp);
+        } else {
+            // Par dÃ©faut : prÃ©vision
+            List<VmTrajetPrevisionCaTotal> previsions = filters.isEmpty() 
+                ? caService.getAllPrevisions() 
+                : caService.searchPrevisions(filters);
+            req.setAttribute("previsions", previsions);
+            req.setAttribute("type", "prevision");
+            req.getRequestDispatcher("/chiffre-affaire-prevision.jsp").forward(req, resp);
+        }
+    }
+
+    private void handleDetail(HttpServletRequest req, String type, Long idTrajet) {
+        if ("reel".equals(type)) {
+            VmTrajetCaReel caReel = caService.getCaReelByTrajetId(idTrajet);
+            req.setAttribute("caReel", caReel);
+            req.setAttribute("type", "reel");
+        } else if ("complet".equals(type)) {
+            VmTrajetCaComplet caComplet = caService.getCaCompletByTrajetId(idTrajet);
+            req.setAttribute("caComplet", caComplet);
+            req.setAttribute("type", "complet");
+        } else {
+            VmTrajetPrevisionCaTotal prevision = caService.getPrevisionByTrajetId(idTrajet);
+            req.setAttribute("prevision", prevision);
+            req.setAttribute("type", "prevision");
+        }
+    }
+
+    private void loadReferenceData(HttpServletRequest req) {
+        List<Ville> villes = villeService.getAllVilles();
+        List<Vehicule> vehicules = vehiculeService.getAllVehicules();
+
+        req.setAttribute("villes", villes);
+        req.setAttribute("vehicules", vehicules);
+    }
+
+    private Map<String, Object> collectFilters(HttpServletRequest req) {
+        Map<String, Object> filters = new HashMap<>();
+
+        // Filtre par ID trajet
+        String idTrajetStr = req.getParameter("idTrajet");
+        if (idTrajetStr != null && !idTrajetStr.isEmpty()) {
+            filters.put("idTrajet", Long.valueOf(idTrajetStr));
+        }
+
+        // Filtre par ville de dÃ©part
+        String villeDepart = req.getParameter("villeDepart");
+        if (villeDepart != null && !villeDepart.isEmpty()) {
+            filters.put("nomVilleDepart", villeDepart);
+        }
+
+        // Filtre par ville d'arrivÃ©e
+        String villeArrive = req.getParameter("villeArrive");
+        if (villeArrive != null && !villeArrive.isEmpty()) {
+            filters.put("nomVilleArrive", villeArrive);
+        }
+
+        // Filtre par immatriculation vÃ©hicule
+        String vehicule = req.getParameter("vehicule");
+        if (vehicule != null && !vehicule.isEmpty()) {
+            filters.put("immatriculationVehicule", vehicule);
+        }
+
+        // Filtre par date de dÃ©part exacte
+        String dateDepartStr = req.getParameter("dateDepart");
+        if (dateDepartStr != null && !dateDepartStr.isEmpty()) {
+            filters.put("dateDepart", LocalDate.parse(dateDepartStr));
+        }
+
+        // Filtre par plage de dates
+        String dateDebut = req.getParameter("dateDebut");
+        if (dateDebut != null && !dateDebut.isEmpty()) {
+            filters.put("dateDepart>=", LocalDate.parse(dateDebut));
+        }
+
+        String dateFin = req.getParameter("dateFin");
+        if (dateFin != null && !dateFin.isEmpty()) {
+            filters.put("dateDepart<=", LocalDate.parse(dateFin));
+        }
+
+        // Filtre par heure de dÃ©part exacte
+        String heureDepartStr = req.getParameter("heureDepart");
+        if (heureDepartStr != null && !heureDepartStr.isEmpty()) {
+            filters.put("heureDepart", LocalTime.parse(heureDepartStr));
+        }
+
+        // Filtre par plage d'heures
+        String heureDebut = req.getParameter("heureDebut");
+        if (heureDebut != null && !heureDebut.isEmpty()) {
+            filters.put("heureDepart>=", LocalTime.parse(heureDebut));
+        }
+
+        String heureFin = req.getParameter("heureFin");
+        if (heureFin != null && !heureFin.isEmpty()) {
+            filters.put("heureDepart<=", LocalTime.parse(heureFin));
+        }
+
+        return filters;
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        // Rediriger vers GET avec les paramÃ¨tres de filtre
+        String type = req.getParameter("type");
+        if (type == null) type = "prevision";
+        
+        resp.sendRedirect(req.getContextPath() + "/chiffre-affaire?type=" + type + 
+            "&" + req.getQueryString());
+    }
+}
+package com.mdgtaxi.servlet;
+
 import com.mdgtaxi.service.DiffusionService;
 import com.mdgtaxi.view.VmDiffusionMensuelGlobal;
 
@@ -315,8 +490,9 @@ public class DiffusionGlobalServlet extends HttpServlet {
 }
 package com.mdgtaxi.servlet;
 
-import com.mdgtaxi.entity.*;
 import com.mdgtaxi.service.*;
+import com.mdgtaxi.view.VmDiffusionPaiement;
+import com.mdgtaxi.entity.*;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -327,6 +503,242 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.*;
 
+@WebServlet("/paiements-dashboard")
+public class DiffusionPaiementDashboardServlet extends HttpServlet {
+
+    private final DiffusionPaiementService paiementService = new DiffusionPaiementService();
+    private final SocieteService societeService = new SocieteService();
+    private final PubliciteService publiciteService = new PubliciteService();
+    private final TrajetService trajetService = new TrajetService();
+
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        // Load reference data for filters
+        loadReferenceData(req);
+
+        // Collect filters
+        Map<String, Object> filters = collectFilters(req);
+
+        List<VmDiffusionPaiement> vmPaiements;
+
+        if (!filters.isEmpty()) {
+            vmPaiements = paiementService.getVmPaiements(
+                    (Long) filters.get("idPublicite"),
+                    (List<Long>) filters.get("idSocietes"),
+                    (Long) filters.get("idTrajet"),
+                    (Integer) filters.get("mois"),
+                    (Integer) filters.get("annee"),
+                    (Integer) filters.get("nombreMin"),
+                    (Integer) filters.get("nombreMax")
+            );
+        } else {
+            vmPaiements = paiementService.getAllVmPaiements();
+        }
+
+        req.setAttribute("vmPaiements", vmPaiements);
+        req.getRequestDispatcher("/paiements-dashboard.jsp").forward(req, resp);
+    }
+
+    private void loadReferenceData(HttpServletRequest req) {
+        List<Societe> societes = societeService.getAllSocietes();
+        List<Publicite> publicites = publiciteService.getAllPublicites();
+        List<Trajet> trajets = trajetService.getAllTrajets();
+
+        req.setAttribute("societes", societes);
+        req.setAttribute("publicites", publicites);
+        req.setAttribute("trajets", trajets);
+    }
+
+    private Map<String, Object> collectFilters(HttpServletRequest req) {
+        Map<String, Object> filters = new HashMap<>();
+
+        String publiciteId = req.getParameter("publiciteId");
+        if (publiciteId != null && !publiciteId.isEmpty()) {
+            filters.put("idPublicite", Long.valueOf(publiciteId));
+        }
+
+        String[] societeIds = req.getParameterValues("societeIds");
+        if (societeIds != null && societeIds.length > 0) {
+            List<Long> idSocietes = new ArrayList<>();
+            for (String id : societeIds) {
+                if (!id.isEmpty()) {
+                    idSocietes.add(Long.valueOf(id));
+                }
+            }
+            if (!idSocietes.isEmpty()) {
+                filters.put("idSocietes", idSocietes);
+            }
+        }
+
+        String trajetId = req.getParameter("trajetId");
+        if (trajetId != null && !trajetId.isEmpty()) {
+            filters.put("idTrajet", Long.valueOf(trajetId));
+        }
+
+        String mois = req.getParameter("mois");
+        if (mois != null && !mois.isEmpty()) {
+            filters.put("mois", Integer.valueOf(mois));
+        }
+
+        String annee = req.getParameter("annee");
+        if (annee != null && !annee.isEmpty()) {
+            filters.put("annee", Integer.valueOf(annee));
+        }
+
+        String nombreMin = req.getParameter("nombreMin");
+        if (nombreMin != null && !nombreMin.isEmpty()) {
+            filters.put("nombreMin", Integer.valueOf(nombreMin));
+        }
+
+        String nombreMax = req.getParameter("nombreMax");
+        if (nombreMax != null && !nombreMax.isEmpty()) {
+            filters.put("nombreMax", Integer.valueOf(nombreMax));
+        }
+
+        return filters;
+    }
+}
+package com.mdgtaxi.servlet;
+
+import com.mdgtaxi.entity.*;
+import com.mdgtaxi.service.*;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+
+@WebServlet("/paiements")
+public class DiffusionPaiementServlet extends HttpServlet {
+
+    private final DiffusionPaiementService paiementService = new DiffusionPaiementService();
+    private final DiffusionService diffusionService = new DiffusionService();
+    private final SocieteService societeService = new SocieteService();
+
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String action = req.getParameter("action");
+        String idStr = req.getParameter("id");
+        Long id = idStr != null && !idStr.isEmpty() ? Long.valueOf(idStr) : null;
+
+        loadReferenceData(req);
+
+        if ("edit".equals(action)) {
+            if (id != null) {
+                DiffusionPaiement paiement = paiementService.getPaiementById(id);
+                req.setAttribute("paiement", paiement);
+            }
+        } else if ("detail".equals(action)) {
+            if (id != null) {
+                handleDetail(req, id);
+                req.getRequestDispatcher("/paiement-detail.jsp").forward(req, resp);
+                return;
+            }
+        } else if ("delete".equals(action)) {
+            if (id != null) {
+                paiementService.deletePaiement(id);
+                resp.sendRedirect(req.getContextPath() + "/paiements");
+                return;
+            }
+        }
+
+        List<DiffusionPaiement> paiements = paiementService.getAllPaiements();
+        req.setAttribute("paiements", paiements);
+        req.getRequestDispatcher("/paiements.jsp").forward(req, resp);
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String action = req.getParameter("action");
+        String idStr = req.getParameter("id");
+        Long id = idStr != null && !idStr.isEmpty() ? Long.valueOf(idStr) : null;
+
+        try {
+            if ("delete".equals(action) && id != null) {
+                paiementService.deletePaiement(id);
+                resp.sendRedirect(req.getContextPath() + "/paiements");
+            } else if ("update".equals(action) && id != null) {
+                DiffusionPaiement paiement = buildPaiementFromRequest(req);
+                paiement.setId(id);
+                paiementService.updatePaiement(paiement);
+                resp.sendRedirect(req.getContextPath() + "/paiements?action=detail&id=" + id);
+            } else {
+                // Create
+                DiffusionPaiement paiement = buildPaiementFromRequest(req);
+                paiement = paiementService.createPaiement(paiement);
+                resp.sendRedirect(req.getContextPath() + "/paiements");
+            }
+        } catch (Exception e) {
+            req.setAttribute("error", "Erreur: " + e.getMessage());
+            loadReferenceData(req);
+            if (id != null) {
+                handleDetail(req, id);
+                req.getRequestDispatcher("/paiement-detail.jsp").forward(req, resp);
+            } else {
+                req.getRequestDispatcher("/paiements.jsp").forward(req, resp);
+            }
+        }
+    }
+
+    private void loadReferenceData(HttpServletRequest req) {
+        List<Diffusion> diffusions = diffusionService.getAllDiffusions();
+        List<Societe> societes = societeService.getAllSocietes();
+
+        req.setAttribute("diffusions", diffusions);
+        req.setAttribute("societes", societes);
+    }
+
+    private void handleDetail(HttpServletRequest req, Long id) {
+        DiffusionPaiement paiement = paiementService.getPaiementById(id);
+        req.setAttribute("paiement", paiement);
+    }
+
+    private DiffusionPaiement buildPaiementFromRequest(HttpServletRequest req) {
+        DiffusionPaiement paiement = new DiffusionPaiement();
+
+        Diffusion diffusion = new Diffusion();
+        diffusion.setId(Long.valueOf(req.getParameter("idDiffusion")));
+        paiement.setDiffusion(diffusion);
+
+        Societe societe = new Societe();
+        societe.setId(Long.valueOf(req.getParameter("idSociete")));
+        paiement.setSociete(societe);
+
+        String datePaiementStr = req.getParameter("datePaiement");
+        if (datePaiementStr != null && !datePaiementStr.isEmpty()) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
+            paiement.setDatePaiement(LocalDateTime.parse(datePaiementStr, formatter));
+        } else {
+            paiement.setDatePaiement(LocalDateTime.now());
+        }
+
+        paiement.setMontantPaye(new BigDecimal(req.getParameter("montant")));
+
+        return paiement;
+    }
+}
+package com.mdgtaxi.servlet;
+
+import com.mdgtaxi.entity.*;
+import com.mdgtaxi.service.*;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.*;
+
 @WebServlet("/diffusions")
 public class DiffusionServlet extends HttpServlet {
 
@@ -334,6 +746,10 @@ public class DiffusionServlet extends HttpServlet {
     private final PubliciteService publiciteService = new PubliciteService();
     private final SocieteService societeService = new SocieteService();
     private final TrajetService trajetService = new TrajetService();
+    private final ConfigurationService configurationService = new ConfigurationService();
+
+    // Code de configuration pour le coÃ»t unitaire de diffusion
+    private static final String CODE_COUT_DIFFUSION = "COUT_DIFFUSION_TAXI";
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -364,22 +780,22 @@ public class DiffusionServlet extends HttpServlet {
 
         // Collecte des filtres
         Map<String, Object> filters = collectFilters(req);
-        
+
         List<Diffusion> diffusions;
         if (!filters.isEmpty()) {
             diffusions = diffusionService.getDiffusion(
-                (Long) filters.get("idPublicite"),
-                (Long) filters.get("idSociete"),
-                (Long) filters.get("idTrajet"),
-                (Integer) filters.get("mois"),
-                (Integer) filters.get("annee"),
-                (Integer) filters.get("nombreMin"),
-                (Integer) filters.get("nombreMax")
+                    (Long) filters.get("idPublicite"),
+                    (Long) filters.get("idSociete"),
+                    (Long) filters.get("idTrajet"),
+                    (Integer) filters.get("mois"),
+                    (Integer) filters.get("annee"),
+                    (Integer) filters.get("nombreMin"),
+                    (Integer) filters.get("nombreMax")
             );
         } else {
             diffusions = diffusionService.getAllDiffusions();
         }
-        
+
         req.setAttribute("diffusions", diffusions);
         req.getRequestDispatcher("/diffusions.jsp").forward(req, resp);
     }
@@ -425,6 +841,14 @@ public class DiffusionServlet extends HttpServlet {
         req.setAttribute("publicites", publicites);
         req.setAttribute("societes", societes);
         req.setAttribute("trajets", trajets);
+
+        // Charger toutes les configurations
+        List<Configuration> configurations = configurationService.getAllConfigurations();
+        req.setAttribute("configurations", configurations);
+
+        // Charger le montant unitaire par dÃ©faut depuis la configuration
+        String montantDefaut = configurationService.getValeurByCode(CODE_COUT_DIFFUSION, "100000");
+        req.setAttribute("montantUniteDefaut", montantDefaut);
     }
 
     private Map<String, Object> collectFilters(HttpServletRequest req) {
@@ -476,16 +900,6 @@ public class DiffusionServlet extends HttpServlet {
     private Diffusion buildDiffusionFromRequest(HttpServletRequest req) {
         Diffusion diffusion = new Diffusion();
 
-        Publicite publicite = new Publicite();
-        publicite.setId(Long.valueOf(req.getParameter("idPublicite")));
-        diffusion.setPublicite(publicite);
-
-        Trajet trajet = new Trajet();
-        trajet.setId(Long.valueOf(req.getParameter("idTrajet")));
-        diffusion.setTrajet(trajet);
-
-        diffusion.setCode(req.getParameter("montantUnite"));
-        diffusion.setNombre(req.getParameter("nombre"));
 
         return diffusion;
     }

@@ -1,6 +1,8 @@
 package com.mdgtaxi.service;
 
+import com.mdgtaxi.entity.Diffusion;
 import com.mdgtaxi.entity.DiffusionPaiement;
+import com.mdgtaxi.entity.Societe;
 import com.mdgtaxi.util.HibernateUtil;
 import com.mdgtaxi.view.VmDiffusionPaiement;
 
@@ -12,6 +14,9 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -193,6 +198,53 @@ public class DiffusionPaiementService {
             return query.getResultList();
         } finally {
             em.close();
+        }
+    }
+
+    // New method for proportional payment based on filters
+    public void makeProportionalPayment(Long idPublicite, List<Long> idSocietes, Long idTrajet,
+                                        Integer mois, Integer annee,
+                                        Integer nombreMin, Integer nombreMax,
+                                        BigDecimal amount) {
+        List<VmDiffusionPaiement> vms = getVmPaiements(idPublicite, idSocietes, idTrajet, mois, annee, nombreMin, nombreMax);
+
+        BigDecimal totalRemaining = BigDecimal.ZERO;
+        for (VmDiffusionPaiement vm : vms) {
+            BigDecimal remaining = vm.getMontantTotal().subtract(vm.getMontantPaye());
+            if (remaining.compareTo(BigDecimal.ZERO) > 0) {
+                totalRemaining = totalRemaining.add(remaining);
+            }
+        }
+
+        if (totalRemaining.compareTo(BigDecimal.ZERO) == 0) {
+            throw new IllegalStateException("Aucun montant dû pour les critères sélectionnés.");
+        }
+
+        if (amount.compareTo(totalRemaining) > 0) {
+            throw new IllegalArgumentException("Le montant de paiement excède le montant dû.");
+        }
+
+        BigDecimal ratio = amount.divide(totalRemaining, 10, RoundingMode.HALF_UP);
+
+        LocalDateTime date = LocalDateTime.now();
+
+        for (VmDiffusionPaiement vm : vms) {
+            BigDecimal remaining = vm.getMontantTotal().subtract(vm.getMontantPaye());
+            if (remaining.compareTo(BigDecimal.ZERO) > 0) {
+                BigDecimal payAmount = remaining.multiply(ratio).setScale(2, RoundingMode.HALF_UP);
+                if (payAmount.compareTo(BigDecimal.ZERO) > 0) {
+                    DiffusionPaiement p = new DiffusionPaiement();
+                    Diffusion d = new Diffusion();
+                    d.setId(vm.getIdDiffusion());
+                    p.setDiffusion(d);
+                    Societe s = new Societe();
+                    s.setId(vm.getIdSociete());
+                    p.setSociete(s);
+                    p.setDatePaiement(date);
+                    p.setMontantPaye(payAmount);
+                    createPaiement(p);
+                }
+            }
         }
     }
 }

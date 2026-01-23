@@ -394,10 +394,10 @@ import java.math.BigDecimal;
 @Subselect("""
     SELECT
         ROW_NUMBER() OVER (ORDER BY EXTRACT(YEAR FROM t.datetime_depart), EXTRACT(MONTH FROM t.datetime_depart)) AS id,
-        EXTRACT(MONTH FROM t.datetime_depart)::integer AS mois,
-        EXTRACT(YEAR  FROM t.datetime_depart)::integer AS annee,
-        SUM(CAST(d.montant_unite AS DECIMAL(10,2))) AS montant_total,
-        SUM(CAST(d.nombre AS INTEGER))          AS nombre_total
+        CAST(EXTRACT(MONTH FROM t.datetime_depart) AS integer) AS mois,
+        CAST(EXTRACT(YEAR FROM t.datetime_depart) AS integer) AS annee,
+        SUM(CAST(d.montant_unite AS DECIMAL(15,2)) * CAST(d.nombre AS INTEGER)) AS montant_total,
+        SUM(CAST(d.nombre AS INTEGER)) AS nombre_total
     FROM Diffusion d
     INNER JOIN Trajet t ON d.id_trajet = t.id
     GROUP BY EXTRACT(YEAR FROM t.datetime_depart), EXTRACT(MONTH FROM t.datetime_depart)
@@ -438,21 +438,24 @@ import java.math.BigDecimal;
     SELECT
         ROW_NUMBER() OVER (ORDER BY s.id, d.id) AS id,
         s.id AS id_societe,
+        s.nom AS nom_societe,
         d.id AS id_diffusion,
         pub.id AS id_publicite,
+        pub.description AS description_publicite,
         t.id AS id_trajet,
-        EXTRACT(MONTH FROM t.datetime_depart)::integer AS mois,
-        EXTRACT(YEAR FROM t.datetime_depart)::integer AS annee,
+        CAST(EXTRACT(MONTH FROM t.datetime_depart) AS integer) AS mois,
+        CAST(EXTRACT(YEAR FROM t.datetime_depart) AS integer) AS annee,
         CAST(d.nombre AS INTEGER) AS nombre,
-        (CAST(d.montant_unite AS DECIMAL(15,2)) * CAST(d.nombre AS INTEGER)) AS montant_a_paye_total,
-        COALESCE(SUM(CAST(p.montant AS DECIMAL(15,2))), 0) AS montant_paye_total,
-        ((CAST(d.montant_unite AS DECIMAL(15,2)) * CAST(d.nombre AS INTEGER)) - COALESCE(SUM(CAST(p.montant AS DECIMAL(15,2))), 0)) AS montant_reste_total
+        CAST(d.montant_unite AS DECIMAL(15,2)) AS montant_unite,
+        (CAST(d.montant_unite AS DECIMAL(15,2)) * CAST(d.nombre AS INTEGER)) AS montant_a_payer,
+        COALESCE(SUM(CAST(p.montant AS DECIMAL(15,2))), 0) AS montant_paye,
+        ((CAST(d.montant_unite AS DECIMAL(15,2)) * CAST(d.nombre AS INTEGER)) - COALESCE(SUM(CAST(p.montant AS DECIMAL(15,2))), 0)) AS montant_reste
     FROM Diffusion d
     INNER JOIN Publicite pub ON d.id_publicite = pub.id
     INNER JOIN Societe s ON pub.id_societe = s.id
     INNER JOIN Trajet t ON d.id_trajet = t.id
-    LEFT JOIN Diffusion_Paiement p ON p.id_diffusion = d.id AND p.id_societe = s.id
-    GROUP BY s.id, d.id, pub.id, t.id, t.datetime_depart, d.nombre, d.montant_unite
+    LEFT JOIN Diffusion_Paiement p ON p.id_diffusion = d.id
+    GROUP BY s.id, s.nom, d.id, pub.id, pub.description, t.id, t.datetime_depart, d.nombre, d.montant_unite
 """)
 @Synchronize({"Diffusion", "Publicite", "Societe", "Trajet", "Diffusion_Paiement"})
 public class VmDiffusionPaiement implements Serializable {
@@ -463,11 +466,17 @@ public class VmDiffusionPaiement implements Serializable {
     @Column(name = "id_societe")
     private Long idSociete;
 
+    @Column(name = "nom_societe")
+    private String nomSociete;
+
     @Column(name = "id_diffusion")
     private Long idDiffusion;
 
     @Column(name = "id_publicite")
     private Long idPublicite;
+
+    @Column(name = "description_publicite")
+    private String descriptionPublicite;
 
     @Column(name = "id_trajet")
     private Long idTrajet;
@@ -481,14 +490,17 @@ public class VmDiffusionPaiement implements Serializable {
     @Column(name = "nombre")
     private Integer nombre;
 
-    @Column(name = "montant_a_paye_total")
-    private BigDecimal montantAPayeTotal;
+    @Column(name = "montant_unite")
+    private BigDecimal montantUnite;
 
-    @Column(name = "montant_paye_total")
-    private BigDecimal montantPayeTotal;
+    @Column(name = "montant_a_payer")
+    private BigDecimal montantAPayer;
 
-    @Column(name = "montant_reste_total")
-    private BigDecimal montantResteTotal;
+    @Column(name = "montant_paye")
+    private BigDecimal montantPaye;
+
+    @Column(name = "montant_reste")
+    private BigDecimal montantReste;
 }
 package com.mdgtaxi.view;
 
@@ -787,6 +799,242 @@ import org.hibernate.annotations.Synchronize;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalTime;
+
+@Data
+@Entity
+@Immutable
+@Subselect("""
+    SELECT
+        t.id AS id_trajet,
+        vd.nom AS nom_ville_depart,
+        va.nom AS nom_ville_arrive,
+        v.immatriculation AS immatriculation_vehicule,
+        c.nom AS nom_chauffeur,
+        c.prenom AS prenom_chauffeur,
+        CAST(t.datetime_depart AS DATE) AS date_depart,
+        CAST(t.datetime_depart AS TIME) AS heure_depart,
+        COALESCE(prev.montant_prevision_ticket, 0) AS montant_prevision_ticket,
+        COALESCE(prev.montant_prevision_diffusion, 0) AS montant_prevision_diffusion,
+        COALESCE(prev.ca_previsionnel, 0) AS ca_previsionnel,
+        COALESCE(reel.montant_reel_ticket, 0) AS montant_reel_ticket,
+        COALESCE(reel.montant_reel_diffusion, 0) AS montant_reel_diffusion,
+        COALESCE(reel.ca_reel, 0) AS ca_reel,
+        COALESCE(prev.ca_previsionnel, 0) - COALESCE(reel.ca_reel, 0) AS ecart_ca
+    FROM Trajet t
+    INNER JOIN Ligne l ON t.id_ligne = l.id
+    INNER JOIN Ville vd ON l.id_ville_depart = vd.id
+    INNER JOIN Ville va ON l.id_ville_arrivee = va.id
+    INNER JOIN Vehicule v ON t.id_vehicule = v.id
+    INNER JOIN Chauffeur c ON t.id_chauffeur = c.id
+    LEFT JOIN (
+        SELECT
+            t.id AS id_trajet,
+            COALESCE(SUM(trd.nombre_places * COALESCE(tttpcr.tarif_unitaire_avec_remise, vttp.tarif_unitaire)), 0) AS montant_prevision_ticket,
+            COALESCE(SUM(dd.nombre_repetition * dd.montant_unitaire), 0) AS montant_prevision_diffusion,
+            COALESCE(SUM(trd.nombre_places * COALESCE(tttpcr.tarif_unitaire_avec_remise, vttp.tarif_unitaire)), 0) 
+                + COALESCE(SUM(dd.nombre_repetition * dd.montant_unitaire), 0) AS ca_previsionnel
+        FROM Trajet t
+        LEFT JOIN Trajet_Reservation tr ON tr.id_trajet = t.id
+        LEFT JOIN Trajet_Reservation_Details trd ON trd.id_trajet_reservation = tr.id
+        LEFT JOIN Trajet_Tarif_Type_Place_Categorie_Remise tttpcr 
+            ON tttpcr.id_trajet = t.id 
+            AND tttpcr.id_type_place = trd.id_type_place 
+            AND tttpcr.id_categorie_personne = trd.id_categorie_personne
+        LEFT JOIN Vehicule_Tarif_Type_Place vttp 
+            ON vttp.id_vehicule = t.id_vehicule 
+            AND vttp.id_type_place = trd.id_type_place
+        LEFT JOIN Diffusion_Detail dd ON dd.id_trajet = t.id
+        GROUP BY t.id
+    ) prev ON prev.id_trajet = t.id
+    LEFT JOIN (
+        SELECT
+            t.id AS id_trajet,
+            COALESCE(SUM(trp.montant), 0) AS montant_reel_ticket,
+            COALESCE(SUM(dpr.montant_paye), 0) AS montant_reel_diffusion,
+            COALESCE(SUM(trp.montant), 0) + COALESCE(SUM(dpr.montant_paye), 0) AS ca_reel
+        FROM Trajet t
+        LEFT JOIN Trajet_Reservation tr ON tr.id_trajet = t.id
+        LEFT JOIN Trajet_Reservation_Paiement trp ON trp.id_trajet_reservation = tr.id
+        LEFT JOIN Diffusion_Detail dd ON dd.id_trajet = t.id
+        LEFT JOIN Diffusion_Paiement_Repartition dpr ON dpr.id_diffusion_detail = dd.id
+        GROUP BY t.id
+    ) reel ON reel.id_trajet = t.id
+""")
+@Synchronize({"Trajet", "Ligne", "Ville", "Vehicule", "Chauffeur", "Trajet_Reservation",
+        "Trajet_Reservation_Details", "Trajet_Tarif_Type_Place_Categorie_Remise",
+        "Vehicule_Tarif_Type_Place", "Trajet_Reservation_Paiement", "Diffusion_Detail",
+        "Diffusion_Paiement_Repartition"})
+public class VmTrajetCaComplet implements Serializable {
+
+    @Id
+    @Column(name = "id_trajet")
+    private Long idTrajet;
+
+    @Column(name = "nom_ville_depart")
+    private String nomVilleDepart;
+
+    @Column(name = "nom_ville_arrive")
+    private String nomVilleArrive;
+
+    @Column(name = "immatriculation_vehicule")
+    private String immatriculationVehicule;
+
+    @Column(name = "nom_chauffeur")
+    private String nomChauffeur;
+
+    @Column(name = "prenom_chauffeur")
+    private String prenomChauffeur;
+
+    @Column(name = "date_depart")
+    private LocalDate dateDepart;
+
+    @Column(name = "heure_depart")
+    private LocalTime heureDepart;
+
+    @Column(name = "montant_prevision_ticket")
+    private BigDecimal montantPrevisionTicket;
+
+    @Column(name = "montant_prevision_diffusion")
+    private BigDecimal montantPrevisionDiffusion;
+
+    @Column(name = "ca_previsionnel")
+    private BigDecimal caPrevisionnel;
+
+    @Column(name = "montant_reel_ticket")
+    private BigDecimal montantReelTicket;
+
+    @Column(name = "montant_reel_diffusion")
+    private BigDecimal montantReelDiffusion;
+
+    @Column(name = "ca_reel")
+    private BigDecimal caReel;
+
+    @Column(name = "ecart_ca")
+    private BigDecimal ecartCa;
+
+    // Alias getters for compatibility
+    public BigDecimal getMontantChiffreAffairePrevision() {
+        return caPrevisionnel;
+    }
+
+    public BigDecimal getMontantChiffreAffaireReel() {
+        return caReel;
+    }
+}
+package com.mdgtaxi.view;
+
+import lombok.Data;
+import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.Subselect;
+import org.hibernate.annotations.Synchronize;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalTime;
+
+@Data
+@Entity
+@Immutable
+@Subselect("""
+    SELECT
+        t.id AS id_trajet,
+        vd.nom AS nom_ville_depart,
+        va.nom AS nom_ville_arrive,
+        v.immatriculation AS immatriculation_vehicule,
+        c.nom AS nom_chauffeur,
+        c.prenom AS prenom_chauffeur,
+        CAST(t.datetime_depart AS DATE) AS date_depart,
+        CAST(t.datetime_depart AS TIME) AS heure_depart,
+        COALESCE(SUM(trp.montant), 0) AS montant_reel_ticket,
+        COALESCE(SUM(dpr.montant_paye), 0) AS montant_reel_diffusion,
+        COALESCE(SUM(trp.montant), 0) + COALESCE(SUM(dpr.montant_paye), 0) AS ca_reel,
+        COALESCE(SUM(trp.montant), 0) AS montant_paye,
+        COALESCE(SUM(trd.nombre_places * COALESCE(tttpcr.tarif_unitaire_avec_remise, vttp.tarif_unitaire)), 0) - COALESCE(SUM(trp.montant), 0) AS montant_restant
+    FROM Trajet t
+    INNER JOIN Ligne l ON t.id_ligne = l.id
+    INNER JOIN Ville vd ON l.id_ville_depart = vd.id
+    INNER JOIN Ville va ON l.id_ville_arrivee = va.id
+    INNER JOIN Vehicule v ON t.id_vehicule = v.id
+    INNER JOIN Chauffeur c ON t.id_chauffeur = c.id
+    LEFT JOIN Trajet_Reservation tr ON tr.id_trajet = t.id
+    LEFT JOIN Trajet_Reservation_Details trd ON trd.id_trajet_reservation = tr.id
+    LEFT JOIN Trajet_Tarif_Type_Place_Categorie_Remise tttpcr 
+        ON tttpcr.id_trajet = t.id 
+        AND tttpcr.id_type_place = trd.id_type_place 
+        AND tttpcr.id_categorie_personne = trd.id_categorie_personne
+    LEFT JOIN Vehicule_Tarif_Type_Place vttp 
+        ON vttp.id_vehicule = t.id_vehicule 
+        AND vttp.id_type_place = trd.id_type_place
+    LEFT JOIN Trajet_Reservation_Paiement trp ON trp.id_trajet_reservation = tr.id
+    LEFT JOIN Diffusion_Detail dd ON dd.id_trajet = t.id
+    LEFT JOIN Diffusion_Paiement_Repartition dpr ON dpr.id_diffusion_detail = dd.id
+    GROUP BY t.id, vd.nom, va.nom, v.immatriculation, c.nom, c.prenom, t.datetime_depart
+""")
+@Synchronize({"Trajet", "Ligne", "Ville", "Vehicule", "Chauffeur", "Trajet_Reservation",
+        "Trajet_Reservation_Details", "Trajet_Tarif_Type_Place_Categorie_Remise",
+        "Vehicule_Tarif_Type_Place", "Trajet_Reservation_Paiement", "Diffusion_Detail",
+        "Diffusion_Paiement_Repartition"})
+public class VmTrajetCaReel implements Serializable {
+
+    @Id
+    @Column(name = "id_trajet")
+    private Long idTrajet;
+
+    @Column(name = "nom_ville_depart")
+    private String nomVilleDepart;
+
+    @Column(name = "nom_ville_arrive")
+    private String nomVilleArrive;
+
+    @Column(name = "immatriculation_vehicule")
+    private String immatriculationVehicule;
+
+    @Column(name = "nom_chauffeur")
+    private String nomChauffeur;
+
+    @Column(name = "prenom_chauffeur")
+    private String prenomChauffeur;
+
+    @Column(name = "date_depart")
+    private LocalDate dateDepart;
+
+    @Column(name = "heure_depart")
+    private LocalTime heureDepart;
+
+    @Column(name = "montant_reel_ticket")
+    private BigDecimal montantReelTicket;
+
+    @Column(name = "montant_reel_diffusion")
+    private BigDecimal montantReelDiffusion;
+
+    @Column(name = "ca_reel")
+    private BigDecimal caReel;
+
+    @Column(name = "montant_paye")
+    private BigDecimal montantPaye;
+
+    @Column(name = "montant_restant")
+    private BigDecimal montantRestant;
+
+    // Alias getter for compatibility
+    public BigDecimal getMontantChiffreAffaireReel() {
+        return caReel;
+    }
+}
+package com.mdgtaxi.view;
+
+import lombok.Data;
+import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.Subselect;
+import org.hibernate.annotations.Synchronize;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -871,6 +1119,108 @@ public class VmTrajetDetail implements Serializable {
 
     @Column(name = "duree_heures")
     private BigDecimal dureeHeures;
+}
+package com.mdgtaxi.view;
+
+import lombok.Data;
+import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.Subselect;
+import org.hibernate.annotations.Synchronize;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalTime;
+
+@Data
+@Entity
+@Immutable
+@Subselect("""
+    SELECT
+        t.id AS id_trajet,
+        vd.nom AS nom_ville_depart,
+        va.nom AS nom_ville_arrive,
+        v.immatriculation AS immatriculation_vehicule,
+        c.nom AS nom_chauffeur,
+        c.prenom AS prenom_chauffeur,
+        CAST(t.datetime_depart AS DATE) AS date_depart,
+        CAST(t.datetime_depart AS TIME) AS heure_depart,
+        COALESCE(SUM(vttp.nombre_place), 0) AS nombre_places_totales,
+        COALESCE(SUM(trd.nombre_places), 0) AS nombre_places_prises,
+        COALESCE(SUM(vttp.nombre_place), 0) - COALESCE(SUM(trd.nombre_places), 0) AS nombre_places_restantes,
+        COALESCE(SUM(trd.nombre_places * COALESCE(tttpcr.tarif_unitaire_avec_remise, vttp.tarif_unitaire)), 0) AS montant_prevision_ticket,
+        COALESCE(SUM(dd.nombre_repetition * dd.montant_unitaire), 0) AS montant_prevision_diffusion,
+        COALESCE(SUM(trd.nombre_places * COALESCE(tttpcr.tarif_unitaire_avec_remise, vttp.tarif_unitaire)), 0) 
+            + COALESCE(SUM(dd.nombre_repetition * dd.montant_unitaire), 0) AS ca_previsionnel
+    FROM Trajet t
+    INNER JOIN Ligne l ON t.id_ligne = l.id
+    INNER JOIN Ville vd ON l.id_ville_depart = vd.id
+    INNER JOIN Ville va ON l.id_ville_arrivee = va.id
+    INNER JOIN Vehicule v ON t.id_vehicule = v.id
+    INNER JOIN Chauffeur c ON t.id_chauffeur = c.id
+    LEFT JOIN Vehicule_Tarif_Type_Place vttp ON vttp.id_vehicule = v.id
+    LEFT JOIN Trajet_Reservation tr ON tr.id_trajet = t.id
+    LEFT JOIN Trajet_Reservation_Details trd ON trd.id_trajet_reservation = tr.id
+    LEFT JOIN Trajet_Tarif_Type_Place_Categorie_Remise tttpcr 
+        ON tttpcr.id_trajet = t.id 
+        AND tttpcr.id_type_place = trd.id_type_place 
+        AND tttpcr.id_categorie_personne = trd.id_categorie_personne
+    LEFT JOIN Diffusion_Detail dd ON dd.id_trajet = t.id
+    GROUP BY t.id, vd.nom, va.nom, v.immatriculation, c.nom, c.prenom, t.datetime_depart
+""")
+@Synchronize({"Trajet", "Ligne", "Ville", "Vehicule", "Chauffeur", "Vehicule_Tarif_Type_Place",
+        "Trajet_Reservation", "Trajet_Reservation_Details", "Trajet_Tarif_Type_Place_Categorie_Remise",
+        "Diffusion_Detail"})
+public class VmTrajetPrevisionCaTotal implements Serializable {
+
+    @Id
+    @Column(name = "id_trajet")
+    private Long idTrajet;
+
+    @Column(name = "nom_ville_depart")
+    private String nomVilleDepart;
+
+    @Column(name = "nom_ville_arrive")
+    private String nomVilleArrive;
+
+    @Column(name = "immatriculation_vehicule")
+    private String immatriculationVehicule;
+
+    @Column(name = "nom_chauffeur")
+    private String nomChauffeur;
+
+    @Column(name = "prenom_chauffeur")
+    private String prenomChauffeur;
+
+    @Column(name = "date_depart")
+    private LocalDate dateDepart;
+
+    @Column(name = "heure_depart")
+    private LocalTime heureDepart;
+
+    @Column(name = "nombre_places_totales")
+    private BigDecimal nombrePlacesTotales;
+
+    @Column(name = "nombre_places_prises")
+    private BigDecimal nombrePlacesPrises;
+
+    @Column(name = "nombre_places_restantes")
+    private BigDecimal nombrePlacesRestantes;
+
+    @Column(name = "montant_prevision_ticket")
+    private BigDecimal montantPrevisionTicket;
+
+    @Column(name = "montant_prevision_diffusion")
+    private BigDecimal montantPrevisionDiffusion;
+
+    @Column(name = "ca_previsionnel")
+    private BigDecimal caPrevisionnel;
+
+    // Alias getter for compatibility
+    public BigDecimal getMontantChiffreAffairePrevision() {
+        return caPrevisionnel;
+    }
 }
 package com.mdgtaxi.view;
 
