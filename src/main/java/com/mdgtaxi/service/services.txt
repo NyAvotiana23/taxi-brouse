@@ -821,52 +821,7 @@ public class DiffusionPaiementService {
         }
     }
 
-    // New method for proportional payment based on filters
-    public void makeProportionalPayment(Long idPublicite, List<Long> idSocietes, Long idTrajet,
-                                        Integer mois, Integer annee,
-                                        Integer nombreMin, Integer nombreMax,
-                                        BigDecimal amount) {
-        List<VmDiffusionPaiement> vms = getVmPaiements(idPublicite, idSocietes, idTrajet, mois, annee, nombreMin, nombreMax);
 
-        BigDecimal totalRemaining = BigDecimal.ZERO;
-        for (VmDiffusionPaiement vm : vms) {
-            BigDecimal remaining = vm.getMontantTotal().subtract(vm.getMontantPaye());
-            if (remaining.compareTo(BigDecimal.ZERO) > 0) {
-                totalRemaining = totalRemaining.add(remaining);
-            }
-        }
-
-        if (totalRemaining.compareTo(BigDecimal.ZERO) == 0) {
-            throw new IllegalStateException("Aucun montant dÃ» pour les critÃ¨res sÃ©lectionnÃ©s.");
-        }
-
-        if (amount.compareTo(totalRemaining) > 0) {
-            throw new IllegalArgumentException("Le montant de paiement excÃ¨de le montant dÃ».");
-        }
-
-        BigDecimal ratio = amount.divide(totalRemaining, 10, RoundingMode.HALF_UP);
-
-        LocalDateTime date = LocalDateTime.now();
-
-        for (VmDiffusionPaiement vm : vms) {
-            BigDecimal remaining = vm.getMontantTotal().subtract(vm.getMontantPaye());
-            if (remaining.compareTo(BigDecimal.ZERO) > 0) {
-                BigDecimal payAmount = remaining.multiply(ratio).setScale(2, RoundingMode.HALF_UP);
-                if (payAmount.compareTo(BigDecimal.ZERO) > 0) {
-                    DiffusionPaiement p = new DiffusionPaiement();
-                    Diffusion d = new Diffusion();
-                    d.setId(vm.getIdDiffusion());
-                    p.setDiffusion(d);
-                    Societe s = new Societe();
-                    s.setId(vm.getIdSociete());
-                    p.setSociete(s);
-                    p.setDatePaiement(date);
-                    p.setMontantPaye(payAmount);
-                    createPaiement(p);
-                }
-            }
-        }
-    }
 }
 package com.mdgtaxi.service;
 

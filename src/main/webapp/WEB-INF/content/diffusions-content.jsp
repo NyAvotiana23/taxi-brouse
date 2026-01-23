@@ -5,80 +5,62 @@
 <div class="container-fluid">
     <div class="row mb-3">
         <div class="col">
-            <h2><i class="bi bi-megaphone-fill"></i> Gestion des Diffusions par Société</h2>
-        </div>
-        <div class="col-auto">
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addDiffusionModal">
-                <i class="bi bi-plus-circle"></i> Nouvelle Diffusion
-            </button>
-        </div>
-    </div>
-
-    <!-- Filtres -->
-    <div class="card mb-3">
-        <div class="card-body">
-            <form method="get" action="${pageContext.request.contextPath}/diffusions" class="row g-3">
-                <div class="col-md-3">
-                    <label for="societeId" class="form-label">Société</label>
-                    <select class="form-select" id="societeId" name="societeId">
-                        <option value="">Toutes les sociétés</option>
-                        <c:forEach var="societe" items="${societes}">
-                            <option value="${societe.id}" ${param.societeId == societe.id ? 'selected' : ''}>
-                                ${societe.nom}
-                            </option>
-                        </c:forEach>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label for="publiciteId" class="form-label">Publicité</label>
-                    <select class="form-select" id="publiciteId" name="publiciteId">
-                        <option value="">Toutes les publicités</option>
-                        <c:forEach var="publicite" items="${publicites}">
-                            <option value="${publicite.id}" ${param.publiciteId == publicite.id ? 'selected' : ''}>
-                                ${publicite.description}
-                            </option>
-                        </c:forEach>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <label for="mois" class="form-label">Mois</label>
-                    <select class="form-select" id="mois" name="mois">
-                        <option value="">Tous</option>
-                        <option value="1" ${param.mois == '1' ? 'selected' : ''}>Janvier</option>
-                        <option value="2" ${param.mois == '2' ? 'selected' : ''}>Février</option>
-                        <option value="3" ${param.mois == '3' ? 'selected' : ''}>Mars</option>
-                        <option value="4" ${param.mois == '4' ? 'selected' : ''}>Avril</option>
-                        <option value="5" ${param.mois == '5' ? 'selected' : ''}>Mai</option>
-                        <option value="6" ${param.mois == '6' ? 'selected' : ''}>Juin</option>
-                        <option value="7" ${param.mois == '7' ? 'selected' : ''}>Juillet</option>
-                        <option value="8" ${param.mois == '8' ? 'selected' : ''}>Août</option>
-                        <option value="9" ${param.mois == '9' ? 'selected' : ''}>Septembre</option>
-                        <option value="10" ${param.mois == '10' ? 'selected' : ''}>Octobre</option>
-                        <option value="11" ${param.mois == '11' ? 'selected' : ''}>Novembre</option>
-                        <option value="12" ${param.mois == '12' ? 'selected' : ''}>Décembre</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <label for="annee" class="form-label">Année</label>
-                    <input type="number" class="form-control" id="annee" name="annee" 
-                           value="${param.annee}" placeholder="2026">
-                </div>
-                <div class="col-md-2 d-flex align-items-end">
-                    <button type="submit" class="btn btn-secondary w-100">
-                        <i class="bi bi-funnel"></i> Filtrer
-                    </button>
-                </div>
-            </form>
+            <h2><i class="bi bi-megaphone-fill"></i> Gestion des Diffusions</h2>
         </div>
     </div>
 
     <!-- Message d'erreur -->
     <c:if test="${not empty error}">
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            ${error}
+                ${error}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     </c:if>
+
+    <!-- Statistiques globales -->
+    <div class="row mb-3">
+        <c:set var="totalAPayer" value="0"/>
+        <c:set var="totalPaye" value="0"/>
+        <c:set var="totalReste" value="0"/>
+        <c:forEach var="vm" items="${vmDiffusions}">
+            <c:set var="totalAPayer" value="${totalAPayer + vm.montantAPayer}"/>
+            <c:set var="totalPaye" value="${totalPaye + vm.montantPaye}"/>
+            <c:set var="totalReste" value="${totalReste + vm.montantReste}"/>
+        </c:forEach>
+
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h6 class="card-title">Total à Payer</h6>
+                    <h3><fmt:formatNumber value="${totalAPayer}" type="currency" currencySymbol="Ar"/></h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h6 class="card-title">Total Payé</h6>
+                    <h3><fmt:formatNumber value="${totalPaye}" type="currency" currencySymbol="Ar"/></h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-dark">
+                <div class="card-body">
+                    <h6 class="card-title">Reste à Payer</h6>
+                    <h3><fmt:formatNumber value="${totalReste}" type="currency" currencySymbol="Ar"/></h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h6 class="card-title">Nombre de Diffusions</h6>
+                    <h3>${vmDiffusions.size()}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Table des diffusions -->
     <div class="card">
@@ -86,49 +68,88 @@
             <div class="table-responsive">
                 <table class="table table-hover">
                     <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Société</th>
-                            <th>Publicité</th>
-                            <th>Trajet</th>
-                            <th>Date du Trajet</th>
-                            <th>Montant Unité</th>
-                            <th>Nombre</th>
-                            <th>Actions</th>
-                        </tr>
+                    <tr>
+                        <th>ID</th>
+                        <th>Société</th>
+                        <th>Date Création</th>
+                        <th class="text-end">Montant à Payer</th>
+                        <th class="text-end">Montant Payé</th>
+                        <th class="text-end">Reste</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
                     </thead>
                     <tbody>
-                        <c:forEach var="diffusion" items="${diffusions}">
-                            <tr>
-                                <td>${diffusion.id}</td>
-                                <td>${diffusion.publicite.societe.nom}</td>
-                                <td>${diffusion.publicite.description}</td>
-                                <td>
-                                    ${diffusion.trajet.ligne.villeDepart.nom} → ${diffusion.trajet.ligne.villeArrivee.nom}
-                                </td>
-                                <td>
-                                    <fmt:parseDate value="${diffusion.trajet.datetimeDepart}" 
-                                                   pattern="yyyy-MM-dd'T'HH:mm" var="parsedDate" type="both"/>
-                                    <fmt:formatDate value="${parsedDate}" pattern="dd/MM/yyyy HH:mm"/>
-                                </td>
-                                <td><fmt:formatNumber value="${diffusion.montantUnite}" type="number" groupingUsed="true"/> Ar</td>
-                                <td>${diffusion.nombre}</td>
-                                <td>
-                                    <a href="${pageContext.request.contextPath}/diffusions?action=detail&id=${diffusion.id}" 
-                                       class="btn btn-sm btn-info">
-                                        <i class="bi bi-eye"></i>
-                                    </a>
-                                    <a href="${pageContext.request.contextPath}/diffusions?action=edit&id=${diffusion.id}" 
-                                       class="btn btn-sm btn-warning">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-                                    <button type="button" class="btn btn-sm btn-danger" 
-                                            onclick="confirmDelete(${diffusion.id})">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                        </c:forEach>
+                    <c:forEach var="vm" items="${vmDiffusions}">
+                        <c:set var="pourcentagePaye" value="${(vm.montantPaye / vm.montantAPayer) * 100}"/>
+                        <tr>
+                            <td><strong>#${vm.idDiffusion}</strong></td>
+                            <td>${vm.nomSociete}</td>
+                            <td>
+                                <fmt:parseDate value="${vm.dateCreation}"
+                                               pattern="yyyy-MM-dd'T'HH:mm" var="parsedDate" type="both"/>
+                                <fmt:formatDate value="${parsedDate}" pattern="dd/MM/yyyy HH:mm"/>
+                            </td>
+                            <td class="text-end">
+                                <strong><fmt:formatNumber value="${vm.montantAPayer}" type="number" groupingUsed="true"/> Ar</strong>
+                            </td>
+                            <td class="text-end">
+                                    <span class="badge bg-success">
+                                        <fmt:formatNumber value="${vm.montantPaye}" type="number" groupingUsed="true"/> Ar
+                                    </span>
+                            </td>
+                            <td class="text-end">
+                                <c:choose>
+                                    <c:when test="${vm.montantReste > 0}">
+                                            <span class="badge bg-warning text-dark">
+                                                <fmt:formatNumber value="${vm.montantReste}" type="number" groupingUsed="true"/> Ar
+                                            </span>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <span class="badge bg-success">Payé</span>
+                                    </c:otherwise>
+                                </c:choose>
+                            </td>
+                            <td>
+                                <div class="progress" style="height: 25px; min-width: 100px;">
+                                    <div class="progress-bar ${pourcentagePaye >= 100 ? 'bg-success' : pourcentagePaye >= 50 ? 'bg-info' : 'bg-warning'}"
+                                         role="progressbar"
+                                         style="width: ${pourcentagePaye > 100 ? 100 : pourcentagePaye}%"
+                                         aria-valuenow="${pourcentagePaye}"
+                                         aria-valuemin="0"
+                                         aria-valuemax="100">
+                                        <fmt:formatNumber value="${pourcentagePaye}" pattern="#0.0"/>%
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <a href="${pageContext.request.contextPath}/diffusions?action=detail&id=${vm.idDiffusion}"
+                                   class="btn btn-sm btn-info" title="Voir détails">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <button type="button"
+                                        class="btn btn-sm btn-success"
+                                        onclick="showPaiementModal(${vm.idDiffusion}, '${vm.nomSociete}', ${vm.montantAPayer}, ${vm.montantReste})"
+                                        title="Ajouter un paiement"
+                                    ${vm.montantReste <= 0 ? 'disabled' : ''}>
+                                    <i class="bi bi-cash-coin"></i>
+                                </button>
+                                <button type="button"
+                                        class="btn btn-sm btn-danger"
+                                        onclick="confirmDelete(${vm.idDiffusion})"
+                                        title="Supprimer">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </c:forEach>
+                    <c:if test="${empty vmDiffusions}">
+                        <tr>
+                            <td colspan="8" class="text-center text-muted">
+                                Aucune diffusion disponible
+                            </td>
+                        </tr>
+                    </c:if>
                     </tbody>
                 </table>
             </div>
@@ -136,56 +157,68 @@
     </div>
 </div>
 
-<!-- Modal Ajout Diffusion -->
-<div class="modal fade" id="addDiffusionModal" tabindex="-1">
+<!-- Modal Ajout Paiement -->
+<div class="modal fade" id="paiementModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
             <form method="post" action="${pageContext.request.contextPath}/diffusions">
-                <div class="modal-header">
-                    <h5 class="modal-title">Nouvelle Diffusion</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <input type="hidden" name="action" value="createPaiement">
+                <input type="hidden" name="id" id="paiementDiffusionId">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">
+                        <i class="bi bi-cash-coin"></i> Nouveau Paiement
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
+                    <div class="alert alert-info">
+                        <strong>Diffusion:</strong> <span id="paiementInfoDiffusion"></span><br>
+                        <strong>Société:</strong> <span id="paiementInfoSociete"></span><br>
+                        <strong>Montant total:</strong> <span id="paiementInfoTotal"></span> Ar<br>
+                        <strong>Reste à payer:</strong> <span id="paiementInfoReste"></span> Ar
+                    </div>
+
                     <div class="mb-3">
-                        <label for="idPublicite" class="form-label">Publicité *</label>
-                        <select class="form-select" id="idPublicite" name="idPublicite" required>
-                            <option value="">Sélectionner une publicité</option>
-                            <c:forEach var="publicite" items="${publicites}">
-                                <option value="${publicite.id}">
-                                    ${publicite.societe.nom} - ${publicite.description}
-                                </option>
+                        <label for="idSociete" class="form-label">Société Payeuse *</label>
+                        <select class="form-select" id="idSociete" name="idSociete" required>
+                            <option value="">Sélectionner une société</option>
+                            <c:forEach var="societe" items="${societes}">
+                                <option value="${societe.id}">${societe.nom}</option>
                             </c:forEach>
                         </select>
                     </div>
+
                     <div class="mb-3">
-                        <label for="idTrajet" class="form-label">Trajet *</label>
-                        <select class="form-select" id="idTrajet" name="idTrajet" required>
-                            <option value="">Sélectionner un trajet</option>
-                            <c:forEach var="trajet" items="${trajets}">
-                                <option value="${trajet.id}">
-                                    #${trajet.id} - ${trajet.ligne.villeDepart.nom} → ${trajet.ligne.villeArrivee.nom}
-                                </option>
-                            </c:forEach>
-                        </select>
+                        <label for="datePaiement" class="form-label">Date de Paiement *</label>
+                        <input type="datetime-local"
+                               class="form-control"
+                               id="datePaiement"
+                               name="datePaiement"
+                               required>
                     </div>
+
                     <div class="mb-3">
-                        <label for="montantUnite" class="form-label">Montant Unité *</label>
+                        <label for="montantPaye" class="form-label">Montant Payé *</label>
                         <div class="input-group">
-                            <input type="text" class="form-control" id="montantUnite" 
-                                   name="montantUnite" value="${montantUniteDefaut}" required>
+                            <input type="number"
+                                   step="0.01"
+                                   class="form-control"
+                                   id="montantPaye"
+                                   name="montantPaye"
+                                   required
+                                   min="0">
                             <span class="input-group-text">Ar</span>
                         </div>
-                        <small class="text-muted">Valeur par défaut depuis la configuration (COUT_DIFFUSION_TAXI)</small>
-                    </div>
-                    <div class="mb-3">
-                        <label for="nombre" class="form-label">Nombre *</label>
-                        <input type="text" class="form-control" id="nombre" 
-                               name="nombre" required>
+                        <small class="text-muted">
+                            Le montant sera automatiquement réparti proportionnellement sur tous les détails de la diffusion
+                        </small>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-check-circle"></i> Enregistrer le Paiement
+                    </button>
                 </div>
             </form>
         </div>
@@ -193,9 +226,34 @@
 </div>
 
 <script>
-function confirmDelete(id) {
-    if (confirm('Êtes-vous sûr de vouloir supprimer cette diffusion ?')) {
-        window.location.href = '${pageContext.request.contextPath}/diffusions?action=delete&id=' + id;
+    // Initialiser la date actuelle
+    document.addEventListener('DOMContentLoaded', function() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+
+        const datetimeLocal = year + '-' + month + '-' + day + 'T' + hours + ':' + minutes;
+        document.getElementById('datePaiement').value = datetimeLocal;
+    });
+
+    function showPaiementModal(diffusionId, societe, montantTotal, montantReste) {
+        document.getElementById('paiementDiffusionId').value = diffusionId;
+        document.getElementById('paiementInfoDiffusion').textContent = '#' + diffusionId;
+        document.getElementById('paiementInfoSociete').textContent = societe;
+        document.getElementById('paiementInfoTotal').textContent = montantTotal.toLocaleString('fr-FR');
+        document.getElementById('paiementInfoReste').textContent = montantReste.toLocaleString('fr-FR');
+        document.getElementById('montantPaye').value = montantReste.toFixed(2);
+
+        const modal = new bootstrap.Modal(document.getElementById('paiementModal'));
+        modal.show();
     }
-}
+
+    function confirmDelete(id) {
+        if (confirm('Êtes-vous sûr de vouloir supprimer cette diffusion et tous ses paiements associés ?')) {
+            window.location.href = '${pageContext.request.contextPath}/diffusions?action=delete&id=' + id;
+        }
+    }
 </script>

@@ -5,23 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c1c861f5-aebe-49fb-9999-4ef53b312464" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/chiffre-affaire-complet-content.jsp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/chiffre-affaire-prevision-content.jsp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/chiffre-affaire-reel-content.jsp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/webapp/chiffre-affaire-complet.jsp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/webapp/chiffre-affaire-prevision.jsp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/webapp/chiffre-affaire-reel.jsp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/entities.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/entities.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/Diffusion.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/Diffusion.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/service/DiffusionPaiementService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/service/DiffusionPaiementService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/service/services.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/service/services.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/servlet/servlets.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/servlet/servlets.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/view/VmTrajetCaComplet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/view/VmTrajetCaComplet.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/view/VmTrajetCaReel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/view/VmTrajetCaReel.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/view/VmTrajetPrevisionCaTotal.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/view/VmTrajetPrevisionCaTotal.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/view/views.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/view/views.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/includes/sidebar.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/includes/sidebar.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/jsps.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/jsps.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/diffusion-detail-content.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/diffusion-detail-content.jsp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

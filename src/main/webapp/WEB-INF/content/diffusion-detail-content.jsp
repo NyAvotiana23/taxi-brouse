@@ -11,11 +11,11 @@
             <a href="${pageContext.request.contextPath}/diffusions" class="btn btn-secondary">
                 <i class="bi bi-arrow-left"></i> Retour
             </a>
-            <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#editDiffusionModal">
-                <i class="bi bi-pencil"></i> Modifier
-            </button>
-            <button class="btn btn-danger" onclick="confirmDelete(${diffusion.id})">
-                <i class="bi bi-trash"></i> Supprimer
+            <button type="button"
+                    class="btn btn-success"
+                    onclick="showPaiementModal(${diffusion.id}, '${diffusion.societe.nom}', ${montantTotal}, ${montantReste})"
+            ${montantReste <= 0 ? 'disabled' : ''}>
+                <i class="bi bi-cash-coin"></i> Ajouter un Paiement
             </button>
         </div>
     </div>
@@ -23,10 +23,52 @@
     <!-- Message d'erreur -->
     <c:if test="${not empty error}">
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            ${error}
+                ${error}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     </c:if>
+
+    <!-- Résumé financier -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h6 class="card-title"><i class="bi bi-calculator"></i> Montant Total</h6>
+                    <h3><fmt:formatNumber value="${montantTotal}" type="number" groupingUsed="true"/> Ar</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h6 class="card-title"><i class="bi bi-check-circle"></i> Montant Payé</h6>
+                    <h3><fmt:formatNumber value="${montantPaye}" type="number" groupingUsed="true"/> Ar</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card ${montantReste > 0 ? 'bg-warning text-dark' : 'bg-success text-white'}">
+                <div class="card-body">
+                    <h6 class="card-title"><i class="bi bi-hourglass-split"></i> Reste à Payer</h6>
+                    <h3><fmt:formatNumber value="${montantReste}" type="number" groupingUsed="true"/> Ar</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h6 class="card-title"><i class="bi bi-percent"></i> Progression</h6>
+                    <c:set var="pourcentage" value="${(montantPaye / montantTotal) * 100}"/>
+                    <h3><fmt:formatNumber value="${pourcentage}" pattern="#0.0"/>%</h3>
+                    <div class="progress mt-2" style="height: 10px;">
+                        <div class="progress-bar bg-light"
+                             role="progressbar"
+                             style="width: ${pourcentage > 100 ? 100 : pourcentage}%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="row">
         <!-- Informations de la Diffusion -->
@@ -39,23 +81,24 @@
                     <table class="table table-borderless">
                         <tr>
                             <th style="width: 40%;">ID Diffusion:</th>
-                            <td>${diffusion.id}</td>
+                            <td><strong>#${diffusion.id}</strong></td>
                         </tr>
                         <tr>
-                            <th>Montant Unité:</th>
-                            <td><strong><fmt:formatNumber value="${diffusion.montantUnite}" type="number" groupingUsed="true"/> Ar</strong></td>
+                            <th>Société:</th>
+                            <td><strong>${diffusion.societe.nom}</strong></td>
                         </tr>
                         <tr>
-                            <th>Nombre de Diffusions:</th>
-                            <td><strong>${diffusion.nombre}</strong></td>
+                            <th>Description:</th>
+                            <td>${diffusion.societe.description}</td>
                         </tr>
                         <tr>
-                            <th>Montant Total:</th>
+                            <th>Date de Création:</th>
                             <td>
-                                <span class="badge bg-success fs-6">
-                                    <c:set var="total" value="${diffusion.montantUnite * diffusion.nombre}"/>
-                                    <fmt:formatNumber value="${total}" type="number" groupingUsed="true"/> Ar
-                                </span>
+                                <c:if test="${not empty diffusion.dateCreation}">
+                                    <fmt:parseDate value="${diffusion.dateCreation}"
+                                                   pattern="yyyy-MM-dd'T'HH:mm" var="parsedDate" type="both"/>
+                                    <fmt:formatDate value="${parsedDate}" pattern="dd/MM/yyyy HH:mm"/>
+                                </c:if>
                             </td>
                         </tr>
                     </table>
@@ -63,172 +106,261 @@
             </div>
         </div>
 
-        <!-- Informations Société et Publicité -->
+        <!-- Détails de Diffusion -->
         <div class="col-md-6">
             <div class="card mb-3">
                 <div class="card-header bg-info text-white">
-                    <h5 class="mb-0"><i class="bi bi-building"></i> Société & Publicité</h5>
+                    <h5 class="mb-0"><i class="bi bi-list-ul"></i> Détails de Diffusion (${details.size()})</h5>
                 </div>
                 <div class="card-body">
-                    <table class="table table-borderless">
-                        <tr>
-                            <th style="width: 40%;">Société:</th>
-                            <td><strong>${diffusion.publicite.societe.nom}</strong></td>
-                        </tr>
-                        <tr>
-                            <th>Description Société:</th>
-                            <td>${diffusion.publicite.societe.description}</td>
-                        </tr>
-                        <tr>
-                            <th>Publicité:</th>
-                            <td>${diffusion.publicite.description}</td>
-                        </tr>
-                        <tr>
-                            <th>Durée Publicité:</th>
-                            <td>${diffusion.publicite.duree}</td>
-                        </tr>
-                    </table>
+                    <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+                        <table class="table table-sm">
+                            <thead class="sticky-top bg-light">
+                            <tr>
+                                <th>Publicité</th>
+                                <th>Trajet</th>
+                                <th class="text-end">Quantité</th>
+                                <th class="text-end">P.U.</th>
+                                <th class="text-end">Total</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <c:forEach var="detail" items="${details}">
+                                <c:set var="totalDetail" value="${detail.montantUnitaire * detail.nombreRepetition}"/>
+                                <tr>
+                                    <td>
+                                        <small>${detail.publicite.description}</small>
+                                    </td>
+                                    <td>
+                                        <small>
+                                                ${detail.trajet.ligne.villeDepart.nom} →
+                                                ${detail.trajet.ligne.villeArrivee.nom}
+                                        </small>
+                                    </td>
+                                    <td class="text-end">${detail.nombreRepetition}</td>
+                                    <td class="text-end">
+                                        <fmt:formatNumber value="${detail.montantUnitaire}" type="number" groupingUsed="true"/>
+                                    </td>
+                                    <td class="text-end">
+                                        <strong>
+                                            <fmt:formatNumber value="${totalDetail}" type="number" groupingUsed="true"/>
+                                        </strong>
+                                    </td>
+                                </tr>
+                            </c:forEach>
+                            <c:if test="${empty details}">
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted">
+                                        Aucun détail disponible
+                                    </td>
+                                </tr>
+                            </c:if>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Informations du Trajet -->
+    <!-- Historique des Paiements -->
     <div class="card mb-3">
-        <div class="card-header bg-warning">
-            <h5 class="mb-0"><i class="bi bi-geo-alt-fill"></i> Informations du Trajet</h5>
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0">
+                <i class="bi bi-cash-stack"></i> Historique des Paiements (${paiements.size()})
+            </h5>
         </div>
         <div class="card-body">
-            <div class="row">
-                <div class="col-md-6">
-                    <table class="table table-borderless">
-                        <tr>
-                            <th style="width: 40%;">ID Trajet:</th>
-                            <td>
-                                <a href="${pageContext.request.contextPath}/trajets?action=detail&id=${diffusion.trajet.id}">
-                                    #${diffusion.trajet.id}
-                                </a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>Ligne:</th>
-                            <td>
-                                <strong>${diffusion.trajet.ligne.villeDepart.nom}</strong> 
-                                <i class="bi bi-arrow-right"></i> 
-                                <strong>${diffusion.trajet.ligne.villeArrivee.nom}</strong>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>Chauffeur:</th>
-                            <td>${diffusion.trajet.chauffeur.nom} ${diffusion.trajet.chauffeur.prenom}</td>
-                        </tr>
-                        <tr>
-                            <th>Véhicule:</th>
-                            <td>${diffusion.trajet.vehicule.immatriculation}</td>
-                        </tr>
-                    </table>
+            <c:if test="${empty paiements}">
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle"></i> Aucun paiement enregistré pour cette diffusion
                 </div>
-                <div class="col-md-6">
-                    <table class="table table-borderless">
-                        <tr>
-                            <th style="width: 40%;">Date Départ:</th>
-                            <td>
-                                <fmt:parseDate value="${diffusion.trajet.datetimeDepart}" 
-                                              pattern="yyyy-MM-dd'T'HH:mm" var="parsedDepart" type="both"/>
-                                <fmt:formatDate value="${parsedDepart}" pattern="dd/MM/yyyy HH:mm"/>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>Date Arrivée:</th>
-                            <td>
-                                <c:choose>
-                                    <c:when test="${not empty diffusion.trajet.datetimeArrivee}">
-                                        <fmt:parseDate value="${diffusion.trajet.datetimeArrivee}" 
-                                                      pattern="yyyy-MM-dd'T'HH:mm" var="parsedArrivee" type="both"/>
-                                        <fmt:formatDate value="${parsedArrivee}" pattern="dd/MM/yyyy HH:mm"/>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <span class="text-muted">Non définie</span>
-                                    </c:otherwise>
-                                </c:choose>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>Nombre Passagers:</th>
-                            <td>${diffusion.trajet.nombrePassager}</td>
-                        </tr>
-                        <tr>
-                            <th>Statut:</th>
-                            <td>
-                                <span class="badge bg-secondary">
-                                    ${diffusion.trajet.trajetStatut.libelle}
+            </c:if>
+
+            <c:forEach var="paiement" items="${paiements}" varStatus="status">
+                <div class="card mb-3 border-success">
+                    <div class="card-header bg-light">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <h6 class="mb-0">
+                                    <i class="bi bi-receipt"></i> Paiement #${paiement.id}
+                                </h6>
+                            </div>
+                            <div class="col-auto">
+                                <span class="badge bg-success fs-6">
+                                    <fmt:formatNumber value="${paiement.montantPaye}" type="number" groupingUsed="true"/> Ar
                                 </span>
-                            </td>
-                        </tr>
-                    </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-2">
+                            <div class="col-md-4">
+                                <strong>Société Payeuse:</strong><br>
+                                    ${paiement.societe.nom}
+                            </div>
+                            <div class="col-md-4">
+                                <strong>Date de Paiement:</strong><br>
+                                <fmt:parseDate value="${paiement.datePaiement}"
+                                               pattern="yyyy-MM-dd'T'HH:mm" var="parsedDate" type="both"/>
+                                <fmt:formatDate value="${parsedDate}" pattern="dd/MM/yyyy HH:mm"/>
+                            </div>
+                            <div class="col-md-4">
+                                <strong>Montant:</strong><br>
+                                <span class="text-success fs-5">
+                                    <fmt:formatNumber value="${paiement.montantPaye}" type="number" groupingUsed="true"/> Ar
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Répartition du paiement -->
+                        <div class="mt-3">
+                            <h6 class="text-muted mb-2">
+                                <i class="bi bi-pie-chart"></i> Répartition du Paiement
+                            </h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-bordered">
+                                    <thead class="table-light">
+                                    <tr>
+                                        <th>Publicité</th>
+                                        <th>Trajet</th>
+                                        <th class="text-end">Montant Détail</th>
+                                        <th class="text-end">% Payé</th>
+                                        <th class="text-end">Montant Réparti</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <c:set var="repartitions" value="${null}"/>
+                                    <jsp:useBean id="paiementService" class="com.mdgtaxi.service.DiffusionPaiementService"/>
+                                    <c:set var="repartitions" value="${paiementService.getRepartitionsByPaiementId(paiement.id)}"/>
+
+                                    <c:forEach var="repartition" items="${repartitions}">
+                                        <c:set var="montantDetail" value="${repartition.diffusiondDetail.montantUnitaire * repartition.diffusiondDetail.nombreRepetition}"/>
+                                        <tr>
+                                            <td>
+                                                <small>${repartition.diffusiondDetail.publicite.description}</small>
+                                            </td>
+                                            <td>
+                                                <small>
+                                                        ${repartition.diffusiondDetail.trajet.ligne.villeDepart.nom} →
+                                                        ${repartition.diffusiondDetail.trajet.ligne.villeArrivee.nom}
+                                                </small>
+                                            </td>
+                                            <td class="text-end">
+                                                <fmt:formatNumber value="${montantDetail}" type="number" groupingUsed="true"/> Ar
+                                            </td>
+                                            <td class="text-end">
+                                                    <span class="badge bg-info">
+                                                        <fmt:formatNumber value="${repartition.pourcentage}" pattern="#0.00"/>%
+                                                    </span>
+                                            </td>
+                                            <td class="text-end">
+                                                <strong class="text-success">
+                                                    <fmt:formatNumber value="${repartition.montantPaye}" type="number" groupingUsed="true"/> Ar
+                                                </strong>
+                                            </td>
+                                        </tr>
+                                    </c:forEach>
+                                    <c:if test="${empty repartitions}">
+                                        <tr>
+                                            <td colspan="5" class="text-center text-muted">
+                                                Aucune répartition disponible
+                                            </td>
+                                        </tr>
+                                    </c:if>
+                                    </tbody>
+                                    <c:if test="${not empty repartitions}">
+                                        <tfoot class="table-light">
+                                        <tr>
+                                            <th colspan="4" class="text-end">Total Réparti:</th>
+                                            <th class="text-end">
+                                                <fmt:formatNumber value="${paiement.montantPaye}" type="number" groupingUsed="true"/> Ar
+                                            </th>
+                                        </tr>
+                                        </tfoot>
+                                    </c:if>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
+            </c:forEach>
         </div>
     </div>
 </div>
 
-<!-- Modal Modification Diffusion -->
-<div class="modal fade" id="editDiffusionModal" tabindex="-1">
+<!-- Modal Ajout Paiement -->
+<div class="modal fade" id="paiementModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
             <form method="post" action="${pageContext.request.contextPath}/diffusions">
-                <input type="hidden" name="action" value="update">
-                <input type="hidden" name="id" value="${diffusion.id}">
-                <div class="modal-header">
-                    <h5 class="modal-title">Modifier la Diffusion</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <input type="hidden" name="action" value="createPaiement">
+                <input type="hidden" name="id" id="paiementDiffusionId" value="${diffusion.id}">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">
+                        <i class="bi bi-cash-coin"></i> Nouveau Paiement
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
+                    <div class="alert alert-info">
+                        <strong>Diffusion:</strong> <span id="paiementInfoDiffusion">#${diffusion.id}</span><br>
+                        <strong>Société:</strong> <span id="paiementInfoSociete">${diffusion.societe.nom}</span><br>
+                        <strong>Montant total:</strong>
+                        <span id="paiementInfoTotal">
+                            <fmt:formatNumber value="${montantTotal}" type="number" groupingUsed="true"/>
+                        </span> Ar<br>
+                        <strong>Reste à payer:</strong>
+                        <span id="paiementInfoReste">
+                            <fmt:formatNumber value="${montantReste}" type="number" groupingUsed="true"/>
+                        </span> Ar
+                    </div>
+
                     <div class="mb-3">
-                        <label for="idPublicite" class="form-label">Publicité *</label>
-                        <select class="form-select" id="idPublicite" name="idPublicite" required>
-                            <c:forEach var="publicite" items="${publicites}">
-                                <option value="${publicite.id}" 
-                                        ${publicite.id == diffusion.publicite.id ? 'selected' : ''}>
-                                    ${publicite.societe.nom} - ${publicite.description}
+                        <label for="idSociete" class="form-label">Société Payeuse *</label>
+                        <select class="form-select" id="idSociete" name="idSociete" required>
+                            <option value="">Sélectionner une société</option>
+                            <c:forEach var="societe" items="${societes}">
+                                <option value="${societe.id}" ${societe.id == diffusion.societe.id ? 'selected' : ''}>
+                                        ${societe.nom}
                                 </option>
                             </c:forEach>
                         </select>
                     </div>
+
                     <div class="mb-3">
-                        <label for="idTrajet" class="form-label">Trajet *</label>
-                        <select class="form-select" id="idTrajet" name="idTrajet" required>
-                            <c:forEach var="trajet" items="${trajets}">
-                                <option value="${trajet.id}" 
-                                        ${trajet.id == diffusion.trajet.id ? 'selected' : ''}>
-                                    #${trajet.id} - ${trajet.ligne.villeDepart.nom} → ${trajet.ligne.villeArrivee.nom}
-                                </option>
-                            </c:forEach>
-                        </select>
+                        <label for="datePaiement" class="form-label">Date de Paiement *</label>
+                        <input type="datetime-local"
+                               class="form-control"
+                               id="datePaiement"
+                               name="datePaiement"
+                               required>
                     </div>
+
                     <div class="mb-3">
-                        <label for="montantUnite" class="form-label">Montant Unité *</label>
+                        <label for="montantPaye" class="form-label">Montant Payé *</label>
                         <div class="input-group">
-                            <input type="text" class="form-control" id="montantUnite" 
-                                   name="montantUnite" value="${diffusion.montantUnite}" required>
+                            <input type="number"
+                                   step="0.01"
+                                   class="form-control"
+                                   id="montantPaye"
+                                   name="montantPaye"
+                                   value="${montantReste}"
+                                   required
+                                   min="0">
                             <span class="input-group-text">Ar</span>
-                            <button type="button" class="btn btn-outline-secondary" 
-                                    onclick="document.getElementById('montantUnite').value='${montantUniteDefaut}'"
-                                    title="Appliquer la valeur par défaut de la configuration">
-                                <i class="bi bi-arrow-counterclockwise"></i>
-                            </button>
                         </div>
-                        <small class="text-muted">Valeur par défaut: <fmt:formatNumber value="${montantUniteDefaut}" type="number" groupingUsed="true"/> Ar</small>
-                    </div>
-                    <div class="mb-3">
-                        <label for="nombre" class="form-label">Nombre *</label>
-                        <input type="text" class="form-control" id="nombre" 
-                               name="nombre" value="${diffusion.nombre}" required>
+                        <small class="text-muted">
+                            <i class="bi bi-info-circle"></i>
+                            Le montant sera automatiquement réparti proportionnellement sur tous les détails de la diffusion
+                        </small>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-check-circle"></i> Enregistrer le Paiement
+                    </button>
                 </div>
             </form>
         </div>
@@ -236,9 +368,23 @@
 </div>
 
 <script>
-function confirmDelete(id) {
-    if (confirm('Êtes-vous sûr de vouloir supprimer cette diffusion ?')) {
-        window.location.href = '${pageContext.request.contextPath}/diffusions?action=delete&id=' + id;
+    // Initialiser la date actuelle
+    document.addEventListener('DOMContentLoaded', function() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+
+        const datetimeLocal = year + '-' + month + '-' + day + 'T' + hours + ':' + minutes;
+        if (document.getElementById('datePaiement')) {
+            document.getElementById('datePaiement').value = datetimeLocal;
+        }
+    });
+
+    function showPaiementModal(diffusionId, societe, montantTotal, montantReste) {
+        const modal = new bootstrap.Modal(document.getElementById('paiementModal'));
+        modal.show();
     }
-}
 </script>
