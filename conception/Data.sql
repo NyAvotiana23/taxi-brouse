@@ -1,6 +1,7 @@
 -- ============================================
 -- Complete Database INSERT Script
 -- Taxi Management System (MDG Taxi)
+-- Corrigé pour PostgreSQL
 -- ============================================
 
 -- ============================================
@@ -74,11 +75,8 @@ VALUES ('Adulte'),
 -- Type_Place
 INSERT INTO Type_Place (nom_type_place, description)
 VALUES ('Premium', 'Siege premium avec confort accru et espace supplementaire'),
-       ('Standard', 'Siege standard pour un voyage economique');
-
--- Additional Type_Place (Examples)
-INSERT INTO Type_Place (nom_type_place, description)
-VALUES ('VIP', 'Siege VIP avec services exclusifs'),
+       ('Standard', 'Siege standard pour un voyage economique'),
+       ('VIP', 'Siege VIP avec services exclusifs'),
        ('Economique', 'Siege basique pour budgets limites');
 
 
@@ -297,19 +295,18 @@ VALUES ('En cours', 10, '<span class="badge bg-info">En cours</span>'),
        ('Termine', 20, '<span class="badge bg-success">Termine</span>'),
        ('Annule', 0, '<span class="badge bg-danger">Annule</span>');
 
--- Trajet (avec frais_unitaire en Ariary)
--- Trajets en décembre 2025 pour les diffusions publicitaires
+-- Trajet (CORRIGÉ: format de date PostgreSQL YYYY-MM-DD au lieu de YYYY-DD-MM)
 INSERT INTO Trajet (id_ligne, id_chauffeur, id_vehicule, nombre_passager, id_trajet_statut, datetime_depart,
                     datetime_arrivee)
-VALUES (1, 1, 1, 50, 2, '2026-20-01 10:00:00', '2026-20-01 12:00:00'),
-       (1, 2, 1, 50, 2, '2026-21-01 10:00:00', '2026-21-01 12:00:00'),
-       (1, 3, 1, 50, 2, '2026-21-01 15:00:00', '2026-21-01 17:00:00');
+VALUES (1, 1, 1, 50, 2, '2026-01-20 10:00:00', '2026-01-20 12:00:00'),
+       (1, 2, 1, 50, 2, '2026-01-21 10:00:00', '2026-01-21 12:00:00'),
+       (1, 3, 1, 50, 2, '2026-01-21 15:00:00', '2026-01-21 17:00:00');
 
 -- Trajet_Mouvement_Statut
 INSERT INTO Trajet_Mouvement_Statut (id_trajet, date_mouvement, id_nouveau_statut, observation)
-VALUES (1, '2025-12-05 00:00:00', 2, 'Trajet terminé'),
-       (2, '2025-12-10 00:00:00', 2, 'Trajet terminé'),
-       (3, '2025-12-15 00:00:00', 2, 'Trajet terminé');
+VALUES (1, '2026-01-20 12:00:00', 2, 'Trajet terminé'),
+       (2, '2026-01-21 12:00:00', 2, 'Trajet terminé'),
+       (3, '2026-01-21 17:00:00', 2, 'Trajet terminé');
 
 -- Trajet_Motif_Arret
 INSERT INTO Trajet_Motif_Arret (libelle)
@@ -320,16 +317,16 @@ VALUES ('Panne'),
 -- Trajet_Arret_Detail
 INSERT INTO Trajet_Arret_Detail (id_trajet, id_caisse, id_ville, id_trajet_motif_arret, montant_depense, datetime_debut,
                                  datetime_fin)
-VALUES (1, NULL, 1, 1, 50.0, '2026-01-01 05:00:00', '2026-01-01 06:00:00'),
-       (2, NULL, 2, 2, 100.0, '2026-01-01 06:00:00', '2026-01-01 07:00:00'),
-       (3, NULL, 3, 3, 150.0, '2026-01-01 07:00:00', '2026-01-01 08:00:00');
+VALUES (1, NULL, 1, 1, 50.0, '2026-01-20 05:00:00', '2026-01-20 06:00:00'),
+       (2, NULL, 2, 2, 100.0, '2026-01-21 06:00:00', '2026-01-21 07:00:00'),
+       (3, NULL, 3, 3, 150.0, '2026-01-21 07:00:00', '2026-01-21 08:00:00');
 
 -- Trajet_Carburant_Detail
 INSERT INTO Trajet_Carburant_Detail (id_trajet, id_caisse, id_ville, id_carburant_type, datetime,
                                      quantite_carburant_ajoute, taux_carburant)
-VALUES (1, NULL, 1, 1, '2026-01-01 05:00:00', 10.0, 1.5),
-       (2, NULL, 2, 2, '2026-01-01 06:00:00', 20.0, 1.2),
-       (3, NULL, 3, 2, '2026-01-01 07:00:00', 30.0, 1.2);
+VALUES (1, NULL, 1, 1, '2026-01-20 05:00:00', 10.0, 1.5),
+       (2, NULL, 2, 2, '2026-01-21 06:00:00', 20.0, 1.2),
+       (3, NULL, 3, 2, '2026-01-21 07:00:00', 30.0, 1.2);
 
 -- Additional Trajet_Statut
 INSERT INTO Trajet_Statut (libelle, score, span_html)
@@ -339,10 +336,10 @@ VALUES ('Prevu', 5, '<span class="badge bg-warning">Prevu</span>'),
 
 -- Additional Trajet (avec frais_unitaire en Ariary)
 INSERT INTO Trajet (id_ligne, id_chauffeur, id_vehicule, nombre_passager, id_trajet_statut, datetime_depart,
-                    datetime_arrivee, frais_unitaire)
-VALUES (4, 4, 4, 2, 4, '2026-02-01 08:00:00', '2026-02-01 18:00:00', 28000.00),
-       (5, 5, 5, 15, 5, '2026-02-15 06:00:00', '2026-02-15 18:00:00', 40000.00),
-       (6, 6, 6, 5, 6, '2026-02-20 07:00:00', '2026-02-20 15:00:00', 32000.00);
+                    datetime_arrivee)
+VALUES (4, 4, 4, 2, 4, '2026-02-01 08:00:00', '2026-02-01 18:00:00'),
+       (5, 5, 5, 15, 5, '2026-02-15 06:00:00', '2026-02-15 18:00:00'),
+       (6, 6, 6, 5, 6, '2026-02-20 07:00:00', '2026-02-20 15:00:00');
 
 -- Additional Trajet_Mouvement_Statut
 INSERT INTO Trajet_Mouvement_Statut (id_trajet, date_mouvement, id_nouveau_statut, observation)
@@ -434,12 +431,7 @@ VALUES ('Confirmee', 10, '<span class="badge bg-success">Confirmee</span>'),
        ('Annulee', 0, '<span class="badge bg-danger">Annulee</span>'),
        ('En attente', 5, '<span class="badge bg-warning">En attente</span>');
 
--- Trajet_Reservation (Adapted: Removed numero_siege and nombre_place_reservation as per entity definition)
-INSERT INTO Trajet_Reservation (id_client, id_trajet, id_reservation_statut, nom_passager,
-                                date_reservation)
-VALUES (1, 1, 1, 'Passager1', '2026-01-01 00:00:00'),
-       (2, 2, 1, 'Passager2', '2026-01-01 00:00:00'),
-       (3, 3, 1, 'Passager3', '2026-01-01 00:00:00');
+
 
 -- Trajet_Reservation_Mouvement_Statut
 INSERT INTO Trajet_Reservation_Mouvement_Statut (id_trajet_reservation, date_mouvement, id_nouveau_statut, observation)
@@ -447,38 +439,19 @@ VALUES (1, '2026-01-01 00:00:00', 1, 'Initial status'),
        (2, '2026-01-01 00:00:00', 1, 'Initial status'),
        (3, '2026-01-01 00:00:00', 1, 'Initial status');
 
--- -- Trajet_Reservation_Paiement
--- INSERT INTO Trajet_Reservation_Paiement (id_client, id_trajet_reservation, id_caisse, montant, id_mode_paiement,
---                                          date_paiement)
--- VALUES (1, 1, NULL, 10.0, 1, '2026-01-01 00:00:00'),
---        (2, 2, NULL, 20.0, 2, '2026-01-01 00:00:00'),
---        (3, 3, NULL, 30.0, 3, '2026-01-01 00:00:00');
-
 -- Additional Reservation_Statut
 INSERT INTO Reservation_Statut (libelle, score, span_html)
 VALUES ('Payee', 15, '<span class="badge bg-primary">Payee</span>'),
        ('Remboursee', 2, '<span class="badge bg-info">Remboursee</span>'),
        ('Expiree', 0, '<span class="badge bg-secondary">Expiree</span>');
 
--- Additional Trajet_Reservation (Adapted: Removed numero_siege and nombre_place_reservation)
-INSERT INTO Trajet_Reservation (id_client, id_trajet, id_reservation_statut, nom_passager,
-                                date_reservation)
-VALUES (4, 4, 4, 'Passager4', '2026-02-01 00:00:00'),
-       (5, 5, 5, 'Passager5', '2026-02-01 00:00:00'),
-       (6, 6, 6, 'Passager6', '2026-02-01 00:00:00');
+-- Additional Trajet_Reserva
 
 -- Additional Trajet_Reservation_Mouvement_Statut
 INSERT INTO Trajet_Reservation_Mouvement_Statut (id_trajet_reservation, date_mouvement, id_nouveau_statut, observation)
 VALUES (4, '2026-02-01 00:00:00', 4, 'Paid'),
        (5, '2026-02-01 00:00:00', 5, 'Refunded'),
        (6, '2026-02-01 00:00:00', 6, 'Expired');
-
--- -- Additional Trajet_Reservation_Paiement
--- INSERT INTO Trajet_Reservation_Paiement (id_client, id_trajet_reservation, id_caisse, montant, id_mode_paiement,
---                                          date_paiement)
--- VALUES (4, 4, NULL, 40.0, 4, '2026-02-01 00:00:00'),
---        (5, 5, NULL, 50.0, 5, '2026-02-01 00:00:00'),
---        (6, 6, NULL, 60.0, 6, '2026-02-01 00:00:00');
 
 -- ============================================
 -- FINANCE (Financial Tracking)
@@ -497,7 +470,7 @@ VALUES (1, NULL, 'Trajet', 10.0, 1, '2026-01-01 00:00:00', 'Prevision pour traje
        (2, NULL, 'Trajet', 20.0, 1, '2026-01-01 00:00:00', 'Prevision pour trajet 2'),
        (3, NULL, 'Trajet', 30.0, 1, '2026-01-01 00:00:00', 'Prevision pour trajet 3');
 
--- Prevision_Trajet (Adapted: Kept frais_unitaire as per entity definition)
+-- Prevision_Trajet
 INSERT INTO Prevision_Trajet (id_ligne, id_chauffeur, id_vehicule, nombre_passager, id_trajet_statut, datetime_depart,
                               datetime_arrivee, frais_unitaire)
 VALUES (1, 1, 1, 5, 1, '2026-01-01 00:00:00', '2026-01-01 10:00:00', 10.0),
@@ -524,79 +497,39 @@ VALUES (4, 4, 4, 2, 4, '2026-02-01 00:00:00', '2026-02-01 12:00:00', 40.0),
        (5, 5, 5, 15, 5, '2026-02-01 00:00:00', '2026-02-01 14:00:00', 50.0),
        (6, 6, 6, 5, 6, '2026-02-01 00:00:00', '2026-02-01 16:00:00', 60.0);
 
-
-
 -- ============================================
--- VEHICULE_TARIF_TYPE_PLACE (New: Added as per request, with tariffs 140000 for Premium, 80000 for Standard)
+-- VEHICULE_TARIF_TYPE_PLACE
 -- ============================================
-
--- Note: If there is a unique constraint on tarif_unitaire causing errors, remove it from the schema as it prevents multiple entries with the same tariff.
--- Assuming the constraint is removed, the following will work.
-
 
 INSERT INTO Vehicule_Tarif_Type_Place (id_vehicule, id_type_place, tarif_unitaire, nombre_place)
-VALUES (1, 3, 65000.0, 20.0);
-
-INSERT INTO Vehicule_Tarif_Type_Place (id_vehicule, id_type_place, tarif_unitaire, nombre_place)
-VALUES (1, 1, 50000.0, 20.0);
-
-INSERT INTO Vehicule_Tarif_Type_Place (id_vehicule, id_type_place, tarif_unitaire, nombre_place)
-VALUES (1, 4, 40000.0, 20.0);
-
-
-
--- TRAJET_RESERVATION_DETAILS (New: Added as per request)
--- ============================================
-
-
-
---Donnees
+VALUES (1, 3, 65000.0, 20.0),
+       (1, 1, 50000.0, 20.0),
+       (1, 4, 40000.0, 20.0);
 
 -- ============================================
--- TYPE_PLACE (New: Added as per request)
+-- TRAJET_TARIF_TYPE_PLACE_CATEGORIE_REMISE
 -- ============================================
 
--- Type_Place
-INSERT INTO Type_Place (nom_type_place, description)
-VALUES ('Premium', 'Siege premium avec confort accru et espace supplementaire'),
-       ('Standard', 'Siege standard pour un voyage economique');
-
--- Additional Type_Place (Examples)
-INSERT INTO Type_Place (nom_type_place, description)
-VALUES ('VIP', 'Siege VIP avec services exclusifs'),
-       ('Economique', 'Siege basique pour budgets limites');
-
-
-
+-- Pour le trajet 1 avec catégorie Enfant (id=2)
 INSERT INTO Trajet_Tarif_Type_Place_Categorie_Remise (id_type_place, id_trajet, id_categorie_personne,
                                                       tarif_unitaire_avec_remise)
-VALUES (3, 1, 2, 65000); -- VIP
+VALUES (3, 1, 2, 65000), -- VIP pour Enfant
+       (1, 1, 2, 50000), -- Premium pour Enfant
+       (4, 1, 2, 40000); -- Economique pour Enfant
 
+-- Pour le trajet 1 avec catégorie Adulte (id=1)
 INSERT INTO Trajet_Tarif_Type_Place_Categorie_Remise (id_type_place, id_trajet, id_categorie_personne,
                                                       tarif_unitaire_avec_remise)
-VALUES (1, 1, 2, 50000); -- Prenium
+VALUES (3, 1, 1, 70000), -- VIP pour Adulte
+       (1, 1, 1, 60000), -- Premium pour Adulte
+       (4, 1, 1, 50000); -- Economique pour Adulte
 
-INSERT INTO Trajet_Tarif_Type_Place_Categorie_Remise (id_type_place, id_trajet, id_categorie_personne,
-                                                      tarif_unitaire_avec_remise)
-VALUES (4, 1, 2, 40000); -- Economique
-
-
-INSERT INTO Trajet_Tarif_Type_Place_Categorie_Remise (id_type_place, id_trajet, id_categorie_personne,
-                                                      tarif_unitaire_avec_remise)
-VALUES (3, 1, 1, 70000); -- VIP
-
-INSERT INTO Trajet_Tarif_Type_Place_Categorie_Remise (id_type_place, id_trajet, id_categorie_personne,
-                                                      tarif_unitaire_avec_remise)
-VALUES (1, 1, 1, 60000); -- Prenium
-
-INSERT INTO Trajet_Tarif_Type_Place_Categorie_Remise (id_type_place, id_trajet, id_categorie_personne,
-                                                      tarif_unitaire_avec_remise)
-VALUES (4, 1, 1, 50000); -- Economique
-
+-- ============================================
+-- TRAJET_REMISE_POURCENTAGE
+-- ============================================
 
 INSERT INTO Trajet_Remise_Pourcentage (id_trajet, categorie_application, categorie_par_rapport, remisePourcent)
 VALUES (1, 3, 2, -20);
-
 
 -- ============================================
 -- UNITE (Unités de mesure / configuration)
@@ -612,7 +545,9 @@ VALUES ('Ariary'),
 -- ============================================
 INSERT INTO Societe (nom, description)
 VALUES ('VaniAla', 'Entreprise de télécommunications - publicité taxi'),
-       ('Lewis', 'Marque de boissons énergisantes - campagnes publicitaires');
+       ('Lewis', 'Marque de boissons énergisantes - campagnes publicitaires'),
+       ('Socobis', 'Societe biscuit'),
+       ('Jejoo', 'Entreprise Magazine');
 
 -- ============================================
 -- CONFIGURATION (exemples de paramètres utiles)
@@ -626,40 +561,62 @@ INSERT INTO Configuration (libelle, valeur, id_unite, code)
 VALUES ('Taux TVA publicité', '20', 4, 'TAUX_TVA_PUBLICITE');
 
 -- ============================================
--- PUBLICITE (Campagnes publicitaires décembre)
+-- PUBLICITE (Campagnes publicitaires)
 -- ============================================
--- Vaniala : 20 diffusions × 100000 = 2 000 000 Ariary
 INSERT INTO Publicite (id_societe, description, duree)
-VALUES (1, 'Campagne publicitaire décembre - 20 diffusions', 'Decembre 2025');
-
--- Lewis : 10 diffusions × 100000 = 1 000 000 Ariary
-INSERT INTO Publicite (id_societe, description, duree)
-VALUES (2, 'Campagne publicitaire décembre - 10 diffusions', 'Decembre 2025');
+VALUES (1, 'Campagne publicitaire janvier 2026 - VaniAla', 'Janvier 2026'),
+       (2, 'Campagne publicitaire janvier 2026 - Lewis', 'Janvier 2026'),
+       (3, 'Campagne publicitaire janvier 2026 - Socobis', 'Janvier 2026'),
+       (4, 'Campagne publicitaire janvier 2026 - Jejoo', 'Janvier 2026');
 
 -- ============================================
 -- DIFFUSION (Diffusions publicitaires sur trajets)
 -- ============================================
--- Vaniala : 20 diffusions sur différents trajets à 100000 Ar/diffusion = 2 000 000 Ar total
-INSERT INTO Diffusion (id_publicite, id_trajet, montant_unite, nombre)
-VALUES (1, 1, 100000, 5),   -- 5 diffusions sur trajet 1 = 500 000 Ar
-       (1, 2, 100000, 8),   -- 8 diffusions sur trajet 2 = 800 000 Ar
-       (1, 3, 100000, 7);   -- 7 diffusions sur trajet 3 = 700 000 Ar
--- Total Vaniala : 5+8+7 = 20 diffusions =       2 000 000 Ar
 
--- Lewis : 10 diffusions sur différents trajets à 100000 Ar/diffusion = 1 000 000 Ar total
-INSERT INTO Diffusion (id_publicite, id_trajet, montant_unite, nombre)
-VALUES (2, 1, 100000, 4),   -- 4 diffusions sur trajet 1 = 400 000 Ar
-       (2, 2, 100000, 6);   -- 6 diffusions sur trajet 2 = 600 000 Ar
--- Total Lewis : 4+6 = 10 diffusions = 1 000 000 Ar
+INSERT INTO Diffusion (id_societe, date_creation) 
+VALUES (1, '2026-01-01 00:00:00'),
+       (2, '2026-01-01 00:00:00'),
+       (3, '2026-01-01 00:00:00'),
+       (4, '2026-01-01 00:00:00');
+
+-- ============================================
+-- DIFFUSION_DETAIL (Détails des diffusions par trajet)
+-- ============================================
+
+INSERT INTO Diffusion_Detail (id_publicite, id_diffusion, id_trajet, nombre_repetition, montant_unitaire)
+VALUES (1, 1, 1, 1, 100000),
+       (2, 2, 1, 1, 100000),
+       (3, 3, 2, 2, 100000),
+       (4, 4, 2, 1, 100000);
 
 -- ============================================
 -- DIFFUSION_PAIEMENT (Paiements des sociétés pour les diffusions)
 -- ============================================
--- Vaniala a payé 1 000 000 Ar sur les 2 000 000 Ar dus (reste 1 000 000 Ar)
-INSERT INTO Diffusion_Paiement (id_diffusion, id_societe, date_paiement, montant)
-VALUES (1, 1, '2025-12-15 10:00:00', 500000),   -- Paiement partiel diffusion 1
-       (2, 1, '2025-12-20 14:30:00', 500000);   -- Paiement partiel diffusion 2
--- Total payé par Vaniala : 500000 + 500000 = 1 000 000 Ar
--- Reste à payer : 2 000 000 - 1 000 000 = 1 000 000 Ar
+-- Les paiements peuvent être ajoutés ici si nécessaire
+-- Exemple commenté:
+-- INSERT INTO Diffusion_Paiement (id_diffusion, id_societe, date_paiement, montant_paye)
+-- VALUES (1, 1, '2026-01-20 10:00:00', 50000);
 
--- Lewis n'a pas encore payé (reste 1 000 000 Ar)
+-- 1. Trajet 1 – 40 adultes
+INSERT INTO Trajet_Reservation (id_client, id_trajet, id_reservation_statut, nom_passager, date_reservation)
+VALUES (1, 1, 1, 'Groupe 40 adultes T1', CURRENT_TIMESTAMP);
+
+INSERT INTO Trajet_Reservation_Details (id_trajet_reservation, id_categorie_personne, id_type_place, nombre_places, tarif_unitaire)
+VALUES (1, 1, 2, 40.0, 50000);
+
+
+-- 2. Trajet 2 – 30 adultes
+INSERT INTO Trajet_Reservation (id_client, id_trajet, id_reservation_statut, nom_passager, date_reservation)
+VALUES (1, 2, 1, 'Groupe 30 adultes T2', CURRENT_TIMESTAMP);
+
+INSERT INTO Trajet_Reservation_Details (id_trajet_reservation, id_categorie_personne, id_type_place, nombre_places, tarif_unitaire)
+VALUES (2, 1, 2, 30.0, 50000);
+
+
+-- 3. Trajet 3 – 50 adultes
+INSERT INTO Trajet_Reservation (id_client, id_trajet, id_reservation_statut, nom_passager, date_reservation)
+VALUES (1, 3, 1, 'Groupe 50 adultes T3', CURRENT_TIMESTAMP);
+
+INSERT INTO Trajet_Reservation_Details (id_trajet_reservation, id_categorie_personne, id_type_place, nombre_places, tarif_unitaire)
+VALUES (3, 1, 2, 50.0, 50000);
+
