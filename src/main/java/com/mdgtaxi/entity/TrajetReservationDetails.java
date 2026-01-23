@@ -29,7 +29,7 @@ public class TrajetReservationDetails {
     @Column(name = "nombre_places", nullable = false)
     private double nombrePlaces;
 
-    @Column(name = "tarif_nitaire")
+    @Column(name = "tarif_unitaire")
     private double tarifUnitaire = 0;
 
 

@@ -393,16 +393,25 @@ import java.math.BigDecimal;
 @Immutable
 @Subselect("""
     SELECT
-        ROW_NUMBER() OVER (ORDER BY EXTRACT(YEAR FROM t.datetime_depart), EXTRACT(MONTH FROM t.datetime_depart)) AS id,
-        CAST(EXTRACT(MONTH FROM t.datetime_depart) AS integer) AS mois,
-        CAST(EXTRACT(YEAR FROM t.datetime_depart) AS integer) AS annee,
-        SUM(CAST(d.montant_unite AS DECIMAL(15,2)) * CAST(d.nombre AS INTEGER)) AS montant_total,
-        SUM(CAST(d.nombre AS INTEGER)) AS nombre_total
-    FROM Diffusion d
-    INNER JOIN Trajet t ON d.id_trajet = t.id
-    GROUP BY EXTRACT(YEAR FROM t.datetime_depart), EXTRACT(MONTH FROM t.datetime_depart)
+        ROW_NUMBER() OVER (ORDER BY annee, mois) AS id,
+        mois,
+        annee,
+        montant_total,
+        nombre_total
+    FROM (
+        SELECT
+            CAST(EXTRACT(MONTH FROM t.datetime_depart) AS integer) AS mois,
+            CAST(EXTRACT(YEAR FROM t.datetime_depart) AS integer) AS annee,
+            SUM(dd.nombre_repetition * dd.montant_unitaire) AS montant_total,
+            SUM(dd.nombre_repetition) AS nombre_total
+        FROM Diffusion_Detail dd
+        INNER JOIN Trajet t ON dd.id_trajet = t.id
+        GROUP BY EXTRACT(YEAR FROM t.datetime_depart), EXTRACT(MONTH FROM t.datetime_depart)
+        
+        
+    ) subquery
 """)
-@Synchronize({"Diffusion", "Trajet"})
+@Synchronize({"Diffusion_Detail", "Trajet"})
 public class VmDiffusionMensuelGlobal implements Serializable {
     @Id
     @Column(name = "id")
@@ -436,28 +445,22 @@ import java.math.BigDecimal;
 @Immutable
 @Subselect("""
     SELECT
-        ROW_NUMBER() OVER (ORDER BY s.id, d.id) AS id,
+        d.id AS id,
         s.id AS id_societe,
         s.nom AS nom_societe,
         d.id AS id_diffusion,
-        pub.id AS id_publicite,
-        pub.description AS description_publicite,
-        t.id AS id_trajet,
-        CAST(EXTRACT(MONTH FROM t.datetime_depart) AS integer) AS mois,
-        CAST(EXTRACT(YEAR FROM t.datetime_depart) AS integer) AS annee,
-        CAST(d.nombre AS INTEGER) AS nombre,
-        CAST(d.montant_unite AS DECIMAL(15,2)) AS montant_unite,
-        (CAST(d.montant_unite AS DECIMAL(15,2)) * CAST(d.nombre AS INTEGER)) AS montant_a_payer,
-        COALESCE(SUM(CAST(p.montant AS DECIMAL(15,2))), 0) AS montant_paye,
-        ((CAST(d.montant_unite AS DECIMAL(15,2)) * CAST(d.nombre AS INTEGER)) - COALESCE(SUM(CAST(p.montant AS DECIMAL(15,2))), 0)) AS montant_reste
+        COALESCE(SUM(CAST(dd.montant_unitaire AS DECIMAL(15,2)) * CAST(dd.nombre_repetition AS INTEGER)), 0) AS montant_a_payer,
+        COALESCE(SUM(CAST(p.montant_paye AS DECIMAL(15,2))), 0) AS montant_paye,
+        (COALESCE(SUM(CAST(dd.montant_unitaire AS DECIMAL(15,2)) * CAST(dd.nombre_repetition AS INTEGER)), 0) - 
+         COALESCE(SUM(CAST(p.montant_paye AS DECIMAL(15,2))), 0)) AS montant_reste,
+        d.date_creation
     FROM Diffusion d
-    INNER JOIN Publicite pub ON d.id_publicite = pub.id
-    INNER JOIN Societe s ON pub.id_societe = s.id
-    INNER JOIN Trajet t ON d.id_trajet = t.id
+    INNER JOIN Societe s ON d.id_societe = s.id
+    LEFT JOIN Diffusion_Detail dd ON dd.id_diffusion = d.id
     LEFT JOIN Diffusion_Paiement p ON p.id_diffusion = d.id
-    GROUP BY s.id, s.nom, d.id, pub.id, pub.description, t.id, t.datetime_depart, d.nombre, d.montant_unite
+    GROUP BY d.id, s.id, s.nom, d.date_creation
 """)
-@Synchronize({"Diffusion", "Publicite", "Societe", "Trajet", "Diffusion_Paiement"})
+@Synchronize({"Diffusion", "Diffusion_Detail", "Societe", "Diffusion_Paiement"})
 public class VmDiffusionPaiement implements Serializable {
     @Id
     @Column(name = "id")
@@ -472,27 +475,6 @@ public class VmDiffusionPaiement implements Serializable {
     @Column(name = "id_diffusion")
     private Long idDiffusion;
 
-    @Column(name = "id_publicite")
-    private Long idPublicite;
-
-    @Column(name = "description_publicite")
-    private String descriptionPublicite;
-
-    @Column(name = "id_trajet")
-    private Long idTrajet;
-
-    @Column(name = "mois")
-    private Integer mois;
-
-    @Column(name = "annee")
-    private Integer annee;
-
-    @Column(name = "nombre")
-    private Integer nombre;
-
-    @Column(name = "montant_unite")
-    private BigDecimal montantUnite;
-
     @Column(name = "montant_a_payer")
     private BigDecimal montantAPayer;
 
@@ -501,6 +483,9 @@ public class VmDiffusionPaiement implements Serializable {
 
     @Column(name = "montant_reste")
     private BigDecimal montantReste;
+
+    @Column(name = "date_creation")
+    private java.time.LocalDateTime dateCreation;
 }
 package com.mdgtaxi.view;
 
@@ -815,57 +800,90 @@ import java.time.LocalTime;
         c.prenom AS prenom_chauffeur,
         CAST(t.datetime_depart AS DATE) AS date_depart,
         CAST(t.datetime_depart AS TIME) AS heure_depart,
-        COALESCE(prev.montant_prevision_ticket, 0) AS montant_prevision_ticket,
-        COALESCE(prev.montant_prevision_diffusion, 0) AS montant_prevision_diffusion,
-        COALESCE(prev.ca_previsionnel, 0) AS ca_previsionnel,
-        COALESCE(reel.montant_reel_ticket, 0) AS montant_reel_ticket,
-        COALESCE(reel.montant_reel_diffusion, 0) AS montant_reel_diffusion,
-        COALESCE(reel.ca_reel, 0) AS ca_reel,
-        COALESCE(prev.ca_previsionnel, 0) - COALESCE(reel.ca_reel, 0) AS ecart_ca
+        
+        -- CA PRÃ‰VISIONNEL
+        -- Montant prÃ©visionnel tickets
+        COALESCE(prevision_tickets.montant_tickets, 0) AS montant_prevision_ticket,
+        
+        -- Montant prÃ©visionnel diffusions
+        COALESCE(prevision_diffusion.montant_diffusion, 0) AS montant_prevision_diffusion,
+        
+        -- CA prÃ©visionnel total
+        COALESCE(prevision_tickets.montant_tickets, 0) + 
+        COALESCE(prevision_diffusion.montant_diffusion, 0) AS montant_chiffre_affaire_prevision,
+        
+        -- CA RÃ‰EL
+        -- Montant rÃ©el tickets (paiements effectuÃ©s)
+        COALESCE(paiements_tickets.montant_reel_tickets, 0) AS montant_reel_ticket,
+        
+        -- Montant restant Ã  payer pour les tickets
+        COALESCE(prevision_tickets.montant_tickets, 0) - 
+        COALESCE(paiements_tickets.montant_reel_tickets, 0) AS montant_rest_ticket,
+        
+        -- Montant rÃ©el diffusions (paiements effectuÃ©s)
+        COALESCE(paiements_diffusion.montant_reel_diffusion, 0) AS montant_reel_diffusion,
+        
+        -- Montant restant Ã  payer pour les diffusions
+        COALESCE(prevision_diffusion.montant_diffusion, 0) - 
+        COALESCE(paiements_diffusion.montant_reel_diffusion, 0) AS montant_rest_diffusion,
+        
+        -- CA rÃ©el total
+        COALESCE(paiements_tickets.montant_reel_tickets, 0) + 
+        COALESCE(paiements_diffusion.montant_reel_diffusion, 0) AS montant_chiffre_affaire_reel,
+        
+        -- Ã‰CART (PrÃ©vu - RÃ©el) - positif = manque Ã  gagner, nÃ©gatif = dÃ©passement
+        (COALESCE(prevision_tickets.montant_tickets, 0) + COALESCE(prevision_diffusion.montant_diffusion, 0)) -
+        (COALESCE(paiements_tickets.montant_reel_tickets, 0) + COALESCE(paiements_diffusion.montant_reel_diffusion, 0)) AS ecart_ca
+        
     FROM Trajet t
     INNER JOIN Ligne l ON t.id_ligne = l.id
     INNER JOIN Ville vd ON l.id_ville_depart = vd.id
     INNER JOIN Ville va ON l.id_ville_arrivee = va.id
     INNER JOIN Vehicule v ON t.id_vehicule = v.id
     INNER JOIN Chauffeur c ON t.id_chauffeur = c.id
+    
+    -- Sous-requÃªte pour le montant prÃ©visionnel des tickets
     LEFT JOIN (
-        SELECT
-            t.id AS id_trajet,
-            COALESCE(SUM(trd.nombre_places * COALESCE(tttpcr.tarif_unitaire_avec_remise, vttp.tarif_unitaire)), 0) AS montant_prevision_ticket,
-            COALESCE(SUM(dd.nombre_repetition * dd.montant_unitaire), 0) AS montant_prevision_diffusion,
-            COALESCE(SUM(trd.nombre_places * COALESCE(tttpcr.tarif_unitaire_avec_remise, vttp.tarif_unitaire)), 0) 
-                + COALESCE(SUM(dd.nombre_repetition * dd.montant_unitaire), 0) AS ca_previsionnel
-        FROM Trajet t
-        LEFT JOIN Trajet_Reservation tr ON tr.id_trajet = t.id
-        LEFT JOIN Trajet_Reservation_Details trd ON trd.id_trajet_reservation = tr.id
-        LEFT JOIN Trajet_Tarif_Type_Place_Categorie_Remise tttpcr 
-            ON tttpcr.id_trajet = t.id 
-            AND tttpcr.id_type_place = trd.id_type_place 
-            AND tttpcr.id_categorie_personne = trd.id_categorie_personne
-        LEFT JOIN Vehicule_Tarif_Type_Place vttp 
-            ON vttp.id_vehicule = t.id_vehicule 
-            AND vttp.id_type_place = trd.id_type_place
-        LEFT JOIN Diffusion_Detail dd ON dd.id_trajet = t.id
-        GROUP BY t.id
-    ) prev ON prev.id_trajet = t.id
+        SELECT 
+            tr.id_trajet,
+            SUM(trd.nombre_places * trd.tarif_unitaire) AS montant_tickets
+        FROM Trajet_Reservation tr
+        INNER JOIN Trajet_Reservation_Details trd ON trd.id_trajet_reservation = tr.id
+        GROUP BY tr.id_trajet
+    ) prevision_tickets ON prevision_tickets.id_trajet = t.id
+    
+    -- Sous-requÃªte pour le montant prÃ©visionnel des diffusions
     LEFT JOIN (
-        SELECT
-            t.id AS id_trajet,
-            COALESCE(SUM(trp.montant), 0) AS montant_reel_ticket,
-            COALESCE(SUM(dpr.montant_paye), 0) AS montant_reel_diffusion,
-            COALESCE(SUM(trp.montant), 0) + COALESCE(SUM(dpr.montant_paye), 0) AS ca_reel
-        FROM Trajet t
-        LEFT JOIN Trajet_Reservation tr ON tr.id_trajet = t.id
-        LEFT JOIN Trajet_Reservation_Paiement trp ON trp.id_trajet_reservation = tr.id
-        LEFT JOIN Diffusion_Detail dd ON dd.id_trajet = t.id
-        LEFT JOIN Diffusion_Paiement_Repartition dpr ON dpr.id_diffusion_detail = dd.id
-        GROUP BY t.id
-    ) reel ON reel.id_trajet = t.id
+        SELECT 
+            dd.id_trajet,
+            SUM(dd.nombre_repetition * dd.montant_unitaire) AS montant_diffusion
+        FROM Diffusion_Detail dd
+        GROUP BY dd.id_trajet
+    ) prevision_diffusion ON prevision_diffusion.id_trajet = t.id
+    
+    -- Sous-requÃªte pour les paiements rÃ©els des tickets
+    LEFT JOIN (
+        SELECT 
+            tr.id_trajet,
+            SUM(trp.montant) AS montant_reel_tickets
+        FROM Trajet_Reservation tr
+        INNER JOIN Trajet_Reservation_Paiement trp ON trp.id_trajet_reservation = tr.id
+        GROUP BY tr.id_trajet
+    ) paiements_tickets ON paiements_tickets.id_trajet = t.id
+    
+    -- Sous-requÃªte pour les paiements rÃ©els des diffusions
+    LEFT JOIN (
+        SELECT 
+            dd.id_trajet,
+            SUM(dpr.montant_paye) AS montant_reel_diffusion
+        FROM Diffusion_Detail dd
+        INNER JOIN Diffusion_Paiement_Repartition dpr ON dpr.id_diffusion_detail = dd.id
+        GROUP BY dd.id_trajet
+    ) paiements_diffusion ON paiements_diffusion.id_trajet = t.id
 """)
-@Synchronize({"Trajet", "Ligne", "Ville", "Vehicule", "Chauffeur", "Trajet_Reservation",
-        "Trajet_Reservation_Details", "Trajet_Tarif_Type_Place_Categorie_Remise",
-        "Vehicule_Tarif_Type_Place", "Trajet_Reservation_Paiement", "Diffusion_Detail",
-        "Diffusion_Paiement_Repartition"})
+@Synchronize({"Trajet", "Ligne", "Ville", "Vehicule", "Chauffeur",
+        "Trajet_Reservation", "Trajet_Reservation_Details", "Trajet_Reservation_Paiement",
+        "Diffusion_Detail", "Diffusion_Paiement_Repartition"})
 public class VmTrajetCaComplet implements Serializable {
 
     @Id
@@ -893,35 +911,35 @@ public class VmTrajetCaComplet implements Serializable {
     @Column(name = "heure_depart")
     private LocalTime heureDepart;
 
+    // PrÃ©visionnel
     @Column(name = "montant_prevision_ticket")
     private BigDecimal montantPrevisionTicket;
 
     @Column(name = "montant_prevision_diffusion")
     private BigDecimal montantPrevisionDiffusion;
 
-    @Column(name = "ca_previsionnel")
-    private BigDecimal caPrevisionnel;
+    @Column(name = "montant_chiffre_affaire_prevision")
+    private BigDecimal montantChiffreAffairePrevision;
 
+    // RÃ©el
     @Column(name = "montant_reel_ticket")
     private BigDecimal montantReelTicket;
+
+    @Column(name = "montant_rest_ticket")
+    private BigDecimal montantRestTicket;
 
     @Column(name = "montant_reel_diffusion")
     private BigDecimal montantReelDiffusion;
 
-    @Column(name = "ca_reel")
-    private BigDecimal caReel;
+    @Column(name = "montant_rest_diffusion")
+    private BigDecimal montantRestDiffusion;
 
+    @Column(name = "montant_chiffre_affaire_reel")
+    private BigDecimal montantChiffreAffaireReel;
+
+    // Ã‰cart
     @Column(name = "ecart_ca")
     private BigDecimal ecartCa;
-
-    // Alias getters for compatibility
-    public BigDecimal getMontantChiffreAffairePrevision() {
-        return caPrevisionnel;
-    }
-
-    public BigDecimal getMontantChiffreAffaireReel() {
-        return caReel;
-    }
 }
 package com.mdgtaxi.view;
 
@@ -949,35 +967,47 @@ import java.time.LocalTime;
         c.prenom AS prenom_chauffeur,
         CAST(t.datetime_depart AS DATE) AS date_depart,
         CAST(t.datetime_depart AS TIME) AS heure_depart,
-        COALESCE(SUM(trp.montant), 0) AS montant_reel_ticket,
-        COALESCE(SUM(dpr.montant_paye), 0) AS montant_reel_diffusion,
-        COALESCE(SUM(trp.montant), 0) + COALESCE(SUM(dpr.montant_paye), 0) AS ca_reel,
-        COALESCE(SUM(trp.montant), 0) AS montant_paye,
-        COALESCE(SUM(trd.nombre_places * COALESCE(tttpcr.tarif_unitaire_avec_remise, vttp.tarif_unitaire)), 0) - COALESCE(SUM(trp.montant), 0) AS montant_restant
+        
+        -- Montant rÃ©el des tickets (via paiements effectuÃ©s)
+        COALESCE(paiements_tickets.montant_reel_tickets, 0) AS montant_reel_ticket,
+        
+        -- Montant rÃ©el des diffusions (via paiements effectuÃ©s)
+        COALESCE(paiements_diffusion.montant_reel_diffusion, 0) AS montant_reel_diffusion,
+        
+        -- CA rÃ©el total
+        COALESCE(paiements_tickets.montant_reel_tickets, 0) + 
+        COALESCE(paiements_diffusion.montant_reel_diffusion, 0) AS montant_chiffre_affaire_reel
+        
     FROM Trajet t
     INNER JOIN Ligne l ON t.id_ligne = l.id
     INNER JOIN Ville vd ON l.id_ville_depart = vd.id
     INNER JOIN Ville va ON l.id_ville_arrivee = va.id
     INNER JOIN Vehicule v ON t.id_vehicule = v.id
     INNER JOIN Chauffeur c ON t.id_chauffeur = c.id
-    LEFT JOIN Trajet_Reservation tr ON tr.id_trajet = t.id
-    LEFT JOIN Trajet_Reservation_Details trd ON trd.id_trajet_reservation = tr.id
-    LEFT JOIN Trajet_Tarif_Type_Place_Categorie_Remise tttpcr 
-        ON tttpcr.id_trajet = t.id 
-        AND tttpcr.id_type_place = trd.id_type_place 
-        AND tttpcr.id_categorie_personne = trd.id_categorie_personne
-    LEFT JOIN Vehicule_Tarif_Type_Place vttp 
-        ON vttp.id_vehicule = t.id_vehicule 
-        AND vttp.id_type_place = trd.id_type_place
-    LEFT JOIN Trajet_Reservation_Paiement trp ON trp.id_trajet_reservation = tr.id
-    LEFT JOIN Diffusion_Detail dd ON dd.id_trajet = t.id
-    LEFT JOIN Diffusion_Paiement_Repartition dpr ON dpr.id_diffusion_detail = dd.id
-    GROUP BY t.id, vd.nom, va.nom, v.immatriculation, c.nom, c.prenom, t.datetime_depart
+    
+    -- Sous-requÃªte pour les paiements des rÃ©servations (tickets)
+    LEFT JOIN (
+        SELECT 
+            tr.id_trajet,
+            SUM(trp.montant) AS montant_reel_tickets
+        FROM Trajet_Reservation tr
+        INNER JOIN Trajet_Reservation_Paiement trp ON trp.id_trajet_reservation = tr.id
+        GROUP BY tr.id_trajet
+    ) paiements_tickets ON paiements_tickets.id_trajet = t.id
+    
+    -- Sous-requÃªte pour les paiements des diffusions publicitaires
+    LEFT JOIN (
+        SELECT 
+            dd.id_trajet,
+            SUM(dpr.montant_paye) AS montant_reel_diffusion
+        FROM Diffusion_Detail dd
+        INNER JOIN Diffusion_Paiement_Repartition dpr ON dpr.id_diffusion_detail = dd.id
+        GROUP BY dd.id_trajet
+    ) paiements_diffusion ON paiements_diffusion.id_trajet = t.id
 """)
-@Synchronize({"Trajet", "Ligne", "Ville", "Vehicule", "Chauffeur", "Trajet_Reservation",
-        "Trajet_Reservation_Details", "Trajet_Tarif_Type_Place_Categorie_Remise",
-        "Vehicule_Tarif_Type_Place", "Trajet_Reservation_Paiement", "Diffusion_Detail",
-        "Diffusion_Paiement_Repartition"})
+@Synchronize({"Trajet", "Ligne", "Ville", "Vehicule", "Chauffeur",
+        "Trajet_Reservation", "Trajet_Reservation_Paiement",
+        "Diffusion_Detail", "Diffusion_Paiement_Repartition"})
 public class VmTrajetCaReel implements Serializable {
 
     @Id
@@ -1011,19 +1041,8 @@ public class VmTrajetCaReel implements Serializable {
     @Column(name = "montant_reel_diffusion")
     private BigDecimal montantReelDiffusion;
 
-    @Column(name = "ca_reel")
-    private BigDecimal caReel;
-
-    @Column(name = "montant_paye")
-    private BigDecimal montantPaye;
-
-    @Column(name = "montant_restant")
-    private BigDecimal montantRestant;
-
-    // Alias getter for compatibility
-    public BigDecimal getMontantChiffreAffaireReel() {
-        return caReel;
-    }
+    @Column(name = "montant_chiffre_affaire_reel")
+    private BigDecimal montantChiffreAffaireReel;
 }
 package com.mdgtaxi.view;
 
@@ -1146,32 +1165,72 @@ import java.time.LocalTime;
         c.prenom AS prenom_chauffeur,
         CAST(t.datetime_depart AS DATE) AS date_depart,
         CAST(t.datetime_depart AS TIME) AS heure_depart,
-        COALESCE(SUM(vttp.nombre_place), 0) AS nombre_places_totales,
-        COALESCE(SUM(trd.nombre_places), 0) AS nombre_places_prises,
-        COALESCE(SUM(vttp.nombre_place), 0) - COALESCE(SUM(trd.nombre_places), 0) AS nombre_places_restantes,
-        COALESCE(SUM(trd.nombre_places * COALESCE(tttpcr.tarif_unitaire_avec_remise, vttp.tarif_unitaire)), 0) AS montant_prevision_ticket,
-        COALESCE(SUM(dd.nombre_repetition * dd.montant_unitaire), 0) AS montant_prevision_diffusion,
-        COALESCE(SUM(trd.nombre_places * COALESCE(tttpcr.tarif_unitaire_avec_remise, vttp.tarif_unitaire)), 0) 
-            + COALESCE(SUM(dd.nombre_repetition * dd.montant_unitaire), 0) AS ca_previsionnel
+        
+        -- Nombre de places totales du vÃ©hicule
+        COALESCE(places_totales.total_places, 0) AS nombre_places_totales,
+        
+        -- Nombre de places prises via rÃ©servations
+        COALESCE(places_prises.total_prises, 0) AS nombre_places_prises,
+        
+        -- Places restantes
+        COALESCE(places_totales.total_places, 0) - COALESCE(places_prises.total_prises, 0) AS nombre_places_restantes,
+        
+        -- Montant des tickets (rÃ©servations)
+        COALESCE(revenus_tickets.montant_tickets, 0) AS montant_prevision_ticket,
+        
+        -- Montant des diffusions publicitaires
+        COALESCE(revenus_diffusion.montant_diffusion, 0) AS montant_prevision_diffusion,
+        
+        -- CA total prÃ©visionnel
+        COALESCE(revenus_tickets.montant_tickets, 0) + COALESCE(revenus_diffusion.montant_diffusion, 0) AS ca_previsionnel
+        
     FROM Trajet t
     INNER JOIN Ligne l ON t.id_ligne = l.id
     INNER JOIN Ville vd ON l.id_ville_depart = vd.id
     INNER JOIN Ville va ON l.id_ville_arrivee = va.id
     INNER JOIN Vehicule v ON t.id_vehicule = v.id
     INNER JOIN Chauffeur c ON t.id_chauffeur = c.id
-    LEFT JOIN Vehicule_Tarif_Type_Place vttp ON vttp.id_vehicule = v.id
-    LEFT JOIN Trajet_Reservation tr ON tr.id_trajet = t.id
-    LEFT JOIN Trajet_Reservation_Details trd ON trd.id_trajet_reservation = tr.id
-    LEFT JOIN Trajet_Tarif_Type_Place_Categorie_Remise tttpcr 
-        ON tttpcr.id_trajet = t.id 
-        AND tttpcr.id_type_place = trd.id_type_place 
-        AND tttpcr.id_categorie_personne = trd.id_categorie_personne
-    LEFT JOIN Diffusion_Detail dd ON dd.id_trajet = t.id
-    GROUP BY t.id, vd.nom, va.nom, v.immatriculation, c.nom, c.prenom, t.datetime_depart
+    
+    -- Sous-requÃªte pour calculer le nombre total de places du vÃ©hicule
+    LEFT JOIN (
+        SELECT 
+            id_vehicule,
+            SUM(nombre_place) AS total_places
+        FROM Vehicule_Tarif_Type_Place
+        GROUP BY id_vehicule
+    ) places_totales ON places_totales.id_vehicule = v.id
+    
+    -- Sous-requÃªte pour calculer le nombre de places prises
+    LEFT JOIN (
+        SELECT 
+            tr.id_trajet,
+            SUM(trd.nombre_places) AS total_prises
+        FROM Trajet_Reservation tr
+        INNER JOIN Trajet_Reservation_Details trd ON trd.id_trajet_reservation = tr.id
+        GROUP BY tr.id_trajet
+    ) places_prises ON places_prises.id_trajet = t.id
+    
+    -- Sous-requÃªte pour calculer le montant des tickets
+    LEFT JOIN (
+        SELECT 
+            tr.id_trajet,
+            SUM(trd.nombre_places * trd.tarif_unitaire) AS montant_tickets
+        FROM Trajet_Reservation tr
+        INNER JOIN Trajet_Reservation_Details trd ON trd.id_trajet_reservation = tr.id
+        GROUP BY tr.id_trajet
+    ) revenus_tickets ON revenus_tickets.id_trajet = t.id
+    
+    -- Sous-requÃªte pour calculer le montant des diffusions
+    LEFT JOIN (
+        SELECT 
+            dd.id_trajet,
+            SUM(dd.nombre_repetition * dd.montant_unitaire) AS montant_diffusion
+        FROM Diffusion_Detail dd
+        GROUP BY dd.id_trajet
+    ) revenus_diffusion ON revenus_diffusion.id_trajet = t.id
 """)
 @Synchronize({"Trajet", "Ligne", "Ville", "Vehicule", "Chauffeur", "Vehicule_Tarif_Type_Place",
-        "Trajet_Reservation", "Trajet_Reservation_Details", "Trajet_Tarif_Type_Place_Categorie_Remise",
-        "Diffusion_Detail"})
+        "Trajet_Reservation", "Trajet_Reservation_Details", "Diffusion_Detail"})
 public class VmTrajetPrevisionCaTotal implements Serializable {
 
     @Id

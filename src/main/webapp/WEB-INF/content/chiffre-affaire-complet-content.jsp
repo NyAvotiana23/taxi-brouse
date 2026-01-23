@@ -250,8 +250,8 @@
                         <th rowspan="2">Arrivée</th>
                         <th rowspan="2">Date</th>
                         <th rowspan="2">Véhicule</th>
-                        <th colspan="2" class="text-center bg-warning">Tickets</th>
-                        <th colspan="2" class="text-center bg-info">Diffusions</th>
+                        <th colspan="3" class="text-center bg-warning">Tickets</th>
+                        <th colspan="3" class="text-center bg-info">Diffusions</th>
                         <th colspan="2" class="text-center bg-success">CA Total</th>
                         <th rowspan="2">Écart</th>
                         <th rowspan="2">%</th>
@@ -260,8 +260,12 @@
                     <tr>
                         <th class="text-center bg-warning">Prévu</th>
                         <th class="text-center bg-warning">Réel</th>
+                        <th class="text-center bg-warning">Reste</th>
+
                         <th class="text-center bg-info">Prévu</th>
                         <th class="text-center bg-info">Réel</th>
+                        <th class="text-center bg-info">Reste</th>
+
                         <th class="text-center bg-success">Prévu</th>
                         <th class="text-center bg-success">Réel</th>
                     </tr>
@@ -282,8 +286,12 @@
                         <td><small><%= ca.getImmatriculationVehicule() %></small></td>
                         <td class="text-end"><small><%= String.format("%,.0f", ca.getMontantPrevisionTicket()) %></small></td>
                         <td class="text-end"><small><%= String.format("%,.0f", ca.getMontantReelTicket()) %></small></td>
+                        <td class="text-end"><small><%= String.format("%,.0f", ca.getMontantRestTicket()) %></small></td>
+
                         <td class="text-end"><small><%= String.format("%,.0f", ca.getMontantPrevisionDiffusion()) %></small></td>
                         <td class="text-end"><small><%= String.format("%,.0f", ca.getMontantReelDiffusion()) %></small></td>
+                        <td class="text-end"><small><%= String.format("%,.0f", ca.getMontantRestDiffusion()) %></small></td>
+
                         <td class="text-end"><strong><%= String.format("%,.0f", ca.getMontantChiffreAffairePrevision()) %></strong></td>
                         <td class="text-end"><strong class="text-success"><%= String.format("%,.0f", ca.getMontantChiffreAffaireReel()) %></strong></td>
                         <td class="text-end">

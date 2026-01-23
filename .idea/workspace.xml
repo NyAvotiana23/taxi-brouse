@@ -5,11 +5,21 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c1c861f5-aebe-49fb-9999-4ef53b312464" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources/9d5ae705-3b26-464f-8631-f155dcd826a3.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/9d5ae705-3b26-464f-8631-f155dcd826a3.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources/9d5ae705-3b26-464f-8631-f155dcd826a3/storage_v2/_src_/database/mdgtaxi.zoONNg/schema/public.abK9xQ.meta" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/9d5ae705-3b26-464f-8631-f155dcd826a3/storage_v2/_src_/database/mdgtaxi.zoONNg/schema/public.abK9xQ.meta" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/Diffusion.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/Diffusion.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/service/DiffusionPaiementService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/service/DiffusionPaiementService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/conception/Data.sql" beforeDir="false" afterPath="$PROJECT_DIR$/conception/Data.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/TrajetReservationDetails.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/TrajetReservationDetails.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/entities.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/entity/entities.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/service/services.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/service/services.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/diffusion-detail-content.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/diffusion-detail-content.jsp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/servlet/servlets.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/servlet/servlets.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/view/VmDiffusionMensuelGlobal.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/view/VmDiffusionMensuelGlobal.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/view/VmTrajetCaComplet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/view/VmTrajetCaComplet.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/view/VmTrajetCaReel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/view/VmTrajetCaReel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/view/VmTrajetPrevisionCaTotal.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/view/VmTrajetPrevisionCaTotal.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/view/views.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mdgtaxi/view/views.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/chiffre-affaire-complet-content.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/chiffre-affaire-complet-content.jsp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/chiffre-affaire-prevision-content.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/chiffre-affaire-prevision-content.jsp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -19,8 +29,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Class" />
         <option value="Jsp File" />
+        <option value="Class" />
       </list>
     </option>
   </component>

@@ -215,10 +215,12 @@
                         <th>Heure</th>
                         <th>Véhicule</th>
                         <th>Chauffeur</th>
-                        <th>Places Totales</th>
-                        <th>Places Prises</th>
-                        <th>Places Restantes</th>
-                        <th>CA Prévisionnel</th>
+
+                        <th>Ticket CA Prévisionnel</th>
+                        <th>Diffusion CA Prévisionnel</th>
+
+
+                        <th>Total CA Prévisionnel</th>
                         <th>Actions</th>
                     </tr>
                     </thead>
@@ -233,14 +235,11 @@
                         <td><%= p.getHeureDepart() %></td>
                         <td><%= p.getImmatriculationVehicule() %></td>
                         <td><%= p.getNomChauffeur() %> <%= p.getPrenomChauffeur() %></td>
-                        <td class="text-center">
-                            <span class="badge bg-secondary"><%= String.format("%.1f", p.getNombrePlacesTotales()) %></span>
+                        <td class="text-end">
+                            <strong class="text-success"><%= String.format("%,.2f", p.getMontantPrevisionTicket()) %>Ar</strong>
                         </td>
-                        <td class="text-center">
-                            <span class="badge bg-primary"><%= String.format("%.1f", p.getNombrePlacesPrises()) %></span>
-                        </td>
-                        <td class="text-center">
-                            <span class="badge bg-success"><%= String.format("%.1f", p.getNombrePlacesRestantes()) %></span>
+                        <td class="text-end">
+                            <strong class="text-success"><%= String.format("%,.2f", p.getMontantPrevisionDiffusion()) %> Ar</strong>
                         </td>
                         <td class="text-end">
                             <strong class="text-success"><%= String.format("%,.2f", p.getCaPrevisionnel()) %> Ar</strong>

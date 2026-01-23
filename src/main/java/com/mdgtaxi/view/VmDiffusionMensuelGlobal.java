@@ -14,16 +14,25 @@ import java.math.BigDecimal;
 @Immutable
 @Subselect("""
     SELECT
-        ROW_NUMBER() OVER (ORDER BY EXTRACT(YEAR FROM t.datetime_depart), EXTRACT(MONTH FROM t.datetime_depart)) AS id,
-        CAST(EXTRACT(MONTH FROM t.datetime_depart) AS integer) AS mois,
-        CAST(EXTRACT(YEAR FROM t.datetime_depart) AS integer) AS annee,
-        SUM(CAST(d.montant_unite AS DECIMAL(15,2)) * CAST(d.nombre AS INTEGER)) AS montant_total,
-        SUM(CAST(d.nombre AS INTEGER)) AS nombre_total
-    FROM Diffusion d
-    INNER JOIN Trajet t ON d.id_trajet = t.id
-    GROUP BY EXTRACT(YEAR FROM t.datetime_depart), EXTRACT(MONTH FROM t.datetime_depart)
+        ROW_NUMBER() OVER (ORDER BY annee, mois) AS id,
+        mois,
+        annee,
+        montant_total,
+        nombre_total
+    FROM (
+        SELECT
+            CAST(EXTRACT(MONTH FROM t.datetime_depart) AS integer) AS mois,
+            CAST(EXTRACT(YEAR FROM t.datetime_depart) AS integer) AS annee,
+            SUM(dd.nombre_repetition * dd.montant_unitaire) AS montant_total,
+            SUM(dd.nombre_repetition) AS nombre_total
+        FROM Diffusion_Detail dd
+        INNER JOIN Trajet t ON dd.id_trajet = t.id
+        GROUP BY EXTRACT(YEAR FROM t.datetime_depart), EXTRACT(MONTH FROM t.datetime_depart)
+        
+        
+    ) subquery
 """)
-@Synchronize({"Diffusion", "Trajet"})
+@Synchronize({"Diffusion_Detail", "Trajet"})
 public class VmDiffusionMensuelGlobal implements Serializable {
     @Id
     @Column(name = "id")

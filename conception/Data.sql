@@ -431,13 +431,7 @@ VALUES ('Confirmee', 10, '<span class="badge bg-success">Confirmee</span>'),
        ('Annulee', 0, '<span class="badge bg-danger">Annulee</span>'),
        ('En attente', 5, '<span class="badge bg-warning">En attente</span>');
 
-
-
--- Trajet_Reservation_Mouvement_Statut
-INSERT INTO Trajet_Reservation_Mouvement_Statut (id_trajet_reservation, date_mouvement, id_nouveau_statut, observation)
-VALUES (1, '2026-01-01 00:00:00', 1, 'Initial status'),
-       (2, '2026-01-01 00:00:00', 1, 'Initial status'),
-       (3, '2026-01-01 00:00:00', 1, 'Initial status');
+;
 
 -- Additional Reservation_Statut
 INSERT INTO Reservation_Statut (libelle, score, span_html)
@@ -445,13 +439,6 @@ VALUES ('Payee', 15, '<span class="badge bg-primary">Payee</span>'),
        ('Remboursee', 2, '<span class="badge bg-info">Remboursee</span>'),
        ('Expiree', 0, '<span class="badge bg-secondary">Expiree</span>');
 
--- Additional Trajet_Reserva
-
--- Additional Trajet_Reservation_Mouvement_Statut
-INSERT INTO Trajet_Reservation_Mouvement_Statut (id_trajet_reservation, date_mouvement, id_nouveau_statut, observation)
-VALUES (4, '2026-02-01 00:00:00', 4, 'Paid'),
-       (5, '2026-02-01 00:00:00', 5, 'Refunded'),
-       (6, '2026-02-01 00:00:00', 6, 'Expired');
 
 -- ============================================
 -- FINANCE (Financial Tracking)
