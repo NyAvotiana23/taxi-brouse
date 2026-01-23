@@ -1,19 +1,11 @@
 package com.mdgtaxi.service;
 
-import com.mdgtaxi.entity.Diffusion;
-import com.mdgtaxi.entity.DiffusionPaiement;
-import com.mdgtaxi.entity.Societe;
+import com.mdgtaxi.entity.*;
 import com.mdgtaxi.util.HibernateUtil;
 import com.mdgtaxi.view.VmDiffusionPaiement;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityTransaction;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import javax.persistence.*;
+import javax.persistence.criteria.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
@@ -24,13 +16,76 @@ public class DiffusionPaiementService {
 
     private final EntityManagerFactory emf = HibernateUtil.getEntityManagerFactory();
 
-    // CREATE
-    public DiffusionPaiement createPaiement(DiffusionPaiement paiement) {
+    /**
+     * Crée un paiement et génère automatiquement la répartition proportionnelle
+     * sur tous les détails de diffusion associés
+     */
+    public DiffusionPaiement createPaiementAvecRepartition(DiffusionPaiement paiement) {
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
+
+            // Persister le paiement
             em.persist(paiement);
+            em.flush(); // Pour obtenir l'ID généré
+
+            // Récupérer tous les détails de diffusion pour cette diffusion
+            TypedQuery<DiffusionDetail> query = em.createQuery(
+                    "SELECT dd FROM DiffusionDetail dd WHERE dd.diffusion.id = :diffusionId",
+                    DiffusionDetail.class
+            );
+            query.setParameter("diffusionId", paiement.getDiffusion().getId());
+            List<DiffusionDetail> details = query.getResultList();
+
+            if (details.isEmpty()) {
+                throw new IllegalStateException("Aucun détail de diffusion trouvé pour la diffusion #"
+                        + paiement.getDiffusion().getId());
+            }
+
+            // Calculer le montant total à payer de la diffusion
+            BigDecimal montantTotalDiffusion = BigDecimal.ZERO;
+            for (DiffusionDetail detail : details) {
+                BigDecimal montantDetail = detail.getMontantUnitaire()
+                        .multiply(new BigDecimal(detail.getNombreRepetition()));
+                montantTotalDiffusion = montantTotalDiffusion.add(montantDetail);
+            }
+
+            // Calculer le pourcentage payé
+            BigDecimal pourcentagePaye = paiement.getMontantPaye()
+                    .divide(montantTotalDiffusion, 6, RoundingMode.HALF_UP)
+                    .multiply(new BigDecimal(100));
+
+            // Créer les répartitions pour chaque détail
+            BigDecimal totalReparti = BigDecimal.ZERO;
+            int lastIndex = details.size() - 1;
+
+            for (int i = 0; i < details.size(); i++) {
+                DiffusionDetail detail = details.get(i);
+                DiffusionPaiementRepartition repartition = new DiffusionPaiementRepartition();
+
+                repartition.setDiffusiondDetail(detail);
+                repartition.setDiffusionPaiement(paiement);
+                repartition.setPourcentage(pourcentagePaye.doubleValue());
+
+                // Calculer le montant pour ce détail
+                BigDecimal montantDetail = detail.getMontantUnitaire()
+                        .multiply(new BigDecimal(detail.getNombreRepetition()));
+                BigDecimal montantRepartition = montantDetail
+                        .multiply(pourcentagePaye)
+                        .divide(new BigDecimal(100), 2, RoundingMode.HALF_UP);
+
+                // Ajustement pour le dernier élément pour éviter les erreurs d'arrondi
+                if (i == lastIndex) {
+                    montantRepartition = paiement.getMontantPaye().subtract(totalReparti);
+                } else {
+                    totalReparti = totalReparti.add(montantRepartition);
+                }
+
+                repartition.setMontantPaye(montantRepartition);
+                em.persist(repartition);
+            }
+
             tx.commit();
             return paiement;
         } catch (Exception e) {
@@ -40,6 +95,11 @@ public class DiffusionPaiementService {
         } finally {
             em.close();
         }
+    }
+
+    // CREATE (ancienne méthode conservée pour compatibilité)
+    public DiffusionPaiement createPaiement(DiffusionPaiement paiement) {
+        return createPaiementAvecRepartition(paiement);
     }
 
     // READ - by ID
@@ -75,6 +135,22 @@ public class DiffusionPaiementService {
                     DiffusionPaiement.class
             );
             query.setParameter("diffusionId", diffusionId);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    // READ - Répartitions by Paiement ID
+    public List<DiffusionPaiementRepartition> getRepartitionsByPaiementId(Long paiementId) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<DiffusionPaiementRepartition> query = em.createQuery(
+                    "SELECT r FROM DiffusionPaiementRepartition r " +
+                            "WHERE r.diffusionPaiement.id = :paiementId",
+                    DiffusionPaiementRepartition.class
+            );
+            query.setParameter("paiementId", paiementId);
             return query.getResultList();
         } finally {
             em.close();
@@ -122,6 +198,14 @@ public class DiffusionPaiementService {
             tx.begin();
             DiffusionPaiement paiement = em.find(DiffusionPaiement.class, id);
             if (paiement != null) {
+                // Supprimer d'abord les répartitions
+                Query deleteRepartitions = em.createQuery(
+                        "DELETE FROM DiffusionPaiementRepartition r WHERE r.diffusionPaiement.id = :paiementId"
+                );
+                deleteRepartitions.setParameter("paiementId", id);
+                deleteRepartitions.executeUpdate();
+
+                // Puis supprimer le paiement
                 em.remove(paiement);
             }
             tx.commit();
@@ -198,53 +282,6 @@ public class DiffusionPaiementService {
             return query.getResultList();
         } finally {
             em.close();
-        }
-    }
-
-    // New method for proportional payment based on filters
-    public void makeProportionalPayment(Long idPublicite, List<Long> idSocietes, Long idTrajet,
-                                        Integer mois, Integer annee,
-                                        Integer nombreMin, Integer nombreMax,
-                                        BigDecimal amount) {
-        List<VmDiffusionPaiement> vms = getVmPaiements(idPublicite, idSocietes, idTrajet, mois, annee, nombreMin, nombreMax);
-
-        BigDecimal totalRemaining = BigDecimal.ZERO;
-        for (VmDiffusionPaiement vm : vms) {
-            BigDecimal remaining = vm.getMontantTotal().subtract(vm.getMontantPaye());
-            if (remaining.compareTo(BigDecimal.ZERO) > 0) {
-                totalRemaining = totalRemaining.add(remaining);
-            }
-        }
-
-        if (totalRemaining.compareTo(BigDecimal.ZERO) == 0) {
-            throw new IllegalStateException("Aucun montant dû pour les critères sélectionnés.");
-        }
-
-        if (amount.compareTo(totalRemaining) > 0) {
-            throw new IllegalArgumentException("Le montant de paiement excède le montant dû.");
-        }
-
-        BigDecimal ratio = amount.divide(totalRemaining, 10, RoundingMode.HALF_UP);
-
-        LocalDateTime date = LocalDateTime.now();
-
-        for (VmDiffusionPaiement vm : vms) {
-            BigDecimal remaining = vm.getMontantTotal().subtract(vm.getMontantPaye());
-            if (remaining.compareTo(BigDecimal.ZERO) > 0) {
-                BigDecimal payAmount = remaining.multiply(ratio).setScale(2, RoundingMode.HALF_UP);
-                if (payAmount.compareTo(BigDecimal.ZERO) > 0) {
-                    DiffusionPaiement p = new DiffusionPaiement();
-                    Diffusion d = new Diffusion();
-                    d.setId(vm.getIdDiffusion());
-                    p.setDiffusion(d);
-                    Societe s = new Societe();
-                    s.setId(vm.getIdSociete());
-                    p.setSociete(s);
-                    p.setDatePaiement(date);
-                    p.setMontantPaye(payAmount);
-                    createPaiement(p);
-                }
-            }
         }
     }
 }
