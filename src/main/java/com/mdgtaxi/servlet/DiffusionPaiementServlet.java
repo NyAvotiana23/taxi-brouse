@@ -119,7 +119,7 @@ public class DiffusionPaiementServlet extends HttpServlet {
             paiement.setDatePaiement(LocalDateTime.now());
         }
 
-        paiement.setMontant(new BigDecimal(req.getParameter("montant")));
+        paiement.setMontantPaye(new BigDecimal(req.getParameter("montant")));
 
         return paiement;
     }

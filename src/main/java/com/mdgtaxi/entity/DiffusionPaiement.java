@@ -26,7 +26,7 @@ public class DiffusionPaiement {
     @Column(name = "date_paiement", nullable = false)
     private LocalDateTime datePaiement;
 
-    @Column(name = "montant", nullable = false, precision = 15, scale = 2)
-    private BigDecimal montant;
+    @Column(name = "montant_paye", nullable = false, precision = 15, scale = 2)
+    private BigDecimal montantPaye;
 
 }

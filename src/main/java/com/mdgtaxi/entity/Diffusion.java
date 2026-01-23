@@ -5,6 +5,7 @@ import lombok.Data;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Data
 @Entity
@@ -15,16 +16,9 @@ public class Diffusion implements Serializable {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "id_publicite", nullable = false)
-    private Publicite publicite;
+    @JoinColumn(name = "id_societe", nullable = false)
+    private Societe societe;
 
-    @ManyToOne
-    @JoinColumn(name = "id_trajet", nullable = false)
-    private Trajet trajet;
-
-    @Column(name = "montant_unite")
-    private BigDecimal montantUnite;
-
-    @Column(name = "nombre")
-    private Integer nombre;
+    @Column(name = "date_creation")
+    private LocalDateTime dateCreation;
 }

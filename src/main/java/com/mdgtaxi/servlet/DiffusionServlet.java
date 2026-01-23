@@ -174,16 +174,6 @@ public class DiffusionServlet extends HttpServlet {
     private Diffusion buildDiffusionFromRequest(HttpServletRequest req) {
         Diffusion diffusion = new Diffusion();
 
-        Publicite publicite = new Publicite();
-        publicite.setId(Long.valueOf(req.getParameter("idPublicite")));
-        diffusion.setPublicite(publicite);
-
-        Trajet trajet = new Trajet();
-        trajet.setId(Long.valueOf(req.getParameter("idTrajet")));
-        diffusion.setTrajet(trajet);
-
-        diffusion.setMontantUnite(BigDecimal.valueOf(Double.parseDouble(req.getParameter("montantUnite"))));
-        diffusion.setNombre(Integer.valueOf(req.getParameter("nombre")));
 
         return diffusion;
     }

@@ -113,7 +113,7 @@ VALUES ('Disponible', 10, '<span class="badge bg-success">Disponible</span>'),
 -- Vehicule
 INSERT INTO Vehicule (id_type, id_type_carburant, marque, modele, maximum_passager, immatriculation, capacite_carburant,
                       depense_carburant_100km)
-VALUES (1, 1, 'Toyota', 'Corolla', 5, 'ABC123', 50.0, 5.0),
+VALUES (1, 1, 'Toyota', 'Corolla', 5, '1244 TBK', 50.0, 5.0),
        (2, 2, 'Mercedes', 'Sprinter', 20, 'DEF456', 100.0, 10.0),
        (3, 2, 'Volvo', 'FH12', 2, 'GHI789', 200.0, 20.0);
 
@@ -247,7 +247,7 @@ VALUES (4, 'Mahajanga'),
 
 -- Ligne
 INSERT INTO Ligne (id_ville_depart, id_ville_arrivee, distance_km)
-VALUES (1, 2, 300.0),
+VALUES (1, 4, 300.0),
        (2, 3, 400.0),
        (3, 1, 500.0);
 
@@ -300,10 +300,10 @@ VALUES ('En cours', 10, '<span class="badge bg-info">En cours</span>'),
 -- Trajet (avec frais_unitaire en Ariary)
 -- Trajets en décembre 2025 pour les diffusions publicitaires
 INSERT INTO Trajet (id_ligne, id_chauffeur, id_vehicule, nombre_passager, id_trajet_statut, datetime_depart,
-                    datetime_arrivee, frais_unitaire)
-VALUES (1, 1, 1, 5, 2, '2025-12-05 08:00:00', '2025-12-05 18:00:00', 25000.00),
-       (2, 2, 2, 20, 2, '2025-12-10 06:00:00', '2025-12-10 16:00:00', 35000.00),
-       (3, 3, 3, 2, 2, '2025-12-15 07:00:00', '2025-12-15 15:00:00', 30000.00);
+                    datetime_arrivee)
+VALUES (1, 1, 1, 50, 2, '2026-20-01 10:00:00', '2026-20-01 12:00:00'),
+       (1, 2, 1, 50, 2, '2026-21-01 10:00:00', '2026-21-01 12:00:00'),
+       (1, 3, 1, 50, 2, '2026-21-01 15:00:00', '2026-21-01 17:00:00');
 
 -- Trajet_Mouvement_Statut
 INSERT INTO Trajet_Mouvement_Statut (id_trajet, date_mouvement, id_nouveau_statut, observation)
@@ -644,7 +644,7 @@ INSERT INTO Diffusion (id_publicite, id_trajet, montant_unite, nombre)
 VALUES (1, 1, 100000, 5),   -- 5 diffusions sur trajet 1 = 500 000 Ar
        (1, 2, 100000, 8),   -- 8 diffusions sur trajet 2 = 800 000 Ar
        (1, 3, 100000, 7);   -- 7 diffusions sur trajet 3 = 700 000 Ar
--- Total Vaniala : 5+8+7 = 20 diffusions = 2 000 000 Ar
+-- Total Vaniala : 5+8+7 = 20 diffusions =       2 000 000 Ar
 
 -- Lewis : 10 diffusions sur différents trajets à 100000 Ar/diffusion = 1 000 000 Ar total
 INSERT INTO Diffusion (id_publicite, id_trajet, montant_unite, nombre)
