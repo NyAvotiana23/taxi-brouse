@@ -607,3 +607,17 @@ VALUES (1, 3, 1, 'Groupe 50 adultes T3', CURRENT_TIMESTAMP);
 INSERT INTO Trajet_Reservation_Details (id_trajet_reservation, id_categorie_personne, id_type_place, nombre_places, tarif_unitaire)
 VALUES (3, 1, 2, 50.0, 50000);
 
+
+--Donnees Produit Categorie
+INSERT INTO Produit_Categorie (libelle)
+VALUES ('Boisson');
+
+--Donnees Produit extra
+INSERT INTO Produit_Extra (nom, prix_unitaire, id_categorie, id_societe)
+VALUES ('Eau', 5000, 1, 1);
+
+--Donnees Produit extra vente
+INSERT INTO Produit_Extra_Vente (id_Produit, date, quantite, remise, prix_unitaire, id_client)
+VALUES (1, '2026-01-20 10:00:00', 10, 0, 5000, 1)
+VALUES (1, '2026-01-20 10:00:00', 10, 0, 5000, 1);
+
