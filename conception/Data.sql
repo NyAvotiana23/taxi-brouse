@@ -618,6 +618,6 @@ VALUES ('Eau', 5000, 1, 1);
 
 --Donnees Produit extra vente
 INSERT INTO Produit_Extra_Vente (id_Produit, date, quantite, remise, prix_unitaire, id_client)
-VALUES (1, '2026-01-20 10:00:00', 10, 0, 5000, 1)
-VALUES (1, '2026-01-20 10:00:00', 10, 0, 5000, 1);
+VALUES (1, '2026-01-20 10:00:00', 10, 0, 5000, 1),
+(1, '2026-01-20 10:00:00', 10, 0, 5000, 1);
 
