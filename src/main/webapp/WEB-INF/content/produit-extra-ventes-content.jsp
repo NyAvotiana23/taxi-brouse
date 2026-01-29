@@ -3,6 +3,7 @@
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Map" %>
 <%@ page import="java.math.BigDecimal" %>
+<%@ page import="com.mdgtaxi.util.TableUtil" %>
 <%
     List<ProduitExtraVente> ventes = (List<ProduitExtraVente>) request.getAttribute("ventes");
     List<ProduitCategorie> categories = (List<ProduitCategorie>) request.getAttribute("categories");
@@ -12,7 +13,8 @@
     Map<Long, BigDecimal> montantsTotaux = (Map<Long, BigDecimal>) request.getAttribute("montantsTotaux");
     Map<Long, BigDecimal> montantsPayes = (Map<Long, BigDecimal>) request.getAttribute("montantsPayes");
     Map<Long, BigDecimal> montantsRestes = (Map<Long, BigDecimal>) request.getAttribute("montantsRestes");
-    
+
+    double quantiteTotale = TableUtil.sum(ventes, "quantite");
     String error = request.getParameter("error");
     String success = request.getParameter("success");
 
@@ -64,7 +66,7 @@
 
     <!-- Summary Cards -->
     <div class="row mb-4">
-        <div class="col-md-3">
+        <div class="col-md-2">
             <div class="card border-left-primary shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
@@ -83,7 +85,26 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Quantité Totale Vendue
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                <%= quantiteTotale %>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-cart3 fs-2 text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
             <div class="card border-left-warning shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
@@ -102,7 +123,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
             <div class="card border-left-success shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">

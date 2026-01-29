@@ -5,13 +5,22 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c1c861f5-aebe-49fb-9999-4ef53b312464" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources/9d5ae705-3b26-464f-8631-f155dcd826a3.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/9d5ae705-3b26-464f-8631-f155dcd826a3.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources/9d5ae705-3b26-464f-8631-f155dcd826a3/storage_v2/_src_/database/mdgtaxi.zoONNg/schema/public.abK9xQ.meta" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/9d5ae705-3b26-464f-8631-f155dcd826a3/storage_v2/_src_/database/mdgtaxi.zoONNg/schema/public.abK9xQ.meta" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/chiffre-affaire-complet-content.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/chiffre-affaire-complet-content.jsp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/conception/Data.sql" beforeDir="false" afterPath="$PROJECT_DIR$/conception/Data.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/produit-extra-ventes-content.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/content/produit-extra-ventes-content.jsp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/form/produit-extra-vente-form-content.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/form/produit-extra-vente-form-content.jsp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="CopilotPersistence">
+    <persistenceIdMap>
+      <entry key="_D:/S5/Mme Baovola/taxi-brouse" value="380TzXtaiBmiw58UVM7jKgEvHRy" />
+    </persistenceIdMap>
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -156,10 +165,20 @@
       <workItem from="1769057139277" duration="3395000" />
       <workItem from="1769066249091" duration="4617000" />
       <workItem from="1769269295998" duration="176000" />
+      <workItem from="1769679035997" duration="10678000" />
+      <workItem from="1769706354900" duration="68000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="github-copilot-workspace">
+    <instructionFileLocations>
+      <option value=".github/instructions" />
+    </instructionFileLocations>
+    <promptFileLocations>
+      <option value=".github/prompts" />
+    </promptFileLocations>
   </component>
 </project>

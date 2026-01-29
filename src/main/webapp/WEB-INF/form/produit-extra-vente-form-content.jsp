@@ -116,7 +116,7 @@
                         <label for="prixUnitaire" class="form-label">Prix Unitaire (Ar)</label>
                         <input type="number" class="form-control" id="prixUnitaire" name="prixUnitaire" step="0.01"
                                value="<%= isEdit && vente.getPrixUnitaire() != null ? vente.getPrixUnitaire() : "" %>"
-                               onchange="calculateTotal()">
+                               onchange="calculateTotal()" readonly>
                         <small class="text-muted">Laisser vide pour utiliser le prix du produit</small>
                     </div>
 
