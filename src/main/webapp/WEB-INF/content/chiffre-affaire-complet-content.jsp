@@ -17,6 +17,9 @@
     BigDecimal totalReelTicket = BigDecimal.ZERO;
     BigDecimal totalPrevisionDiffusion = BigDecimal.ZERO;
     BigDecimal totalReelDiffusion = BigDecimal.ZERO;
+    BigDecimal totalRestDiffusion = BigDecimal.ZERO;
+    BigDecimal totalRestTicket = BigDecimal.ZERO;
+
 
     if (caComplets != null) {
         for (VmTrajetCaComplet ca : caComplets) {
@@ -40,6 +43,13 @@
             }
             if (ca.getMontantReelDiffusion() != null) {
                 totalReelDiffusion = totalReelDiffusion.add(ca.getMontantReelDiffusion());
+            }
+
+            if (ca.getMontantReelDiffusion() != null) {
+                totalRestDiffusion = totalRestDiffusion.add(ca.getMontantRestDiffusion());
+            }
+            if (ca.getMontantReelDiffusion() != null) {
+                totalRestTicket = totalRestTicket.add(ca.getMontantRestTicket());
             }
         }
     }
@@ -327,8 +337,12 @@
                         <th colspan="5" class="text-end">Total:</th>
                         <th class="text-end"><%= String.format("%,.0f", totalPrevisionTicket) %></th>
                         <th class="text-end"><%= String.format("%,.0f", totalReelTicket) %></th>
+                        <th class="text-end"><%= String.format("%,.0f", totalRestTicket) %></th>
+
                         <th class="text-end"><%= String.format("%,.0f", totalPrevisionDiffusion) %></th>
                         <th class="text-end"><%= String.format("%,.0f", totalReelDiffusion) %></th>
+                        <th class="text-end"><%= String.format("%,.0f", totalRestDiffusion) %></th>
+
                         <th class="text-end"><strong><%= String.format("%,.0f", totalCaPrevision) %></strong></th>
                         <th class="text-end"><strong class="text-success"><%= String.format("%,.0f", totalCaReel) %></strong></th>
                         <th class="text-end">
