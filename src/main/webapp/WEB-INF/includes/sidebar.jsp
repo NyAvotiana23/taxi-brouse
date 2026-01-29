@@ -47,6 +47,30 @@
             <i class="bi bi-clipboard-data"></i> CA Complet
           </a>
         </li>
+        <li>
+          <a class="dropdown-item" href="<%= request.getContextPath() %>/ca-complet">
+            <i class="bi bi-bar-chart-fill"></i> CA Complet Mensuel
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Menu Produits Extra avec sous-menus -->
+    <div class="nav-item dropdown">
+      <a class="nav-link dropdown-toggle" href="#" id="produitExtraDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="bi bi-box-seam"></i> Produits Extra
+      </a>
+      <ul class="dropdown-menu" aria-labelledby="produitExtraDropdown">
+        <li>
+          <a class="dropdown-item" href="<%= request.getContextPath() %>/produit-extra-ventes">
+            <i class="bi bi-cart3"></i> Ventes
+          </a>
+        </li>
+        <li>
+          <a class="dropdown-item" href="<%= request.getContextPath() %>/produit-extra-ventes?action=add">
+            <i class="bi bi-plus-circle"></i> Nouvelle Vente
+          </a>
+        </li>
       </ul>
     </div>
 

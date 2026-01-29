@@ -1,6 +1,7 @@
 package com.mdgtaxi.service;
 
 import com.mdgtaxi.util.HibernateUtil;
+import com.mdgtaxi.view.VmCAComplet;
 import com.mdgtaxi.view.VmTrajetCaComplet;
 import com.mdgtaxi.view.VmTrajetCaReel;
 import com.mdgtaxi.view.VmTrajetPrevisionCaTotal;
@@ -206,5 +207,32 @@ public class ChiffreAffaireService {
         }
 
         return predicates;
+    }
+
+    public List<VmCAComplet> getCAPrevisionTotal(Integer mois, Integer annee) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<VmCAComplet> cq = cb.createQuery(VmCAComplet.class);
+            Root<VmCAComplet> root = cq.from(VmCAComplet.class);
+
+            List<Predicate> predicates = new ArrayList<>();
+
+            if (mois != null) {
+                predicates.add(cb.equal(root.get("mois"), mois));
+            }
+            if (annee != null) {
+                predicates.add(cb.equal(root.get("annee"), annee));
+            }
+
+            if (!predicates.isEmpty()) {
+                cq.where(cb.and(predicates.toArray(new Predicate[0])));
+            }
+
+            TypedQuery<VmCAComplet> query = em.createQuery(cq);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
     }
 }
