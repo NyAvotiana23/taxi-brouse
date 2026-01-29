@@ -16,8 +16,8 @@ import java.time.LocalTime;
 @Immutable
 @Subselect("""
             SELECT
-                EXTRACT(MONTH FROM t.datetime_depart)::INTEGER AS mois,
-                EXTRACT(YEAR FROM t.datetime_depart)::INTEGER AS annee,
+                CAST(EXTRACT(MONTH FROM t.datetime_depart) AS INTEGER) AS mois,
+                CAST(EXTRACT(YEAR FROM t.datetime_depart) AS INTEGER) AS annee,
         
                 -- CA PRÉVISIONNEL
                 -- Montant prévisionnel tickets par mois
@@ -27,12 +27,12 @@ import java.time.LocalTime;
                 COALESCE(SUM(COALESCE(prevision_diffusion.montant_diffusion, 0)), 0) AS caPrevisionDiffusion,
         
                 -- Montant prévisionnel produits (ventes de produits supplémentaires)
-                COALESCE(prevision_produits.montant_produits, 0) AS caPrevisionProduit,
+                COALESCE(MAX(prevision_produits.montant_produits), 0) AS caPrevisionProduit,
         
                 -- CA prévisionnel total
                 COALESCE(SUM(COALESCE(prevision_tickets.montant_tickets, 0)), 0) + 
                 COALESCE(SUM(COALESCE(prevision_diffusion.montant_diffusion, 0)), 0) +
-                COALESCE(prevision_produits.montant_produits, 0) AS caPrevisionTotal,
+                COALESCE(MAX(prevision_produits.montant_produits), 0) AS caPrevisionTotal,
         
                 -- CA RÉEL
                 -- Montant réel tickets (paiements effectués)
@@ -42,12 +42,12 @@ import java.time.LocalTime;
                 COALESCE(SUM(COALESCE(paiements_diffusion.montant_reel_diffusion, 0)), 0) AS caReelDiffusion,
         
                 -- Montant réel produits (paiements effectués)
-                COALESCE(paiements_produits.montant_reel_produits, 0) AS caReelProduit,
+                COALESCE(MAX(paiements_produits.montant_reel_produits), 0) AS caReelProduit,
         
                 -- CA réel total
                 COALESCE(SUM(COALESCE(paiements_tickets.montant_reel_tickets, 0)), 0) + 
                 COALESCE(SUM(COALESCE(paiements_diffusion.montant_reel_diffusion, 0)), 0) +
-                COALESCE(paiements_produits.montant_reel_produits, 0) AS caReelTotal
+                COALESCE(MAX(paiements_produits.montant_reel_produits), 0) AS caReelTotal
         
             FROM Trajet t
             INNER JOIN Ligne l ON t.id_ligne = l.id
@@ -74,13 +74,13 @@ import java.time.LocalTime;
             -- Sous-requête pour le montant prévisionnel des produits supplémentaires par mois/année
             LEFT JOIN (
                 SELECT 
-                    EXTRACT(MONTH FROM pev.date)::INTEGER AS mois,
-                    EXTRACT(YEAR FROM pev.date)::INTEGER AS annee,
+                    CAST(EXTRACT(MONTH FROM pev.date) AS INTEGER) AS mois,
+                    CAST(EXTRACT(YEAR FROM pev.date) AS INTEGER) AS annee,
                     SUM(COALESCE(pev.quantite, 0) * COALESCE(pev.prix_unitaire, 0)) AS montant_produits
                 FROM Produit_Extra_Vente pev
-                GROUP BY EXTRACT(MONTH FROM pev.date), EXTRACT(YEAR FROM pev.date)
-            ) prevision_produits ON prevision_produits.mois = EXTRACT(MONTH FROM t.datetime_depart)::INTEGER 
-                                 AND prevision_produits.annee = EXTRACT(YEAR FROM t.datetime_depart)::INTEGER
+                GROUP BY CAST(EXTRACT(MONTH FROM pev.date) AS INTEGER), CAST(EXTRACT(YEAR FROM pev.date) AS INTEGER)
+            ) prevision_produits ON prevision_produits.mois = CAST(EXTRACT(MONTH FROM t.datetime_depart) AS INTEGER) 
+                                 AND prevision_produits.annee = CAST(EXTRACT(YEAR FROM t.datetime_depart) AS INTEGER)
         
             -- Sous-requête pour les paiements réels des tickets
             LEFT JOIN (
@@ -105,15 +105,15 @@ import java.time.LocalTime;
             -- Sous-requête pour les paiements réels des produits supplémentaires par mois/année
             LEFT JOIN (
                 SELECT 
-                    EXTRACT(MONTH FROM pevp.date_payement)::INTEGER AS mois,
-                    EXTRACT(YEAR FROM pevp.date_payement)::INTEGER AS annee,
+                    CAST(EXTRACT(MONTH FROM pevp.date_payement) AS INTEGER) AS mois,
+                    CAST(EXTRACT(YEAR FROM pevp.date_payement) AS INTEGER) AS annee,
                     SUM(COALESCE(pevp.montant, 0)) AS montant_reel_produits
                 FROM Produit_Extra_Vente_Payement pevp
-                GROUP BY EXTRACT(MONTH FROM pevp.date_payement), EXTRACT(YEAR FROM pevp.date_payement)
-            ) paiements_produits ON paiements_produits.mois = EXTRACT(MONTH FROM t.datetime_depart)::INTEGER 
-                                 AND paiements_produits.annee = EXTRACT(YEAR FROM t.datetime_depart)::INTEGER
+                GROUP BY CAST(EXTRACT(MONTH FROM pevp.date_payement) AS INTEGER), CAST(EXTRACT(YEAR FROM pevp.date_payement) AS INTEGER)
+            ) paiements_produits ON paiements_produits.mois = CAST(EXTRACT(MONTH FROM t.datetime_depart) AS INTEGER) 
+                                 AND paiements_produits.annee = CAST(EXTRACT(YEAR FROM t.datetime_depart) AS INTEGER)
         
-            GROUP BY EXTRACT(MONTH FROM t.datetime_depart), EXTRACT(YEAR FROM t.datetime_depart)
+            GROUP BY CAST(EXTRACT(MONTH FROM t.datetime_depart) AS INTEGER), CAST(EXTRACT(YEAR FROM t.datetime_depart) AS INTEGER)
             ORDER BY annee DESC, mois DESC
         """)
 @Synchronize({"Trajet", "Ligne",
