@@ -92,7 +92,7 @@
                                                        vente.getClient().getId().equals(c.getId());
                             %>
                             <option value="<%= c.getId() %>" <%= selected ? "selected" : "" %>>
-                                <%= c.getNom() %>
+                                <%= c.getNomClient() %>
                             </option>
                             <% }
                             } %>

@@ -162,7 +162,7 @@
                         </tr>
                         <tr>
                             <th>Client:</th>
-                            <td><%= vente.getClient() != null ? vente.getClient().getNom() : "-" %></td>
+                            <td><%= vente.getClient() != null ? vente.getClient().getNomClient() : "-" %></td>
                         </tr>
                     </table>
                 </div>

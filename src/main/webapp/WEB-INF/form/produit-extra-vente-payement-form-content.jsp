@@ -96,7 +96,7 @@
             <div class="row">
                 <div class="col-md-6">
                     <p><strong>Produit:</strong> <%= vente.getProduitExtra() != null ? vente.getProduitExtra().getNom() : "-" %></p>
-                    <p><strong>Client:</strong> <%= vente.getClient() != null ? vente.getClient().getNom() : "-" %></p>
+                    <p><strong>Client:</strong> <%= vente.getClient() != null ? vente.getClient().getNomClient() : "-" %></p>
                 </div>
                 <div class="col-md-6">
                     <p><strong>Quantité:</strong> <%= vente.getQuantite() %></p>

@@ -188,7 +188,7 @@
                                 for (Client c : clients) { %>
                             <option value="<%= c.getId() %>"
                                     <%= request.getParameter("clientId") != null && request.getParameter("clientId").equals(String.valueOf(c.getId())) ? "selected" : "" %>>
-                                <%= c.getNom() %>
+                                <%= c.getNomClient() %>
                             </option>
                             <% }
                             } %>
@@ -258,7 +258,7 @@
                         <td><%= v.getDate() != null ? v.getDate().toLocalDate() : "-" %></td>
                         <td><%= v.getProduitExtra() != null ? v.getProduitExtra().getNom() : "-" %></td>
                         <td><%= v.getProduitExtra() != null && v.getProduitExtra().getProduitCategorie() != null ? v.getProduitExtra().getProduitCategorie().getLibelle() : "-" %></td>
-                        <td><%= v.getClient() != null ? v.getClient().getNom() : "-" %></td>
+                        <td><%= v.getClient() != null ? v.getClient().getNomClient() : "-" %></td>
                         <td class="text-center"><%= v.getQuantite() %></td>
                         <td class="text-end"><%= String.format("%,.0f", v.getPrixUnitaire()) %></td>
                         <td class="text-center"><%= v.getRemise() != null ? String.format("%.1f%%", v.getRemise()) : "0%" %></td>
