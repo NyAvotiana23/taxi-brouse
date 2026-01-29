@@ -651,6 +651,119 @@ import java.io.Serializable;
 
 @Data
 @Entity
+@Table(name = "Produit_Categorie")
+public class ProduitCategorie implements Serializable{
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "libelle")
+    private String libelle;
+}
+package com.mdgtaxi.entity;
+
+import lombok.Data;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.math.BigDecimal;
+
+
+@Data
+@Entity
+@Table(name = "Produit_Extra")
+public class ProduitExtra implements Serializable{
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "nom")
+    private String nom;
+
+    @Column(name = "prix_unitaire")
+    private BigDecimal prixUnitaire;
+
+    @ManyToOne
+    @JoinColumn(name = "id_categorie", nullable = false)
+    private ProduitCategorie produitCategorie;
+
+    @ManyToOne
+    @JoinColumn(name = "id_societe", nullable = false)
+    private Societe societe;
+}
+package com.mdgtaxi.entity;
+
+import lombok.Data;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Data
+@Entity
+@Table(name = "Produit_Extra_Vente")
+public class ProduitExtraVente implements Serializable{
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "id_Produit", nullable = false)
+    private ProduitExtra produitExtra;
+
+    @Column(name = "date")
+    private LocalDateTime date;
+
+    @Column(name = "quantite")
+    private Integer quantite;
+
+    @Column(name = "remise")
+    private Double remise;
+
+    @Column(name = "prix_unitaire")
+    private BigDecimal prixUnitaire;
+
+    @ManyToOne
+    @JoinColumn(name = "id_client", nullable = false)
+    private Client client;
+}
+package com.mdgtaxi.entity;
+
+import lombok.Data;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Data
+@Entity
+@Table(name = "Produit_Extra_Vente_Payement")
+public class ProduitExtraVentePayement implements Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "id_produit_extra_vente", nullable = false)
+    private ProduitExtraVente produitExtraVente;
+
+    @Column(name = "date_payement")
+    private LocalDateTime datePayement;
+
+    @Column(name = "montant")
+    private BigDecimal montant;
+}
+package com.mdgtaxi.entity;
+
+import lombok.Data;
+
+import javax.persistence.*;
+import java.io.Serializable;
+
+@Data
+@Entity
 @Table(name = "Province")
 public class Province implements Serializable {
     @Id

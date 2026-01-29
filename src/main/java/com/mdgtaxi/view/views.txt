@@ -8,6 +8,48 @@ import org.hibernate.annotations.Synchronize;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalTime;
+
+@Data
+@Entity
+@Immutable
+@Subselect("""  """)
+@Synchronize({})
+
+public class VmCAComplet implements Serializable{
+    mois
+
+    annee
+
+    caPrevisionTicket
+
+    caPrevisionDiffusion
+
+    caPrevisionProduit
+
+    caPrevisionTotal
+
+    caReelTicket
+
+    caReelDiffusion
+
+    caReelProduit
+
+    caReelTotal
+}
+
+
+package com.mdgtaxi.view;
+
+import lombok.Data;
+import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.Subselect;
+import org.hibernate.annotations.Synchronize;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.math.BigDecimal;
 
 @Data
 @Entity
@@ -791,96 +833,98 @@ import java.time.LocalTime;
 @Entity
 @Immutable
 @Subselect("""
-    SELECT
-        t.id AS id_trajet,
-        vd.nom AS nom_ville_depart,
-        va.nom AS nom_ville_arrive,
-        v.immatriculation AS immatriculation_vehicule,
-        c.nom AS nom_chauffeur,
-        c.prenom AS prenom_chauffeur,
-        CAST(t.datetime_depart AS DATE) AS date_depart,
-        CAST(t.datetime_depart AS TIME) AS heure_depart,
+            SELECT
+                t.id AS id_trajet,
+                vd.nom AS nom_ville_depart,
+                va.nom AS nom_ville_arrive,
+                v.immatriculation AS immatriculation_vehicule,
+                c.nom AS nom_chauffeur,
+                c.prenom AS prenom_chauffeur,
+                CAST(t.datetime_depart AS DATE) AS date_depart,
+                CAST(t.datetime_depart AS TIME) AS heure_depart,
         
-        -- CA PRÃ‰VISIONNEL
-        -- Montant prÃ©visionnel tickets
-        COALESCE(prevision_tickets.montant_tickets, 0) AS montant_prevision_ticket,
+                -- CA PRÃ‰VISIONNEL
+                -- Montant prÃ©visionnel tickets
+                COALESCE(prevision_tickets.montant_tickets, 0) AS montant_prevision_ticket,
         
-        -- Montant prÃ©visionnel diffusions
-        COALESCE(prevision_diffusion.montant_diffusion, 0) AS montant_prevision_diffusion,
+                -- Montant prÃ©visionnel diffusions
+                COALESCE(prevision_diffusion.montant_diffusion, 0) AS montant_prevision_diffusion,
         
-        -- CA prÃ©visionnel total
-        COALESCE(prevision_tickets.montant_tickets, 0) + 
-        COALESCE(prevision_diffusion.montant_diffusion, 0) AS montant_chiffre_affaire_prevision,
+                -- CA prÃ©visionnel total
+                COALESCE(prevision_tickets.montant_tickets, 0) + 
+                COALESCE(prevision_diffusion.montant_diffusion, 0) AS montant_chiffre_affaire_prevision,
         
-        -- CA RÃ‰EL
-        -- Montant rÃ©el tickets (paiements effectuÃ©s)
-        COALESCE(paiements_tickets.montant_reel_tickets, 0) AS montant_reel_ticket,
+                -- CA RÃ‰EL
+                -- Montant rÃ©el tickets (paiements effectuÃ©s)
+                COALESCE(paiements_tickets.montant_reel_tickets, 0) AS montant_reel_ticket,
         
-        -- Montant restant Ã  payer pour les tickets
-        COALESCE(prevision_tickets.montant_tickets, 0) - 
-        COALESCE(paiements_tickets.montant_reel_tickets, 0) AS montant_rest_ticket,
+                -- Montant restant Ã  payer pour les tickets
+                COALESCE(prevision_tickets.montant_tickets, 0) - 
+                COALESCE(paiements_tickets.montant_reel_tickets, 0) AS montant_rest_ticket,
         
-        -- Montant rÃ©el diffusions (paiements effectuÃ©s)
-        COALESCE(paiements_diffusion.montant_reel_diffusion, 0) AS montant_reel_diffusion,
+                -- Montant rÃ©el diffusions (paiements effectuÃ©s)
+                COALESCE(paiements_diffusion.montant_reel_diffusion, 0) AS montant_reel_diffusion,
         
-        -- Montant restant Ã  payer pour les diffusions
-        COALESCE(prevision_diffusion.montant_diffusion, 0) - 
-        COALESCE(paiements_diffusion.montant_reel_diffusion, 0) AS montant_rest_diffusion,
+                -- Montant restant Ã  payer pour les diffusions
+                COALESCE(prevision_diffusion.montant_diffusion, 0) - 
+                COALESCE(paiements_diffusion.montant_reel_diffusion, 0) AS montant_rest_diffusion,
         
-        -- CA rÃ©el total
-        COALESCE(paiements_tickets.montant_reel_tickets, 0) + 
-        COALESCE(paiements_diffusion.montant_reel_diffusion, 0) AS montant_chiffre_affaire_reel,
+                -- CA rÃ©el total
+                COALESCE(paiements_tickets.montant_reel_tickets, 0) + 
+                COALESCE(paiements_diffusion.montant_reel_diffusion, 0) AS montant_chiffre_affaire_reel,
         
-        -- Ã‰CART (PrÃ©vu - RÃ©el) - positif = manque Ã  gagner, nÃ©gatif = dÃ©passement
-        (COALESCE(prevision_tickets.montant_tickets, 0) + COALESCE(prevision_diffusion.montant_diffusion, 0)) -
-        (COALESCE(paiements_tickets.montant_reel_tickets, 0) + COALESCE(paiements_diffusion.montant_reel_diffusion, 0)) AS ecart_ca
+                -- Ã‰CART (PrÃ©vu - RÃ©el) - positif = manque Ã  gagner, nÃ©gatif = dÃ©passement
+                (COALESCE(prevision_tickets.montant_tickets, 0) + COALESCE(prevision_diffusion.montant_diffusion, 0)) -
+                (COALESCE(paiements_tickets.montant_reel_tickets, 0) + COALESCE(paiements_diffusion.montant_reel_diffusion, 0)) AS ecart_ca
         
-    FROM Trajet t
-    INNER JOIN Ligne l ON t.id_ligne = l.id
-    INNER JOIN Ville vd ON l.id_ville_depart = vd.id
-    INNER JOIN Ville va ON l.id_ville_arrivee = va.id
-    INNER JOIN Vehicule v ON t.id_vehicule = v.id
-    INNER JOIN Chauffeur c ON t.id_chauffeur = c.id
-    
-    -- Sous-requÃªte pour le montant prÃ©visionnel des tickets
-    LEFT JOIN (
-        SELECT 
-            tr.id_trajet,
-            SUM(trd.nombre_places * trd.tarif_unitaire) AS montant_tickets
-        FROM Trajet_Reservation tr
-        INNER JOIN Trajet_Reservation_Details trd ON trd.id_trajet_reservation = tr.id
-        GROUP BY tr.id_trajet
-    ) prevision_tickets ON prevision_tickets.id_trajet = t.id
-    
-    -- Sous-requÃªte pour le montant prÃ©visionnel des diffusions
-    LEFT JOIN (
-        SELECT 
-            dd.id_trajet,
-            SUM(dd.nombre_repetition * dd.montant_unitaire) AS montant_diffusion
-        FROM Diffusion_Detail dd
-        GROUP BY dd.id_trajet
-    ) prevision_diffusion ON prevision_diffusion.id_trajet = t.id
-    
-    -- Sous-requÃªte pour les paiements rÃ©els des tickets
-    LEFT JOIN (
-        SELECT 
-            tr.id_trajet,
-            SUM(trp.montant) AS montant_reel_tickets
-        FROM Trajet_Reservation tr
-        INNER JOIN Trajet_Reservation_Paiement trp ON trp.id_trajet_reservation = tr.id
-        GROUP BY tr.id_trajet
-    ) paiements_tickets ON paiements_tickets.id_trajet = t.id
-    
-    -- Sous-requÃªte pour les paiements rÃ©els des diffusions
-    LEFT JOIN (
-        SELECT 
-            dd.id_trajet,
-            SUM(dpr.montant_paye) AS montant_reel_diffusion
-        FROM Diffusion_Detail dd
-        INNER JOIN Diffusion_Paiement_Repartition dpr ON dpr.id_diffusion_detail = dd.id
-        GROUP BY dd.id_trajet
-    ) paiements_diffusion ON paiements_diffusion.id_trajet = t.id
-""")
+            FROM Trajet t
+            INNER JOIN Ligne l ON t.id_ligne = l.id
+            INNER JOIN Ville vd ON l.id_ville_depart = vd.id
+            INNER JOIN Ville va ON l.id_ville_arrivee = va.id
+            INNER JOIN Vehicule v ON t.id_vehicule = v.id
+            INNER JOIN Chauffeur c ON t.id_chauffeur = c.id
+        
+            -- Sous-requÃªte pour le montant prÃ©visionnel des tickets
+            LEFT JOIN (
+                SELECT 
+                    tr.id_trajet,
+                    SUM(trd.nombre_places * trd.tarif_unitaire) AS montant_tickets
+                FROM Trajet_Reservation tr
+                INNER JOIN Trajet_Reservation_Details trd ON trd.id_trajet_reservation = tr.id
+                GROUP BY tr.id_trajet
+            ) prevision_tickets ON prevision_tickets.id_trajet = t.id
+        
+            -- Sous-requÃªte pour le montant prÃ©visionnel des diffusions
+            LEFT JOIN (
+                SELECT 
+                    dd.id_trajet,
+                    SUM(dd.nombre_repetition * dd.montant_unitaire) AS montant_diffusion
+                FROM Diffusion_Detail dd
+                GROUP BY dd.id_trajet
+            ) prevision_diffusion ON prevision_diffusion.id_trajet = t.id
+        
+            -- Sous-requÃªte pour les paiements rÃ©els des tickets
+            LEFT JOIN (
+                SELECT 
+                    tr.id_trajet,
+                    SUM(trp.montant) AS montant_reel_tickets
+                FROM Trajet_Reservation tr
+                INNER JOIN Trajet_Reservation_Paiement trp ON trp.id_trajet_reservation = tr.id
+                GROUP BY tr.id_trajet
+            ) paiements_tickets ON paiements_tickets.id_trajet = t.id
+        
+            -- Sous-requÃªte pour les paiements rÃ©els des diffusions
+            LEFT JOIN (
+                SELECT 
+                    dd.id_trajet,
+                    SUM(dpr.montant_paye) AS montant_reel_diffusion
+                FROM Diffusion_Detail dd
+                INNER JOIN Diffusion_Paiement_Repartition dpr ON dpr.id_diffusion_detail = dd.id
+                GROUP BY dd.id_trajet
+            ) paiements_diffusion ON paiements_diffusion.id_trajet = t.id
+        
+            ORDER BY t.id DESC
+        """)
 @Synchronize({"Trajet", "Ligne", "Ville", "Vehicule", "Chauffeur",
         "Trajet_Reservation", "Trajet_Reservation_Details", "Trajet_Reservation_Paiement",
         "Diffusion_Detail", "Diffusion_Paiement_Repartition"})
@@ -958,53 +1002,55 @@ import java.time.LocalTime;
 @Entity
 @Immutable
 @Subselect("""
-    SELECT
-        t.id AS id_trajet,
-        vd.nom AS nom_ville_depart,
-        va.nom AS nom_ville_arrive,
-        v.immatriculation AS immatriculation_vehicule,
-        c.nom AS nom_chauffeur,
-        c.prenom AS prenom_chauffeur,
-        CAST(t.datetime_depart AS DATE) AS date_depart,
-        CAST(t.datetime_depart AS TIME) AS heure_depart,
+            SELECT
+                t.id AS id_trajet,
+                vd.nom AS nom_ville_depart,
+                va.nom AS nom_ville_arrive,
+                v.immatriculation AS immatriculation_vehicule,
+                c.nom AS nom_chauffeur,
+                c.prenom AS prenom_chauffeur,
+                CAST(t.datetime_depart AS DATE) AS date_depart,
+                CAST(t.datetime_depart AS TIME) AS heure_depart,
         
-        -- Montant rÃ©el des tickets (via paiements effectuÃ©s)
-        COALESCE(paiements_tickets.montant_reel_tickets, 0) AS montant_reel_ticket,
+                -- Montant rÃ©el des tickets (via paiements effectuÃ©s)
+                COALESCE(paiements_tickets.montant_reel_tickets, 0) AS montant_reel_ticket,
         
-        -- Montant rÃ©el des diffusions (via paiements effectuÃ©s)
-        COALESCE(paiements_diffusion.montant_reel_diffusion, 0) AS montant_reel_diffusion,
+                -- Montant rÃ©el des diffusions (via paiements effectuÃ©s)
+                COALESCE(paiements_diffusion.montant_reel_diffusion, 0) AS montant_reel_diffusion,
         
-        -- CA rÃ©el total
-        COALESCE(paiements_tickets.montant_reel_tickets, 0) + 
-        COALESCE(paiements_diffusion.montant_reel_diffusion, 0) AS montant_chiffre_affaire_reel
+                -- CA rÃ©el total
+                COALESCE(paiements_tickets.montant_reel_tickets, 0) + 
+                COALESCE(paiements_diffusion.montant_reel_diffusion, 0) AS montant_chiffre_affaire_reel
         
-    FROM Trajet t
-    INNER JOIN Ligne l ON t.id_ligne = l.id
-    INNER JOIN Ville vd ON l.id_ville_depart = vd.id
-    INNER JOIN Ville va ON l.id_ville_arrivee = va.id
-    INNER JOIN Vehicule v ON t.id_vehicule = v.id
-    INNER JOIN Chauffeur c ON t.id_chauffeur = c.id
-    
-    -- Sous-requÃªte pour les paiements des rÃ©servations (tickets)
-    LEFT JOIN (
-        SELECT 
-            tr.id_trajet,
-            SUM(trp.montant) AS montant_reel_tickets
-        FROM Trajet_Reservation tr
-        INNER JOIN Trajet_Reservation_Paiement trp ON trp.id_trajet_reservation = tr.id
-        GROUP BY tr.id_trajet
-    ) paiements_tickets ON paiements_tickets.id_trajet = t.id
-    
-    -- Sous-requÃªte pour les paiements des diffusions publicitaires
-    LEFT JOIN (
-        SELECT 
-            dd.id_trajet,
-            SUM(dpr.montant_paye) AS montant_reel_diffusion
-        FROM Diffusion_Detail dd
-        INNER JOIN Diffusion_Paiement_Repartition dpr ON dpr.id_diffusion_detail = dd.id
-        GROUP BY dd.id_trajet
-    ) paiements_diffusion ON paiements_diffusion.id_trajet = t.id
-""")
+            FROM Trajet t
+            INNER JOIN Ligne l ON t.id_ligne = l.id
+            INNER JOIN Ville vd ON l.id_ville_depart = vd.id
+            INNER JOIN Ville va ON l.id_ville_arrivee = va.id
+            INNER JOIN Vehicule v ON t.id_vehicule = v.id
+            INNER JOIN Chauffeur c ON t.id_chauffeur = c.id
+        
+            -- Sous-requÃªte pour les paiements des rÃ©servations (tickets)
+            LEFT JOIN (
+                SELECT 
+                    tr.id_trajet,
+                    SUM(trp.montant) AS montant_reel_tickets
+                FROM Trajet_Reservation tr
+                INNER JOIN Trajet_Reservation_Paiement trp ON trp.id_trajet_reservation = tr.id
+                GROUP BY tr.id_trajet
+            ) paiements_tickets ON paiements_tickets.id_trajet = t.id
+        
+            -- Sous-requÃªte pour les paiements des diffusions publicitaires
+            LEFT JOIN (
+                SELECT 
+                    dd.id_trajet,
+                    SUM(dpr.montant_paye) AS montant_reel_diffusion
+                FROM Diffusion_Detail dd
+                INNER JOIN Diffusion_Paiement_Repartition dpr ON dpr.id_diffusion_detail = dd.id
+                GROUP BY dd.id_trajet
+            ) paiements_diffusion ON paiements_diffusion.id_trajet = t.id
+        
+            ORDER BY t.id ASC
+        """)
 @Synchronize({"Trajet", "Ligne", "Ville", "Vehicule", "Chauffeur",
         "Trajet_Reservation", "Trajet_Reservation_Paiement",
         "Diffusion_Detail", "Diffusion_Paiement_Repartition"})
@@ -1156,79 +1202,81 @@ import java.time.LocalTime;
 @Entity
 @Immutable
 @Subselect("""
-    SELECT
-        t.id AS id_trajet,
-        vd.nom AS nom_ville_depart,
-        va.nom AS nom_ville_arrive,
-        v.immatriculation AS immatriculation_vehicule,
-        c.nom AS nom_chauffeur,
-        c.prenom AS prenom_chauffeur,
-        CAST(t.datetime_depart AS DATE) AS date_depart,
-        CAST(t.datetime_depart AS TIME) AS heure_depart,
+            SELECT
+                t.id AS id_trajet,
+                vd.nom AS nom_ville_depart,
+                va.nom AS nom_ville_arrive,
+                v.immatriculation AS immatriculation_vehicule,
+                c.nom AS nom_chauffeur,
+                c.prenom AS prenom_chauffeur,
+                CAST(t.datetime_depart AS DATE) AS date_depart,
+                CAST(t.datetime_depart AS TIME) AS heure_depart,
         
-        -- Nombre de places totales du vÃ©hicule
-        COALESCE(places_totales.total_places, 0) AS nombre_places_totales,
+                -- Nombre de places totales du vÃ©hicule
+                COALESCE(places_totales.total_places, 0) AS nombre_places_totales,
         
-        -- Nombre de places prises via rÃ©servations
-        COALESCE(places_prises.total_prises, 0) AS nombre_places_prises,
+                -- Nombre de places prises via rÃ©servations
+                COALESCE(places_prises.total_prises, 0) AS nombre_places_prises,
         
-        -- Places restantes
-        COALESCE(places_totales.total_places, 0) - COALESCE(places_prises.total_prises, 0) AS nombre_places_restantes,
+                -- Places restantes
+                COALESCE(places_totales.total_places, 0) - COALESCE(places_prises.total_prises, 0) AS nombre_places_restantes,
         
-        -- Montant des tickets (rÃ©servations)
-        COALESCE(revenus_tickets.montant_tickets, 0) AS montant_prevision_ticket,
+                -- Montant des tickets (rÃ©servations)
+                COALESCE(revenus_tickets.montant_tickets, 0) AS montant_prevision_ticket,
         
-        -- Montant des diffusions publicitaires
-        COALESCE(revenus_diffusion.montant_diffusion, 0) AS montant_prevision_diffusion,
+                -- Montant des diffusions publicitaires
+                COALESCE(revenus_diffusion.montant_diffusion, 0) AS montant_prevision_diffusion,
         
-        -- CA total prÃ©visionnel
-        COALESCE(revenus_tickets.montant_tickets, 0) + COALESCE(revenus_diffusion.montant_diffusion, 0) AS ca_previsionnel
+                -- CA total prÃ©visionnel
+                COALESCE(revenus_tickets.montant_tickets, 0) + COALESCE(revenus_diffusion.montant_diffusion, 0) AS ca_previsionnel
         
-    FROM Trajet t
-    INNER JOIN Ligne l ON t.id_ligne = l.id
-    INNER JOIN Ville vd ON l.id_ville_depart = vd.id
-    INNER JOIN Ville va ON l.id_ville_arrivee = va.id
-    INNER JOIN Vehicule v ON t.id_vehicule = v.id
-    INNER JOIN Chauffeur c ON t.id_chauffeur = c.id
-    
-    -- Sous-requÃªte pour calculer le nombre total de places du vÃ©hicule
-    LEFT JOIN (
-        SELECT 
-            id_vehicule,
-            SUM(nombre_place) AS total_places
-        FROM Vehicule_Tarif_Type_Place
-        GROUP BY id_vehicule
-    ) places_totales ON places_totales.id_vehicule = v.id
-    
-    -- Sous-requÃªte pour calculer le nombre de places prises
-    LEFT JOIN (
-        SELECT 
-            tr.id_trajet,
-            SUM(trd.nombre_places) AS total_prises
-        FROM Trajet_Reservation tr
-        INNER JOIN Trajet_Reservation_Details trd ON trd.id_trajet_reservation = tr.id
-        GROUP BY tr.id_trajet
-    ) places_prises ON places_prises.id_trajet = t.id
-    
-    -- Sous-requÃªte pour calculer le montant des tickets
-    LEFT JOIN (
-        SELECT 
-            tr.id_trajet,
-            SUM(trd.nombre_places * trd.tarif_unitaire) AS montant_tickets
-        FROM Trajet_Reservation tr
-        INNER JOIN Trajet_Reservation_Details trd ON trd.id_trajet_reservation = tr.id
-        GROUP BY tr.id_trajet
-    ) revenus_tickets ON revenus_tickets.id_trajet = t.id
-    
-    -- Sous-requÃªte pour calculer le montant des diffusions
-    LEFT JOIN (
-        SELECT 
-            dd.id_trajet,
-            SUM(dd.nombre_repetition * dd.montant_unitaire) AS montant_diffusion
-        FROM Diffusion_Detail dd
-        GROUP BY dd.id_trajet
-    ) revenus_diffusion ON revenus_diffusion.id_trajet = t.id
-""")
+            FROM Trajet t
+            INNER JOIN Ligne l ON t.id_ligne = l.id
+            INNER JOIN Ville vd ON l.id_ville_depart = vd.id
+            INNER JOIN Ville va ON l.id_ville_arrivee = va.id
+            INNER JOIN Vehicule v ON t.id_vehicule = v.id
+            INNER JOIN Chauffeur c ON t.id_chauffeur = c.id
+        
+            -- Sous-requÃªte pour calculer le nombre total de places du vÃ©hicule
+            LEFT JOIN (
+                SELECT 
+                    id_vehicule,
+                    SUM(nombre_place) AS total_places
+                FROM Vehicule_Tarif_Type_Place
+                GROUP BY id_vehicule
+            ) places_totales ON places_totales.id_vehicule = v.id
+        
+            -- Sous-requÃªte pour calculer le nombre de places prises
+            LEFT JOIN (
+                SELECT 
+                    tr.id_trajet,
+                    SUM(trd.nombre_places) AS total_prises
+                FROM Trajet_Reservation tr
+                INNER JOIN Trajet_Reservation_Details trd ON trd.id_trajet_reservation = tr.id
+                GROUP BY tr.id_trajet
+            ) places_prises ON places_prises.id_trajet = t.id
+        
+            -- Sous-requÃªte pour calculer le montant des tickets
+            LEFT JOIN (
+                SELECT 
+                    tr.id_trajet,
+                    SUM(trd.nombre_places * trd.tarif_unitaire) AS montant_tickets
+                FROM Trajet_Reservation tr
+                INNER JOIN Trajet_Reservation_Details trd ON trd.id_trajet_reservation = tr.id
+                GROUP BY tr.id_trajet
+            ) revenus_tickets ON revenus_tickets.id_trajet = t.id
+        
+            -- Sous-requÃªte pour calculer le montant des diffusions
+            LEFT JOIN (
+                SELECT 
+                    dd.id_trajet,
+                    SUM(dd.nombre_repetition * dd.montant_unitaire) AS montant_diffusion
+                FROM Diffusion_Detail dd
+                GROUP BY dd.id_trajet
+            ) revenus_diffusion ON revenus_diffusion.id_trajet = t.id
+        
+            ORDER BY t.id ASC
+        """)
 @Synchronize({"Trajet", "Ligne", "Ville", "Vehicule", "Chauffeur", "Vehicule_Tarif_Type_Place",
         "Trajet_Reservation", "Trajet_Reservation_Details", "Diffusion_Detail"})
 public class VmTrajetPrevisionCaTotal implements Serializable {
